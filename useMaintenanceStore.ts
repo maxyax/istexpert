@@ -1,0 +1,29 @@
+
+import { create } from 'zustand';
+import { MaintenanceRecord, BreakdownRecord, FuelRecord } from './types';
+
+interface MaintenanceState {
+  records: MaintenanceRecord[];
+  breakdowns: BreakdownRecord[];
+  fuelRecords: FuelRecord[];
+  selectedMaintenanceEquipId: string | null;
+  setSelectedMaintenanceEquipId: (id: string | null) => void;
+  addMaintenance: (record: MaintenanceRecord) => void;
+  addBreakdown: (record: BreakdownRecord) => void;
+  updateBreakdownStatus: (id: string, status: any, date?: string) => void;
+  addFuelRecord: (record: FuelRecord) => void;
+}
+
+export const useMaintenanceStore = create<MaintenanceState>((set) => ({
+  records: [],
+  breakdowns: [],
+  fuelRecords: [],
+  selectedMaintenanceEquipId: null,
+  setSelectedMaintenanceEquipId: (id) => set({ selectedMaintenanceEquipId: id }),
+  addMaintenance: (record) => set((state) => ({ records: [record, ...state.records] })),
+  addBreakdown: (record) => set((state) => ({ breakdowns: [record, ...state.breakdowns] })),
+  updateBreakdownStatus: (id, status, date) => set((state) => ({
+    breakdowns: state.breakdowns.map(b => b.id === id ? { ...b, status, fixedDate: date } : b)
+  })),
+  addFuelRecord: (record) => set((state) => ({ fuelRecords: [record, ...state.fuelRecords] })),
+}));

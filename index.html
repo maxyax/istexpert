@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ISTExpert Pro - Fleet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: { neo: { bg: 'var(--neo-bg)', shadow: 'var(--neo-shadow)' } },
+            boxShadow: { neo: 'var(--shadow-neo)', 'neo-inset': 'var(--shadow-neo-inset)', 'neo-sm': 'var(--shadow-neo-sm)' }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --neo-bg: #e0e5ec;
+        --shadow-neo: 9px 9px 16px rgb(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+        --shadow-neo-inset: inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff;
+        --shadow-neo-sm: 4px 4px 8px rgb(163, 177, 198, 0.6), -4px -4px 8px rgba(255, 255, 255, 0.5);
+      }
+      .dark {
+        --neo-bg: #1e2228;
+        --shadow-neo: 9px 9px 16px #14171c, -9px -9px 16px #282e37;
+        --shadow-neo-inset: inset 6px 6px 12px #14171c, inset -6px -6px 12px #282e37;
+      }
+      body { background-color: var(--neo-bg); transition: 0.3s ease; }
+      .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "zustand": "https://esm.sh/zustand@^5.0.11",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "qrcode": "https://esm.sh/qrcode@^1.5.4",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+
+import { create } from 'zustand';
+import { Equipment, EquipStatus, MaintenanceRegulation } from '../types';
+
+interface FleetState {
+  equipment: Equipment[];
+  selectedEquipmentId: string | null;
+  addEquipment: (item: Equipment) => void;
+  updateEquipment: (id: string, updates: Partial<Equipment>) => void;
+  deleteEquipment: (id: string) => void;
+  selectEquipment: (id: string | null) => void;
+  updateRegulations: (id: string, regs: MaintenanceRegulation[]) => void;
+}
+
+export const useFleetStore = create<FleetState>((set) => ({
+  equipment: [
+    { 
+      id: 'id-1', 
+      name: 'Liebherr PR 736', 
+      make: 'Liebherr', 
+      model: 'PR 736 LGP', 
+      vin: 'LB-736-2023-XYZ-01', 
+      license_plate: '7788 РЕ 77',
+      status: EquipStatus.ACTIVE, 
+      hours: 1420, 
+      mileage_km: 12500,
+      year: 2023,
+      driver: 'Иванов С.П.',
+      insurance_end: '2025-12-10',
+      image: 'https://images.unsplash.com/photo-1579412691522-dc97576572f4?auto=format&fit=crop&q=80&w=800',
+      regulations: [
+        { id: 'r1', type: 'ТО-250', intervalHours: 250, works: ['Замена масла ДВС', 'Проверка гидравлики', 'Смазка узлов'] }
+      ]
+    },
+    { 
+      id: 'id-2', 
+      name: 'Caterpillar 336', 
+      make: 'CAT', 
+      model: '336 Next Gen', 
+      vin: 'CAT-336-EXT-992', 
+      license_plate: '0012 МС 50',
+      status: EquipStatus.REPAIR, 
+      hours: 3120, 
+      mileage_km: 8400,
+      year: 2022,
+      driver: 'Петров А.В.',
+      insurance_end: '2024-05-15',
+      image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=800',
+      regulations: []
+    }
+  ],
+  selectedEquipmentId: null,
+  addEquipment: (item) => set((state) => ({ equipment: [item, ...state.equipment] })),
+  updateEquipment: (id, updates) => set((state) => ({
+    equipment: state.equipment.map(e => e.id === id ? { ...e, ...updates } : e)
+  })),
+  deleteEquipment: (id) => set((state) => ({
+    equipment: state.equipment.filter(e => e.id !== id)
+  })),
+  selectEquipment: (id) => set({ selectedEquipmentId: id }),
+  updateRegulations: (id, regs) => set((state) => ({
+    equipment: state.equipment.map(e => e.id === id ? { ...e, regulations: regs } : e)
+  })),
+}));
