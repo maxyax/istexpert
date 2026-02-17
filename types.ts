@@ -47,6 +47,7 @@ export interface Equipment {
   regulations?: MaintenanceRegulation[];
   driver?: string;
   documents?: { name: string; url: string; type: string }[];
+  photos?: string[];
 }
 
 export interface FluidRecord {
