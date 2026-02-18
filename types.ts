@@ -44,6 +44,12 @@ export interface Equipment {
   image?: string;
   insurance_end?: string;
   insurance_policy?: string;
+  insuranceCompany?: string;
+  insuranceNumber?: string;
+  insuranceStart?: string;
+  supplier?: string;
+  supplierPhone?: string;
+  supplierEmail?: string;
   regulations?: MaintenanceRegulation[];
   driver?: string;
   documents?: { name: string; url: string; type: string }[];

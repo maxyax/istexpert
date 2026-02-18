@@ -27,6 +27,9 @@ export const useFleetStore = create<FleetState>((set) => ({
       year: 2023,
       driver: 'Иванов С.П.',
       insurance_end: '2025-12-10',
+      insuranceCompany: 'Росгосстрах',
+      insuranceNumber: 'ОСАГО-2023-12345678',
+      insuranceStart: '2024-12-10',
       image: 'https://images.unsplash.com/photo-1579412691522-dc97576572f4?auto=format&fit=crop&q=80&w=800',
       regulations: [
         { id: 'r1', type: 'ТО-250', intervalHours: 250, works: ['Замена масла ДВС', 'Проверка гидравлики', 'Смазка узлов'] }
@@ -44,7 +47,10 @@ export const useFleetStore = create<FleetState>((set) => ({
       mileage_km: 8400,
       year: 2022,
       driver: 'Петров А.В.',
-      insurance_end: '2024-05-15',
+      insurance_end: '2025-02-25',
+      insuranceCompany: 'АльфаСтрахование',
+      insuranceNumber: 'ОСАГО-2024-87654321',
+      insuranceStart: '2024-02-25',
       image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=800',
       regulations: []
     }

@@ -1,35 +1,134 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, Plus, Truck, X, QrCode, Zap, Gauge, Edit3, Save, Camera, FileText, User, ChevronRight, History, Upload, LayoutGrid, List, Clock
+  Search, Plus, Truck, X, QrCode, Zap, Gauge, Edit3, Save, Camera, FileText, User, ChevronRight, History, Upload, LayoutGrid, List, Clock, Trash2
 } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { EquipStatus, Equipment } from '../types';
 import QRCode from 'qrcode';
 
+// Функция проверки срока страховки
+const getInsuranceStatus = (insuranceEnd?: string): { status: 'expired' | 'warning' | 'critical' | 'ok', daysLeft: number, message: string } => {
+  if (!insuranceEnd) return { status: 'ok', daysLeft: 999, message: '' };
+  
+  const today = new Date();
+  const endDate = new Date(insuranceEnd);
+  const diffTime = endDate.getTime() - today.getTime();
+  const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (daysLeft < 0) {
+    return { status: 'expired', daysLeft, message: `Страховка истекла ${Math.abs(daysLeft)} дн. назад` };
+  } else if (daysLeft <= 7) {
+    return { status: 'critical', daysLeft, message: `Осталось ${daysLeft} дн.` };
+  } else if (daysLeft <= 30) {
+    return { status: 'warning', daysLeft, message: `Осталось ${daysLeft} дн.` };
+  }
+  
+  return { status: 'ok', daysLeft, message: `Действительна` };
+};
+
 export const EquipmentList: React.FC = () => {
-  const { equipment, selectEquipment, selectedEquipmentId, updateEquipment } = useFleetStore();
+  const { equipment, selectEquipment, selectedEquipmentId, updateEquipment, deleteEquipment, addEquipment } = useFleetStore();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isEditing, setIsEditing] = useState(false);
   const [qrBase64, setQrBase64] = useState('');
-  const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history'>('main');
+  const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history'>('main')
+  const [isNewEquipment, setIsNewEquipment] = useState(false);
 
   const selectedItem = equipment.find(e => e.id === selectedEquipmentId);
   const [editForm, setEditForm] = useState<Partial<Equipment>>({});
 
   useEffect(() => {
     if (selectedItem) {
-      QRCode.toDataURL(`asset:${selectedItem.id}`).then(setQrBase64);
+      const qrData = `${window.location.origin}/?equipment=${selectedItem.id}`;
+      QRCode.toDataURL(qrData, { width: 300, margin: 2 }).then(setQrBase64);
       setEditForm(selectedItem);
     }
   }, [selectedItem]);
 
   const handleSave = () => {
     if (selectedItem) {
-      updateEquipment(selectedItem.id, editForm);
+      const updatedData = {
+        ...editForm,
+        name: editForm.make && editForm.model ? `${editForm.make} ${editForm.model}` : editForm.name
+      };
+      updateEquipment(selectedItem.id, updatedData);
       setIsEditing(false);
+      setIsNewEquipment(false);
     }
+  };
+
+  const handleDelete = () => {
+    if (selectedItem) {
+      deleteEquipment(selectedItem.id);
+      selectEquipment(null);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleAddNew = () => {
+    const newEquipment: Equipment = {
+      id: Date.now().toString(),
+      name: 'Новая техника',
+      make: '',
+      model: '',
+      year: new Date().getFullYear(),
+      vin: '',
+      license_plate: '',
+      hours: 0,
+      status: EquipStatus.ACTIVE,
+      driver: '',
+      image: 'https://picsum.photos/seed/tech/800/600'
+    };
+    addEquipment(newEquipment);
+    selectEquipment(newEquipment.id);
+    setIsEditing(true);
+    setIsNewEquipment(true);
+  };
+
+  const handleUploadDocument = (docType: 'sts' | 'osago' | 'diagnostic' | 'catalog' | 'manual' | 'other') => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.txt';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const fileUrl = event.target?.result as string;
+          // Сохраняем документ в editForm
+          setEditForm(prev => ({
+            ...prev,
+            documents: {
+              ...prev.documents,
+              [docType]: fileUrl
+            }
+          }));
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
+
+  const handleUploadPhoto = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const imageUrl = event.target?.result as string;
+          setEditForm({...editForm, image: imageUrl});
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
   };
 
   const filtered = equipment.filter(e => 
@@ -52,13 +151,15 @@ export const EquipmentList: React.FC = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input type="text" placeholder="Поиск по VIN..." className="pl-12 pr-6 py-4 rounded-2xl bg-neo-bg shadow-neo-inset outline-none text-sm w-full md:w-80 border-none text-gray-700" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <button className="p-4 rounded-2xl bg-neo-bg shadow-neo text-blue-600 hover:shadow-neo-inset active:scale-95 transition-all border border-blue-500/10"><Plus size={24} /></button>
+          <button onClick={handleAddNew} className="p-4 rounded-2xl bg-neo-bg shadow-neo text-blue-600 hover:shadow-neo-inset active:scale-95 transition-all border border-blue-500/10"><Plus size={24} /></button>
         </div>
       </div>
 
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filtered.map(e => (
+          {filtered.map(e => {
+            const insuranceStatus = getInsuranceStatus(e.insurance_end);
+            return (
             <div key={e.id} onClick={() => selectEquipment(e.id)} className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg group hover:shadow-neo-inset transition-all cursor-pointer border border-white/10 relative overflow-hidden">
               <div className={`absolute top-0 right-0 w-2 h-full ${e.status === EquipStatus.ACTIVE ? 'bg-green-500' : 'bg-red-500'}`} />
               <div className="flex items-start justify-between mb-6">
@@ -72,9 +173,21 @@ export const EquipmentList: React.FC = () => {
                     <div className="flex items-center gap-2"><Gauge size={14} className="text-blue-600"/> Наработка</div>
                     <span className="text-gray-800 font-bold">{e.hours} м/ч</span>
                  </div>
+                 {e.insurance_end && (
+                   <div className={`flex justify-between items-center text-[10px] font-black uppercase p-3 rounded-xl ${
+                     insuranceStatus.status === 'expired' ? 'bg-red-500/10 text-red-600' :
+                     insuranceStatus.status === 'critical' ? 'bg-orange-500/10 text-orange-600' :
+                     insuranceStatus.status === 'warning' ? 'bg-yellow-500/10 text-yellow-600' :
+                     'bg-green-500/10 text-green-600'
+                   }`}>
+                      <div className="flex items-center gap-2">ОСАГО</div>
+                      <span className="font-bold">{insuranceStatus.message}</span>
+                   </div>
+                 )}
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       ) : (
         <div className="bg-neo-bg rounded-[2.5rem] shadow-neo-inset p-4 overflow-hidden border border-white/10">
@@ -125,13 +238,19 @@ export const EquipmentList: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-2 md:gap-4">
                 {isEditing ? (
-                  <button onClick={handleSave} className="p-4 rounded-2xl shadow-neo-inset text-emerald-600 font-black uppercase text-[10px] flex items-center gap-2 transition-all"><Save size={20}/> Сохранить</button>
+                  <button onClick={handleSave} className="p-3 md:p-4 rounded-2xl shadow-neo-inset text-emerald-600 font-black uppercase text-[10px] flex items-center gap-2 transition-all"><Save size={20}/> Сохранить</button>
                 ) : (
-                  <button onClick={() => setIsEditing(true)} className="p-4 rounded-2xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Edit3 size={20}/></button>
+                  <button onClick={() => setIsEditing(true)} className="p-3 md:p-4 rounded-2xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Edit3 size={20}/></button>
                 )}
-                <button onClick={() => selectEquipment(null)} className="p-4 rounded-2xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+                <button onClick={() => {
+                  if (isNewEquipment && selectedItem) {
+                    deleteEquipment(selectedItem.id);
+                    setIsNewEquipment(false);
+                  }
+                  selectEquipment(null);
+                }} className="p-3 md:p-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo transition-all"><X size={24}/></button>
               </div>
             </div>
 
@@ -142,7 +261,7 @@ export const EquipmentList: React.FC = () => {
                     <div className="aspect-[4/3] rounded-[2.5rem] shadow-neo bg-neo-bg overflow-hidden relative border-4 border-white/50">
                       <img src={editForm.image || 'https://picsum.photos/seed/tech/800/600'} className="w-full h-full object-cover" />
                       {isEditing && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm"><button className="p-5 rounded-2xl bg-neo-bg shadow-neo text-blue-600"><Camera size={32}/></button></div>
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm"><button onClick={handleUploadPhoto} className="p-5 rounded-2xl bg-neo-bg shadow-neo text-blue-600"><Camera size={32}/></button></div>
                       )}
                     </div>
                     <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center space-y-6 border border-white/5">
@@ -152,12 +271,40 @@ export const EquipmentList: React.FC = () => {
                   </div>
                   <div className="lg:col-span-8 space-y-10">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <EditableBlock label="Марка / Модель" value={`${editForm.make} ${editForm.model}`} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, model: v})} />
+                      <EditableBlock label="Марка" value={editForm.make} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, make: v})} />
+                      <EditableBlock label="Модель" value={editForm.model} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, model: v})} />
                       <EditableBlock label="Гос. номер" value={editForm.license_plate} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, license_plate: v})} />
                       <EditableBlock label="VIN (Заводской №)" value={editForm.vin} isEditing={isEditing} font="font-mono" onChange={(v:string) => setEditForm({...editForm, vin: v})} />
                       <EditableBlock label="Год выпуска" value={editForm.year} isEditing={isEditing} type="number" onChange={(v:string) => setEditForm({...editForm, year: parseInt(v)})} />
-                      <EditableBlock label="Наработка" value={`${editForm.hours} м/ч`} isEditing={isEditing} type="number" onChange={(v:string) => setEditForm({...editForm, hours: parseInt(v)})} highlight />
+                      <EditableBlock label="Наработка" value={editForm.hours} isEditing={isEditing} type="number" onChange={(v:string) => setEditForm({...editForm, hours: parseInt(v)})} highlight suffix=" м/ч" />
                       <EditableBlock label="Водитель" value={editForm.driver} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, driver: v})} />
+                      <EditableBlock label="Контрагент/Продавец" value={editForm.supplier} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, supplier: v})} />
+                      <EditableBlock label="Телефон контрагента" value={editForm.supplierPhone} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, supplierPhone: v})} />
+                      <EditableBlock label="Email контрагента" value={editForm.supplierEmail} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, supplierEmail: v})} />
+                    </div>
+                    <div className="p-10 rounded-[2.5rem] shadow-neo-inset bg-neo-bg border border-blue-500/10">
+                       <div className="flex items-center justify-between mb-8">
+                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Данные страхования</h3>
+                         {editForm.insurance_end && (() => {
+                           const status = getInsuranceStatus(editForm.insurance_end);
+                           return (
+                             <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase ${
+                               status.status === 'expired' ? 'bg-red-500 text-white' :
+                               status.status === 'critical' ? 'bg-orange-500 text-white' :
+                               status.status === 'warning' ? 'bg-yellow-500 text-white' :
+                               'bg-green-500 text-white'
+                             }`}>
+                               {status.message}
+                             </div>
+                           );
+                         })()}
+                       </div>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <EditableBlock label="Страховая компания" value={editForm.insuranceCompany} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, insuranceCompany: v})} />
+                         <EditableBlock label="Номер страховки" value={editForm.insuranceNumber} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, insuranceNumber: v})} />
+                         <EditableBlock label="Дата начала" value={editForm.insuranceStart} isEditing={isEditing} type="date" onChange={(v:string) => setEditForm({...editForm, insuranceStart: v})} />
+                         <EditableBlock label="Дата окончания" value={editForm.insurance_end} isEditing={isEditing} type="date" onChange={(v:string) => setEditForm({...editForm, insurance_end: v})} highlight />
+                       </div>
                     </div>
                     <div className="p-10 rounded-[2.5rem] shadow-neo-inset bg-neo-bg border border-white/5">
                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-8">Операционный статус</h3>
@@ -167,15 +314,30 @@ export const EquipmentList: React.FC = () => {
                           ))}
                        </div>
                     </div>
+                    {isEditing && (
+                      <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
+                        <button onClick={() => setShowDeleteConfirm(true)} className="px-10 py-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2 mx-auto"><Trash2 size={16}/>Удалить технику</button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
               {activeTab === 'docs' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                   <DocCard label="СТС / ПТС" isEditing={isEditing} />
-                   <DocCard label="Страховка ОСАГО" isEditing={isEditing} />
-                   <DocCard label="Диагностическая карта" isEditing={isEditing} />
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                     <DocCard label="СТС / ПТС" isEditing={isEditing} onUpload={() => handleUploadDocument('sts')} documentUrl={editForm.documents?.sts} />
+                     <DocCard label="Страховка ОСАГО" isEditing={isEditing} onUpload={() => handleUploadDocument('osago')} documentUrl={editForm.documents?.osago} />
+                     <DocCard label="Диагностическая карта" isEditing={isEditing} onUpload={() => handleUploadDocument('diagnostic')} documentUrl={editForm.documents?.diagnostic} />
+                     <DocCard label="Каталог" isEditing={isEditing} onUpload={() => handleUploadDocument('catalog')} documentUrl={editForm.documents?.catalog} />
+                     <DocCard label="Инструкция" isEditing={isEditing} onUpload={() => handleUploadDocument('manual')} documentUrl={editForm.documents?.manual} />
+                     <DocCard label="Другое" isEditing={isEditing} onUpload={() => handleUploadDocument('other')} documentUrl={editForm.documents?.other} />
+                  </div>
+                  {isEditing && (
+                    <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
+                      <button onClick={() => setShowDeleteConfirm(true)} className="px-10 py-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2 mx-auto"><Trash2 size={16}/>Удалить технику</button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -186,9 +348,27 @@ export const EquipmentList: React.FC = () => {
                       <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">История обслуживания пока пуста</p>
                       <button className="mt-8 px-10 py-4 rounded-2xl shadow-neo text-[10px] font-black uppercase text-blue-600 hover:shadow-neo-inset transition-all active:scale-95 border border-blue-500/10">Скачать отчет PDF</button>
                    </div>
+                   {isEditing && (
+                     <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
+                       <button onClick={() => setShowDeleteConfirm(true)} className="px-10 py-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95">Удалить технику</button>
+                     </div>
+                   )}
                 </div>
               )}
             </div>
+
+            {showDeleteConfirm && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 rounded-[3rem]">
+                <div className="bg-neo-bg p-10 rounded-[2.5rem] shadow-neo max-w-md mx-4 border border-white/20">
+                  <h3 className="text-xl font-black uppercase text-gray-800 mb-4">Подтвердите удаление</h3>
+                  <p className="text-sm text-gray-600 mb-8">Вы уверены, что хотите удалить технику "{selectedItem?.name}"? Это действие нельзя отменить.</p>
+                  <div className="flex gap-4">
+                    <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 px-6 py-3 rounded-2xl shadow-neo text-gray-600 hover:shadow-neo-inset transition-all font-black uppercase text-[10px]">Отмена</button>
+                    <button onClick={handleDelete} className="flex-1 px-6 py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo transition-all font-black uppercase text-[10px]">Удалить</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -196,7 +376,7 @@ export const EquipmentList: React.FC = () => {
   );
 };
 
-const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highlight = false, font = "" }: any) => (
+const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highlight = false, font = "", suffix = "" }: any) => (
   <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
     <p className="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">{label}</p>
     {isEditing ? (
@@ -207,13 +387,13 @@ const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highl
   </div>
 );
 
-const DocCard = ({ label, isEditing }: any) => (
-  <div className="p-10 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-8 group hover:shadow-neo-inset transition-all cursor-pointer border border-white/5">
+const DocCard = ({ label, isEditing, onUpload, documentUrl }: any) => (
+  <div onClick={() => !isEditing && documentUrl && window.open(documentUrl, '_blank')} className={`p-10 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-8 group hover:shadow-neo-inset transition-all border border-white/5 ${documentUrl && !isEditing ? 'cursor-pointer' : ''}`}>
      <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600"><FileText size={32}/></div>
      <div className="text-center">
         <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-gray-700">{label}</h4>
-        <p className="text-[8px] font-bold text-gray-400 uppercase opacity-60">Файл не загружен</p>
+        <p className={`text-[8px] font-bold uppercase opacity-60 ${documentUrl ? 'text-green-600' : 'text-gray-400'}`}>{documentUrl ? 'Файл загружен' : 'Файл не загружен'}</p>
      </div>
-     {isEditing && <button className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Upload size={18}/></button>}
+     {isEditing && <button onClick={onUpload} className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Upload size={18}/></button>}
   </div>
 );
