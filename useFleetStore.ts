@@ -17,8 +17,21 @@ export const useFleetStore = create<FleetState>((set) => ({
     { 
       id: 'id-1', name: 'Бульдозер Б-01', make: 'Liebherr', model: 'PR 736', vin: 'LB-736-XYZ', 
       status: EquipStatus.ACTIVE, hours: 1420, year: 2022,
+      image: 'https://images.unsplash.com/photo-1581094271901-8022df4466f9?w=800&q=80',
+      license_plate: 'А123ВС77',
+      driver: 'Иванов И.И.',
       regulations: [
         { id: 'r1', type: 'ТО-250', intervalHours: 250, works: ['Замена масла', 'Проверка гидравлики'] }
+      ]
+    },
+    { 
+      id: 'id-2', name: 'Экскаватор Э-01', make: 'CAT', model: '320', vin: 'CAT-320-ABC', 
+      status: EquipStatus.ACTIVE, hours: 2150, year: 2021,
+      image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&q=80',
+      license_plate: 'В456ТР77',
+      driver: 'Петров П.П.',
+      regulations: [
+        { id: 'r2', type: 'ТО-250', intervalHours: 250, works: ['Замена масла', 'Проверка фильтров', 'Смазка узлов'] }
       ]
     }
   ],
