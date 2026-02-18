@@ -30,7 +30,7 @@ export const useFleetStore = create<FleetState>((set) => ({
       insuranceCompany: 'Росгосстрах',
       insuranceNumber: 'ОСАГО-2023-12345678',
       insuranceStart: '2024-12-10',
-      image: 'https://images.unsplash.com/photo-1579412691522-dc97576572f4?auto=format&fit=crop&q=80&w=800',
+      image: 'https://www.liebherr.com/shared/media/construction-machinery/crawler-tractors/pr-736/pr-736-litronic-crawler-tractor-liebherr.jpg',
       documents: [
         { name: 'СТС.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', type: 'sts' },
         { name: 'ОСАГО.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', type: 'osago' }
@@ -55,7 +55,7 @@ export const useFleetStore = create<FleetState>((set) => ({
       insuranceCompany: 'АльфаСтрахование',
       insuranceNumber: 'ОСАГО-2024-87654321',
       insuranceStart: '2024-02-25',
-      image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=800',
+      image: 'https://s7d2.scene7.com/is/image/Caterpillar/CM20180815-47583-22842',
       regulations: []
     }
   ],
