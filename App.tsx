@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useAuthStore } from './store/useAuthStore';
-import { Layout } from './components/Layout';
+import { Layout } from './Layout';
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
