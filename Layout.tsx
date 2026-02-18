@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { LayoutDashboard, Truck, Wrench, Bell, LogOut, Moon, Sun, Menu, X, ShoppingBag, Fuel } from 'lucide-react';
+import { LayoutDashboard, Truck, Wrench, Bell, LogOut, Moon, Sun, Menu, X, ShoppingBag, Fuel, Calendar } from 'lucide-react';
 import { useAuthStore } from './useAuthStore';
 import { useNotificationStore } from './useNotificationStore';
 
@@ -13,6 +13,7 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
     { id: 'dashboard', label: 'Дашборд', icon: LayoutDashboard },
     { id: 'equipment', label: 'Автопарк', icon: Truck },
     { id: 'maintenance', label: 'ТО и Ремонт', icon: Wrench },
+    { id: 'maintenanceCalendar', label: 'Календарь ТО', icon: Calendar },
     { id: 'procurement', label: 'Снабжение', icon: ShoppingBag },
     { id: 'fuel', label: 'Топливо', icon: Fuel },
   ];
