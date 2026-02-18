@@ -26,8 +26,10 @@ export enum EquipStatus {
 export interface MaintenanceRegulation {
   id: string;
   type: string;
-  intervalHours: number;
+  intervalHours?: number;
+  intervalKm?: number;
   works: string[];
+  fluids?: { name: string; quantity: string }[];
 }
 
 export interface Equipment {

@@ -4,7 +4,7 @@ import {
   Search, Plus, Truck, X, QrCode, Zap, Gauge, Edit3, Save, Camera, FileText, User, ChevronRight, History, Upload, LayoutGrid, List, Clock, Trash2
 } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
-import { EquipStatus, Equipment } from '../types';
+import { EquipStatus, Equipment, MaintenanceRegulation } from '../types';
 import QRCode from 'qrcode';
 
 // Функция проверки срока страховки
@@ -34,7 +34,7 @@ export const EquipmentList: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isEditing, setIsEditing] = useState(false);
   const [qrBase64, setQrBase64] = useState('');
-  const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history'>('main')
+  const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history' | 'regulations'>('main')
   const [isNewEquipment, setIsNewEquipment] = useState(false);
 
   const selectedItem = equipment.find(e => e.id === selectedEquipmentId);
@@ -166,8 +166,8 @@ export const EquipmentList: React.FC = () => {
                 <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform"><Truck size={32} /></div>
                 <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">{e.year} г.в.</span>
               </div>
-              <h3 className="text-xl font-black uppercase tracking-tight text-gray-800 group-hover:text-blue-600 transition-colors">{e.name}</h3>
-              <p className="text-[11px] font-black text-gray-400 uppercase mt-1 tracking-widest">{e.make} {e.model}</p>
+              <h3 className="text-xl font-black uppercase tracking-tight text-gray-700 dark:text-gray-200 group-hover:text-blue-600 transition-colors">{e.name}</h3>
+              <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase mt-1 tracking-widest">{e.make} {e.model}</p>
               <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 space-y-4">
                  <div className="flex justify-between items-center text-[10px] font-black uppercase text-gray-400">
                     <div className="flex items-center gap-2"><Gauge size={14} className="text-blue-600"/> Наработка</div>
@@ -234,6 +234,7 @@ export const EquipmentList: React.FC = () => {
                   <div className="flex gap-8 mt-5">
                      <button onClick={() => setActiveTab('main')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'main' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Основное</button>
                      <button onClick={() => setActiveTab('docs')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'docs' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Документы</button>
+                     <button onClick={() => setActiveTab('regulations')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'regulations' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Регламент ТО</button>
                      <button onClick={() => setActiveTab('history')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'history' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>История обслуживания</button>
                   </div>
                 </div>
@@ -341,6 +342,267 @@ export const EquipmentList: React.FC = () => {
                 </div>
               )}
 
+              {activeTab === 'regulations' && (
+                <div className="space-y-8">
+                  <div className="p-10 rounded-[2.5rem] shadow-neo bg-neo-bg border border-blue-500/10">
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Регламент технического обслуживания</h3>
+                      {isEditing && (
+                        <button onClick={() => {
+                          const newReg: MaintenanceRegulation = {
+                            id: Date.now().toString(),
+                            type: 'ТО-' + ((editForm.regulations?.length || 0) + 1),
+                            intervalHours: 250,
+                            intervalKm: 1000,
+                            works: ['Замена масла'],
+                            fluids: [{ name: 'Моторное масло', quantity: '10 л' }]
+                          };
+                          setEditForm({
+                            ...editForm,
+                            regulations: [...(editForm.regulations || []), newReg]
+                          });
+                        }} className="px-6 py-3 rounded-2xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all text-[10px] font-black uppercase flex items-center gap-2">
+                          <Plus size={16}/> Добавить ТО
+                        </button>
+                      )}
+                    </div>
+                    
+                    {(!editForm.regulations || editForm.regulations.length === 0) ? (
+                      <div className="p-20 rounded-[2.5rem] shadow-neo-inset bg-neo-bg text-center">
+                        <div className="w-20 h-20 rounded-full shadow-neo mx-auto mb-8 flex items-center justify-center text-gray-300"><Clock size={40}/></div>
+                        <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">Регламент ТО не настроен</p>
+                        {isEditing && (
+                          <p className="text-[10px] text-gray-500 mt-4">Нажмите "Добавить ТО" чтобы создать график обслуживания</p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {editForm.regulations
+                          .sort((a, b) => {
+                            const aInterval = a.intervalKm || a.intervalHours || 0;
+                            const bInterval = b.intervalKm || b.intervalHours || 0;
+                            return aInterval - bInterval;
+                          })
+                          .map((reg, idx) => {
+                            const currentValue = editForm.mileage_km || editForm.hours || 0;
+                            const interval = reg.intervalKm || reg.intervalHours || 0;
+                            const nextService = Math.ceil(currentValue / interval) * interval;
+                            const isOverdue = currentValue >= nextService;
+                            
+                            return (
+                              <div key={reg.id} className={`p-8 rounded-[2.5rem] shadow-neo bg-neo-bg border ${isOverdue ? 'border-orange-500/30' : 'border-white/5'}`}>
+                                <div className="flex items-start justify-between mb-6">
+                                  <div className="flex-1">
+                                    {isEditing ? (
+                                      <input 
+                                        type="text" 
+                                        value={reg.type} 
+                                        onChange={(e) => {
+                                          const updated = [...(editForm.regulations || [])];
+                                          updated[idx] = { ...updated[idx], type: e.target.value };
+                                          setEditForm({ ...editForm, regulations: updated });
+                                        }}
+                                        className="text-lg font-black uppercase text-blue-600 bg-neo-bg shadow-neo-inset px-4 py-2 rounded-xl border-none outline-none"
+                                      />
+                                    ) : (
+                                      <h4 className="text-lg font-black uppercase text-gray-800">{reg.type}</h4>
+                                    )}
+                                    <div className="flex gap-6 mt-4">
+                                      {reg.intervalKm && (
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-[10px] font-black text-gray-400 uppercase">Пробег:</span>
+                                          {isEditing ? (
+                                            <input 
+                                              type="number" 
+                                              value={reg.intervalKm} 
+                                              onChange={(e) => {
+                                                const updated = [...(editForm.regulations || [])];
+                                                updated[idx] = { ...updated[idx], intervalKm: parseInt(e.target.value) };
+                                                setEditForm({ ...editForm, regulations: updated });
+                                              }}
+                                              className="w-24 text-sm font-black text-blue-600 bg-neo-bg shadow-neo-inset px-3 py-1 rounded-lg border-none outline-none"
+                                            />
+                                          ) : (
+                                            <span className="text-sm font-black text-gray-700">{reg.intervalKm} км</span>
+                                          )}
+                                        </div>
+                                      )}
+                                      {reg.intervalHours && (
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-[10px] font-black text-gray-400 uppercase">Моточасы:</span>
+                                          {isEditing ? (
+                                            <input 
+                                              type="number" 
+                                              value={reg.intervalHours} 
+                                              onChange={(e) => {
+                                                const updated = [...(editForm.regulations || [])];
+                                                updated[idx] = { ...updated[idx], intervalHours: parseInt(e.target.value) };
+                                                setEditForm({ ...editForm, regulations: updated });
+                                              }}
+                                              className="w-24 text-sm font-black text-blue-600 bg-neo-bg shadow-neo-inset px-3 py-1 rounded-lg border-none outline-none"
+                                            />
+                                          ) : (
+                                            <span className="text-sm font-black text-gray-700">{reg.intervalHours} м/ч</span>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {!isEditing && (
+                                      <div className={`mt-4 px-4 py-2 rounded-xl inline-block text-[10px] font-black uppercase ${
+                                        isOverdue ? 'bg-orange-500/20 text-orange-600' : 'bg-green-500/20 text-green-600'
+                                      }`}>
+                                        {isOverdue ? `Требуется при ${nextService}` : `Следующее: ${nextService}`} {reg.intervalKm ? 'км' : 'м/ч'}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {isEditing && (
+                                    <button 
+                                      onClick={() => {
+                                        const updated = editForm.regulations?.filter((_, i) => i !== idx);
+                                        setEditForm({ ...editForm, regulations: updated });
+                                      }}
+                                      className="p-3 rounded-xl bg-red-500/10 text-red-600 hover:bg-red-500/20 transition-all"
+                                    >
+                                      <Trash2 size={16}/>
+                                    </button>
+                                  )}
+                                </div>
+                                
+                                <div className="space-y-4">
+                                  <div>
+                                    <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Состав работ:</h5>
+                                    <div className="space-y-2">
+                                      {reg.works.map((work, workIdx) => (
+                                        <div key={workIdx} className="flex items-center gap-3">
+                                          <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                                          {isEditing ? (
+                                            <input 
+                                              type="text" 
+                                              value={work} 
+                                              onChange={(e) => {
+                                                const updated = [...(editForm.regulations || [])];
+                                                const updatedWorks = [...updated[idx].works];
+                                                updatedWorks[workIdx] = e.target.value;
+                                                updated[idx] = { ...updated[idx], works: updatedWorks };
+                                                setEditForm({ ...editForm, regulations: updated });
+                                              }}
+                                              className="flex-1 text-sm text-gray-700 bg-neo-bg shadow-neo-inset px-3 py-2 rounded-lg border-none outline-none"
+                                            />
+                                          ) : (
+                                            <span className="text-sm text-gray-700">{work}</span>
+                                          )}
+                                          {isEditing && (
+                                            <button 
+                                              onClick={() => {
+                                                const updated = [...(editForm.regulations || [])];
+                                                updated[idx].works = updated[idx].works.filter((_, i) => i !== workIdx);
+                                                setEditForm({ ...editForm, regulations: updated });
+                                              }}
+                                              className="p-1 text-red-500 hover:text-red-700"
+                                            >
+                                              <X size={14}/>
+                                            </button>
+                                          )}
+                                        </div>
+                                      ))}
+                                      {isEditing && (
+                                        <button 
+                                          onClick={() => {
+                                            const updated = [...(editForm.regulations || [])];
+                                            updated[idx].works = [...updated[idx].works, 'Новая работа'];
+                                            setEditForm({ ...editForm, regulations: updated });
+                                          }}
+                                          className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-700 flex items-center gap-2 mt-2"
+                                        >
+                                          <Plus size={12}/> Добавить работу
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  {reg.fluids && reg.fluids.length > 0 && (
+                                    <div>
+                                      <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Замена жидкостей:</h5>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {reg.fluids.map((fluid, fluidIdx) => (
+                                          <div key={fluidIdx} className="p-4 rounded-xl shadow-neo-inset bg-neo-bg flex items-center justify-between">
+                                            {isEditing ? (
+                                              <>
+                                                <input 
+                                                  type="text" 
+                                                  value={fluid.name} 
+                                                  onChange={(e) => {
+                                                    const updated = [...(editForm.regulations || [])];
+                                                    const updatedFluids = [...(updated[idx].fluids || [])];
+                                                    updatedFluids[fluidIdx] = { ...updatedFluids[fluidIdx], name: e.target.value };
+                                                    updated[idx] = { ...updated[idx], fluids: updatedFluids };
+                                                    setEditForm({ ...editForm, regulations: updated });
+                                                  }}
+                                                  className="flex-1 text-xs font-bold text-gray-700 bg-transparent border-none outline-none"
+                                                  placeholder="Название"
+                                                />
+                                                <input 
+                                                  type="text" 
+                                                  value={fluid.quantity} 
+                                                  onChange={(e) => {
+                                                    const updated = [...(editForm.regulations || [])];
+                                                    const updatedFluids = [...(updated[idx].fluids || [])];
+                                                    updatedFluids[fluidIdx] = { ...updatedFluids[fluidIdx], quantity: e.target.value };
+                                                    updated[idx] = { ...updated[idx], fluids: updatedFluids };
+                                                    setEditForm({ ...editForm, regulations: updated });
+                                                  }}
+                                                  className="w-20 text-xs font-bold text-blue-600 bg-transparent border-none outline-none text-right"
+                                                  placeholder="Кол-во"
+                                                />
+                                                <button 
+                                                  onClick={() => {
+                                                    const updated = [...(editForm.regulations || [])];
+                                                    updated[idx].fluids = updated[idx].fluids?.filter((_, i) => i !== fluidIdx);
+                                                    setEditForm({ ...editForm, regulations: updated });
+                                                  }}
+                                                  className="ml-2 p-1 text-red-500 hover:text-red-700"
+                                                >
+                                                  <X size={14}/>
+                                                </button>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <span className="text-xs font-bold text-gray-700">{fluid.name}</span>
+                                                <span className="text-xs font-black text-blue-600">{fluid.quantity}</span>
+                                              </>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                      {isEditing && (
+                                        <button 
+                                          onClick={() => {
+                                            const updated = [...(editForm.regulations || [])];
+                                            updated[idx].fluids = [...(updated[idx].fluids || []), { name: 'Новая жидкость', quantity: '0 л' }];
+                                            setEditForm({ ...editForm, regulations: updated });
+                                          }}
+                                          className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-700 flex items-center gap-2 mt-3"
+                                        >
+                                          <Plus size={12}/> Добавить жидкость
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+                  {isEditing && (
+                    <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
+                      <button onClick={() => setShowDeleteConfirm(true)} className="px-10 py-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2 mx-auto"><Trash2 size={16}/>Удалить технику</button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {activeTab === 'history' && (
                 <div className="space-y-6">
                    <div className="p-20 rounded-[3rem] shadow-neo-inset bg-neo-bg text-center">
@@ -378,11 +640,11 @@ export const EquipmentList: React.FC = () => {
 
 const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highlight = false, font = "", suffix = "" }: any) => (
   <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
-    <p className="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">{label}</p>
+    <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 tracking-widest">{label}</p>
     {isEditing ? (
-      <input type={type} className={`w-full bg-neo-bg shadow-neo-inset p-3 rounded-xl border-none outline-none text-xs font-black uppercase text-blue-600 ${font}`} value={value} onChange={e => onChange(e.target.value)} />
+      <input type={type} className={`w-full bg-neo-bg shadow-neo-inset p-3 rounded-xl border-none outline-none text-xs font-black uppercase text-blue-600 dark:text-blue-400 ${font}`} value={value} onChange={e => onChange(e.target.value)} />
     ) : (
-      <p className={`text-sm font-black uppercase tracking-tight ${font} ${highlight ? 'text-blue-600' : 'text-gray-800'}`}>{value || '—'}</p>
+      <p className={`text-sm font-black uppercase tracking-tight ${font} ${highlight ? 'text-blue-600 dark:text-blue-400' : 'text-gray-800 dark:text-gray-200'}`}>{value || '—'}{suffix}</p>
     )}
   </div>
 );

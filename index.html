@@ -13,7 +13,14 @@
         theme: {
           extend: {
             fontFamily: { sans: ['Inter', 'sans-serif'] },
-            colors: { neo: { bg: 'var(--neo-bg)', shadow: 'var(--neo-shadow)' } },
+            colors: { 
+              neo: { bg: 'var(--neo-bg)', shadow: 'var(--neo-shadow)' },
+              blue: {
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+              }
+            },
             boxShadow: { neo: 'var(--shadow-neo)', 'neo-inset': 'var(--shadow-neo-inset)', 'neo-sm': 'var(--shadow-neo-sm)' }
           }
         }
@@ -31,6 +38,22 @@
         --shadow-neo: 9px 9px 16px #14171c, -9px -9px 16px #282e37;
         --shadow-neo-inset: inset 6px 6px 12px #14171c, inset -6px -6px 12px #282e37;
       }
+      /* Более светлые синие цвета для темного режима */
+      .dark .text-blue-600 { color: #60a5fa !important; }
+      .dark .text-blue-500 { color: #60a5fa !important; }
+      .dark .text-blue-400 { color: #93c5fd !important; }
+      .dark .border-blue-500 { border-color: #60a5fa !important; }
+      .dark .border-blue-600 { border-color: #60a5fa !important; }
+      .dark .bg-blue-600 { background-color: #60a5fa !important; }
+      .dark .bg-blue-500 { background-color: #60a5fa !important; }
+      /* Более светлые серые цвета для лучшей читаемости текста */
+      .dark .text-gray-800 { color: #e5e7eb !important; }
+      .dark .text-gray-700 { color: #d1d5db !important; }
+      .dark .text-gray-600 { color: #d1d5db !important; }
+      .dark .text-gray-500 { color: #9ca3af !important; }
+      .dark .text-gray-400 { color: #9ca3af !important; }
+      .dark .text-gray-300 { color: #d1d5db !important; }
+      .dark .text-gray-200 { color: #e5e7eb !important; }
       body { background-color: var(--neo-bg); transition: 0.3s ease; }
       .custom-scrollbar::-webkit-scrollbar { width: 5px; }
       .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
