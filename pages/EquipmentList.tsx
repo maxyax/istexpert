@@ -212,7 +212,7 @@ export const EquipmentList: React.FC = () => {
                             <p className="text-[9px] text-gray-400 uppercase font-bold">{e.vin}</p>
                          </div>
                       </td>
-                      <td className="px-6 py-6"><span className={`text-[9px] font-black uppercase px-4 py-1.5 rounded-full shadow-neo-sm ${e.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{e.status}</span></td>
+                      <td className="px-6 py-6"><span className={`text-[9px] font-black uppercase px-4 py-1.5 rounded-full shadow-neo-sm whitespace-nowrap ${e.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{e.status}</span></td>
                       <td className="px-6 py-6 text-sm font-black text-gray-700">{e.hours} м/ч</td>
                       <td className="px-6 py-6 text-sm font-black text-gray-400 uppercase">{e.driver || '—'}</td>
                       <td className="px-6 py-6 text-right"><ChevronRight size={18} className="text-gray-300 group-hover:text-blue-600 transition-all"/></td>
@@ -232,11 +232,11 @@ export const EquipmentList: React.FC = () => {
                 <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 border border-blue-500/10 shrink-0"><Truck size={24} className="md:w-8 md:h-8"/></div>
                 <div className="min-w-0 flex-1">
                   <h2 className="text-base md:text-2xl font-black uppercase leading-none text-gray-800 dark:text-gray-200 tracking-tight truncate">{selectedItem.name}</h2>
-                  <div className="flex gap-2 md:gap-8 mt-3 md:mt-5 overflow-x-auto pb-2 scrollbar-hide">
-                     <button onClick={() => setActiveTab('main')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === 'main' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Основное</button>
-                     <button onClick={() => setActiveTab('docs')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === 'docs' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Документы</button>
-                     <button onClick={() => setActiveTab('regulations')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === 'regulations' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Регламент ТО</button>
-                     <button onClick={() => setActiveTab('history')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === 'history' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>История</button>
+                  <div className="flex gap-2 md:gap-8 mt-3 md:mt-5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                     <button onClick={() => setActiveTab('main')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'main' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Основное</button>
+                     <button onClick={() => setActiveTab('docs')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'docs' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Документы</button>
+                     <button onClick={() => setActiveTab('regulations')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'regulations' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Регламент ТО</button>
+                     <button onClick={() => setActiveTab('history')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'history' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>История</button>
                   </div>
                 </div>
               </div>
