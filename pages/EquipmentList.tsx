@@ -212,7 +212,7 @@ export const EquipmentList: React.FC = () => {
                             <p className="text-[9px] text-gray-400 uppercase font-bold">{e.vin}</p>
                          </div>
                       </td>
-                      <td className="px-6 py-6"><span className={`text-[9px] font-black uppercase px-4 py-1.5 rounded-full shadow-neo-sm whitespace-nowrap ${e.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{e.status}</span></td>
+                      <td className="px-6 py-6"><span className={`text-[10px] md:text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-neo-sm whitespace-nowrap ${e.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{e.status}</span></td>
                       <td className="px-6 py-6 text-sm font-black text-gray-700">{e.hours} м/ч</td>
                       <td className="px-6 py-6 text-sm font-black text-gray-400 uppercase">{e.driver || '—'}</td>
                       <td className="px-6 py-6 text-right"><ChevronRight size={18} className="text-gray-300 group-hover:text-blue-600 transition-all"/></td>
@@ -225,7 +225,7 @@ export const EquipmentList: React.FC = () => {
 
       {selectedItem && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-neo-bg w-full h-full md:h-[90vh] md:max-w-6xl md:rounded-[3rem] shadow-neo overflow-hidden flex flex-col border-0 md:border md:border-white/20 animate-in zoom-in duration-300">
+          <div className="fixed inset-0 md:relative md:w-[95%] md:max-w-7xl bg-neo-bg md:h-[90vh] md:rounded-[3rem] shadow-neo overflow-y-auto flex flex-col border-0 md:border md:border-white/20 animate-in zoom-in duration-300">
             {/* Паспорт - Хедер */}
             <div className="p-4 md:p-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-start md:items-center bg-neo-bg shrink-0">
               <div className="flex items-start md:items-center gap-3 md:gap-8 flex-1 min-w-0">
