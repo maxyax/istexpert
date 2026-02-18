@@ -31,6 +31,10 @@ export const useFleetStore = create<FleetState>((set) => ({
       insuranceNumber: 'ОСАГО-2023-12345678',
       insuranceStart: '2024-12-10',
       image: 'https://images.unsplash.com/photo-1579412691522-dc97576572f4?auto=format&fit=crop&q=80&w=800',
+      documents: [
+        { name: 'СТС.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', type: 'sts' },
+        { name: 'ОСАГО.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', type: 'osago' }
+      ],
       regulations: [
         { id: 'r1', type: 'ТО-250', intervalHours: 250, works: ['Замена масла ДВС', 'Проверка гидравлики', 'Смазка узлов'] }
       ]

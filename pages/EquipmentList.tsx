@@ -650,13 +650,44 @@ const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highl
   </div>
 );
 
-const DocCard = ({ label, isEditing, onUpload, documentUrl }: any) => (
-  <div onClick={() => !isEditing && documentUrl && window.open(documentUrl, '_blank')} className={`p-10 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-8 group hover:shadow-neo-inset transition-all border border-white/5 ${documentUrl && !isEditing ? 'cursor-pointer' : ''}`}>
-     <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600"><FileText size={32}/></div>
-     <div className="text-center">
-        <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-gray-700">{label}</h4>
-        <p className={`text-[8px] font-bold uppercase opacity-60 ${documentUrl ? 'text-green-600' : 'text-gray-400'}`}>{documentUrl ? 'Файл загружен' : 'Файл не загружен'}</p>
-     </div>
-     {isEditing && <button onClick={onUpload} className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Upload size={18}/></button>}
-  </div>
-);
+const DocCard = ({ label, isEditing, onUpload, documentUrl }: any) => {
+  const handleViewDocument = (e: React.MouseEvent) => {
+    if (!isEditing && documentUrl) {
+      e.stopPropagation();
+      // Если это base64 data URL, создаем ссылку для скачивания
+      if (documentUrl.startsWith('data:')) {
+        try {
+          // Создаем временную ссылку и кликаем на нее для скачивания
+          const link = document.createElement('a');
+          link.href = documentUrl;
+          link.download = `${label}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (error) {
+          console.error('Error downloading document:', error);
+          alert('Ошибка при скачивании документа');
+        }
+      } else {
+        // Если это обычный URL, открываем напрямую
+        window.open(documentUrl, '_blank');
+      }
+    }
+  };
+
+  const handleUploadClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onUpload();
+  };
+
+  return (
+    <div onClick={handleViewDocument} className={`p-10 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-8 group hover:shadow-neo-inset transition-all border border-white/5 ${documentUrl && !isEditing ? 'cursor-pointer' : ''}`}>
+       <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600"><FileText size={32}/></div>
+       <div className="text-center">
+          <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-gray-700">{label}</h4>
+          <p className={`text-[8px] font-bold uppercase opacity-60 ${documentUrl ? 'text-green-600' : 'text-gray-400'}`}>{documentUrl ? 'Файл загружен' : 'Файл не загружен'}</p>
+       </div>
+       {isEditing && <button onClick={handleUploadClick} className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Upload size={18}/></button>}
+    </div>
+  );
+};
