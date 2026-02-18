@@ -43,12 +43,16 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
           <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-3 rounded-xl shadow-neo"><Menu size={20} /></button>
           <h2 className="text-lg font-black uppercase tracking-tight hidden md:block">{company?.name}</h2>
           <div className="flex items-center space-x-4">
+            <button className="p-3 rounded-xl shadow-neo cursor-pointer hover:shadow-neo-inset transition-all">
+              <Moon size={20} className="dark:hidden" />
+              <Sun size={20} className="hidden dark:block" />
+            </button>
             <div className="relative p-3 rounded-xl shadow-neo cursor-pointer">
               <Bell size={20} />
               {notifications.filter((n:any)=>!n.read).length > 0 && <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-neo-bg" />}
             </div>
             <div className="flex items-center space-x-3 p-2 px-4 rounded-2xl shadow-neo">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xs">{user?.full_name[0]}</div>
+              <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-xs">{user?.full_name[0]}</div>
               <span className="text-xs font-bold hidden sm:block">{user?.full_name}</span>
             </div>
           </div>

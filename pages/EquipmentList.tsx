@@ -196,7 +196,7 @@ export const EquipmentList: React.FC = () => {
               <thead className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800">
                  <tr>
                     <th className="px-8 py-5">Единица техники</th>
-                    <th className="px-6 py-5">Статус</th>
+                    <th className="px-6 py-5 w-48">Статус</th>
                     <th className="px-6 py-5">Наработка</th>
                     <th className="px-6 py-5">Водитель</th>
                     <th className="px-6 py-5"></th>
