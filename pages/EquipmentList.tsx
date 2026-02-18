@@ -224,27 +224,27 @@ export const EquipmentList: React.FC = () => {
       )}
 
       {selectedItem && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-neo-bg w-full max-w-6xl h-[90vh] rounded-[3rem] shadow-neo overflow-hidden flex flex-col border border-white/20 animate-in zoom-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full h-full md:h-[90vh] md:max-w-6xl md:rounded-[3rem] shadow-neo overflow-hidden flex flex-col border-0 md:border md:border-white/20 animate-in zoom-in duration-300">
             {/* Паспорт - Хедер */}
-            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-neo-bg">
-              <div className="flex items-center gap-8">
-                <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 border border-blue-500/10"><Truck size={32}/></div>
-                <div>
-                  <h2 className="text-2xl font-black uppercase leading-none text-gray-800 tracking-tight">{selectedItem.name}</h2>
-                  <div className="flex gap-8 mt-5">
-                     <button onClick={() => setActiveTab('main')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'main' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Основное</button>
-                     <button onClick={() => setActiveTab('docs')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'docs' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Документы</button>
-                     <button onClick={() => setActiveTab('regulations')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'regulations' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Регламент ТО</button>
-                     <button onClick={() => setActiveTab('history')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'history' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>История обслуживания</button>
+            <div className="p-4 md:p-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-start md:items-center bg-neo-bg shrink-0">
+              <div className="flex items-start md:items-center gap-3 md:gap-8 flex-1 min-w-0">
+                <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 border border-blue-500/10 shrink-0"><Truck size={24} className="md:w-8 md:h-8"/></div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base md:text-2xl font-black uppercase leading-none text-gray-800 dark:text-gray-200 tracking-tight truncate">{selectedItem.name}</h2>
+                  <div className="flex gap-2 md:gap-8 mt-3 md:mt-5 overflow-x-auto pb-2 scrollbar-hide">
+                     <button onClick={() => setActiveTab('main')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === 'main' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Основное</button>
+                     <button onClick={() => setActiveTab('docs')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === 'docs' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Документы</button>
+                     <button onClick={() => setActiveTab('regulations')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === 'regulations' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Регламент ТО</button>
+                     <button onClick={() => setActiveTab('history')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === 'history' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>История</button>
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2 md:gap-4">
+              <div className="flex gap-2 shrink-0 ml-2">
                 {isEditing ? (
-                  <button onClick={handleSave} className="p-3 md:p-4 rounded-2xl shadow-neo-inset text-emerald-600 font-black uppercase text-[10px] flex items-center gap-2 transition-all"><Save size={20}/> Сохранить</button>
+                  <button onClick={handleSave} className="p-2 md:p-4 rounded-xl md:rounded-2xl shadow-neo-inset text-emerald-600 font-black uppercase text-[8px] md:text-[10px] flex items-center gap-1 md:gap-2 transition-all"><Save size={16} className="md:w-5 md:h-5"/><span className="hidden md:inline">Сохранить</span></button>
                 ) : (
-                  <button onClick={() => setIsEditing(true)} className="p-3 md:p-4 rounded-2xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Edit3 size={20}/></button>
+                  <button onClick={() => setIsEditing(true)} className="p-2 md:p-4 rounded-xl md:rounded-2xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Edit3 size={16} className="md:w-5 md:h-5"/></button>
                 )}
                 <button onClick={() => {
                   if (isNewEquipment && selectedItem) {
@@ -252,11 +252,11 @@ export const EquipmentList: React.FC = () => {
                     setIsNewEquipment(false);
                   }
                   selectEquipment(null);
-                }} className="p-3 md:p-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo transition-all"><X size={24}/></button>
+                }} className="p-2 md:p-4 rounded-xl md:rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo transition-all z-50"><X size={20} className="md:w-6 md:h-6"/></button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar bg-neo-bg">
+            <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar bg-neo-bg">
               {activeTab === 'main' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                   <div className="lg:col-span-4 space-y-8">
