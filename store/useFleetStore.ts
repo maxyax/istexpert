@@ -29,7 +29,7 @@ export const useFleetStore = create<FleetState>((set) => ({
       insuranceCompany: 'Росгосстрах',
       insuranceNumber: 'ОСАГО-2023-12345678',
       insuranceStart: '2024-12-10',
-      image: 'https://images.unsplash.com/photo-1581094271901-8022df4466f9?w=800',
+      image: '/cat-336.jpg',
       documents: [
         { name: 'СТС.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', type: 'sts' },
         { name: 'ОСАГО.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', type: 'osago' }
@@ -54,7 +54,7 @@ export const useFleetStore = create<FleetState>((set) => ({
       insuranceCompany: 'АльфаСтрахование',
       insuranceNumber: 'ОСАГО-2024-87654321',
       insuranceStart: '2024-02-25',
-      image: 'https://images.unsplash.com/photo-1625519802551-c2b12e80ce7b?w=800',
+      image: '/cat-336.jpg',
       regulations: []
     }
   ],

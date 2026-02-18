@@ -67,3 +67,4 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
     </div>
   );
 };
+PeriodicWave
