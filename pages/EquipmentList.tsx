@@ -98,14 +98,15 @@ export const EquipmentList: React.FC = () => {
         const reader = new FileReader();
         reader.onload = (event) => {
           const fileUrl = event.target?.result as string;
-          // Сохраняем документ в editForm
-          setEditForm(prev => ({
-            ...prev,
-            documents: {
-              ...prev.documents,
-              [docType]: fileUrl
-            }
-          }));
+          // Сохраняем документ в массив documents
+          setEditForm(prev => {
+            const docs = prev.documents || [];
+            const existingIndex = docs.findIndex(d => d.type === docType);
+            const newDocs = existingIndex >= 0 
+              ? docs.map((d, i) => i === existingIndex ? { name: file.name, url: fileUrl, type: docType } : d)
+              : [...docs, { name: file.name, url: fileUrl, type: docType }];
+            return { ...prev, documents: newDocs };
+          });
         };
         reader.readAsDataURL(file);
       }
@@ -327,12 +328,12 @@ export const EquipmentList: React.FC = () => {
               {activeTab === 'docs' && (
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                     <DocCard label="СТС / ПТС" isEditing={isEditing} onUpload={() => handleUploadDocument('sts')} documentUrl={editForm.documents?.sts} />
-                     <DocCard label="Страховка ОСАГО" isEditing={isEditing} onUpload={() => handleUploadDocument('osago')} documentUrl={editForm.documents?.osago} />
-                     <DocCard label="Диагностическая карта" isEditing={isEditing} onUpload={() => handleUploadDocument('diagnostic')} documentUrl={editForm.documents?.diagnostic} />
-                     <DocCard label="Каталог" isEditing={isEditing} onUpload={() => handleUploadDocument('catalog')} documentUrl={editForm.documents?.catalog} />
-                     <DocCard label="Инструкция" isEditing={isEditing} onUpload={() => handleUploadDocument('manual')} documentUrl={editForm.documents?.manual} />
-                     <DocCard label="Другое" isEditing={isEditing} onUpload={() => handleUploadDocument('other')} documentUrl={editForm.documents?.other} />
+                     <DocCard label="СТС / ПТС" isEditing={isEditing} onUpload={() => handleUploadDocument('sts')} documentUrl={editForm.documents?.find(d => d.type === 'sts')?.url} />
+                     <DocCard label="Страховка ОСАГО" isEditing={isEditing} onUpload={() => handleUploadDocument('osago')} documentUrl={editForm.documents?.find(d => d.type === 'osago')?.url} />
+                     <DocCard label="Диагностическая карта" isEditing={isEditing} onUpload={() => handleUploadDocument('diagnostic')} documentUrl={editForm.documents?.find(d => d.type === 'diagnostic')?.url} />
+                     <DocCard label="Каталог" isEditing={isEditing} onUpload={() => handleUploadDocument('catalog')} documentUrl={editForm.documents?.find(d => d.type === 'catalog')?.url} />
+                     <DocCard label="Инструкция" isEditing={isEditing} onUpload={() => handleUploadDocument('manual')} documentUrl={editForm.documents?.find(d => d.type === 'manual')?.url} />
+                     <DocCard label="Другое" isEditing={isEditing} onUpload={() => handleUploadDocument('other')} documentUrl={editForm.documents?.find(d => d.type === 'other')?.url} />
                   </div>
                   {isEditing && (
                     <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
