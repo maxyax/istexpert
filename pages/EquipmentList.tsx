@@ -654,19 +654,32 @@ const DocCard = ({ label, isEditing, onUpload, documentUrl }: any) => {
   const handleViewDocument = (e: React.MouseEvent) => {
     if (!isEditing && documentUrl) {
       e.stopPropagation();
-      // Если это base64 data URL, создаем ссылку для скачивания
+      // Если это base64 data URL, конвертируем в blob для просмотра
       if (documentUrl.startsWith('data:')) {
         try {
-          // Создаем временную ссылку и кликаем на нее для скачивания
-          const link = document.createElement('a');
-          link.href = documentUrl;
-          link.download = `${label}.pdf`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          // Извлекаем base64 данные
+          const base64Data = documentUrl.split(',')[1];
+          const mimeType = documentUrl.split(':')[1].split(';')[0];
+          
+          // Конвертируем base64 в binary
+          const binaryString = window.atob(base64Data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          
+          // Создаем blob и URL для просмотра
+          const blob = new Blob([bytes], { type: mimeType });
+          const blobUrl = URL.createObjectURL(blob);
+          
+          // Открываем в новой вкладке для просмотра
+          window.open(blobUrl, '_blank');
+          
+          // Освобождаем память через 1 минуту
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
         } catch (error) {
-          console.error('Error downloading document:', error);
-          alert('Ошибка при скачивании документа');
+          console.error('Error opening document:', error);
+          alert('Ошибка при открытии документа');
         }
       } else {
         // Если это обычный URL, открываем напрямую
