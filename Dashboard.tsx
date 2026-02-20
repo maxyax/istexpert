@@ -20,7 +20,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map(s => (
-          <div key={s.title} onClick={() => onNavigate(s.id)} className="p-6 md:p-8 rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all group text-center flex flex-col items-center">
+          <div key={s.title} onClick={() => onNavigate(s.id)} className="p-6 md:p-8 rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all group text-center flex flex-col items-center justify-center">
             <div className={`p-4 rounded-2xl shadow-neo w-fit mb-6 ${s.color} group-hover:scale-110 transition-transform`}>{s.icon}</div>
             <h4 className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">{s.title}</h4>
             <div className="text-2xl md:text-4xl font-black tracking-tighter">{s.value}</div>
