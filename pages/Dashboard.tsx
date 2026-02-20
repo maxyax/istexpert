@@ -130,12 +130,14 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                   );
                 } else {
                   const r = item.data;
-                  const isBreakdownRecord = r.type.toLowerCase().includes('поломк') || r.type.toLowerCase().includes('неисправност') || r.type.toLowerCase().includes('акт');
+                  const recordType = 'type' in r ? r.type : '';
+                  const performedBy = 'performedBy' in r ? r.performedBy : '';
+                  const isBreakdownRecord = recordType.toLowerCase().includes('поломк') || recordType.toLowerCase().includes('неисправност') || recordType.toLowerCase().includes('акт');
                   return (
                     <div key={`r-${r.id}`} className={`p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 ${isBreakdownRecord ? 'border-red-500' : 'border-emerald-500'} flex justify-between items-center group cursor-pointer hover:shadow-neo transition-all`}>
                        <div className="overflow-hidden">
-                          <p className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 truncate">{r.type}</p>
-                          <p className="text-[8px] font-bold text-gray-400 uppercase truncate">{r.performedBy} • {equipment.find(e=>e.id===r.equipmentId)?.name}</p>
+                          <p className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 truncate">{recordType}</p>
+                          <p className="text-[8px] font-bold text-gray-400 uppercase truncate">{performedBy} • {equipment.find(e=>e.id===r.equipmentId)?.name}</p>
                        </div>
                        <ChevronRight size={14} className="text-gray-300 group-hover:text-emerald-500 shrink-0" />
                     </div>

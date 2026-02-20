@@ -4,6 +4,7 @@ import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, T
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { EquipStatus } from '../types';
 
 const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[]) => {
   const activeBreakdowns = breakdowns.filter(b => b.equipmentId === equipmentId && b.status !== 'Исправлено');
