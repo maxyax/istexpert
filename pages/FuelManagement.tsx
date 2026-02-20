@@ -71,17 +71,17 @@ export const FuelManagement: React.FC = () => {
                   <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Журнал заправок пуст</p>
                </div>
             ) : fuelRecords.map(r => (
-              <div key={r.id} className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg flex justify-between items-center border-l-4 border-blue-500 group hover:shadow-neo-inset transition-all cursor-default border border-white/5">
-                <div className="flex items-center gap-8">
-                   <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500 group-hover:scale-110 transition-transform"><Fuel size={28}/></div>
-                   <div>
-                      <p className="text-sm font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">{equipment.find(e=>e.id===r.equipmentId)?.name || 'Неизвестно'}</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{r.station} • {new Date(r.date).toLocaleDateString('ru-RU')}</p>
+              <div key={r.id} className="p-6 md:p-8 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col md:flex-row justify-between md:items-center gap-4 border-l-4 border-blue-500 group hover:shadow-neo-inset transition-all cursor-default border border-white/5">
+                <div className="flex items-center gap-4 md:gap-8 min-w-0 flex-1">
+                   <div className="p-3 md:p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500 group-hover:scale-110 transition-transform flex-shrink-0"><Fuel size={24} className="md:w-7 md:h-7"/></div>
+                   <div className="min-w-0 flex-1">
+                      <p className="text-xs md:text-sm font-black uppercase tracking-tight text-gray-800 dark:text-gray-100 truncate">{equipment.find(e=>e.id===r.equipmentId)?.name || 'Неизвестно'}</p>
+                      <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{r.station} • {new Date(r.date).toLocaleDateString('ru-RU')}</p>
                    </div>
                 </div>
-                <div className="text-right">
-                   <p className="text-2xl font-black text-blue-500">+{r.quantity} л</p>
-                   <p className="text-[11px] font-black text-emerald-500 tracking-widest">{r.totalCost.toLocaleString()} ₽</p>
+                <div className="text-left md:text-right flex-shrink-0">
+                   <p className="text-xl md:text-2xl font-black text-blue-500 whitespace-nowrap">+{r.quantity} л</p>
+                   <p className="text-[10px] md:text-[11px] font-black text-emerald-500 tracking-widest whitespace-nowrap">{r.totalCost.toLocaleString()} ₽</p>
                 </div>
               </div>
             ))}
