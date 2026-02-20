@@ -118,12 +118,14 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                 return bDate - aDate;
               }).slice(0, 4).map((item, i) => {
                 if (item.type === 'breakdown') {
-                  const b = item.data;
+                  const b = item.data as any;
+                  const partName = b.partName || '';
+                  const status = b.status || '';
                   return (
                     <div key={`b-${b.id}`} className="p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 border-red-500 flex justify-between items-center group cursor-pointer hover:shadow-neo transition-all">
                        <div className="overflow-hidden">
-                          <p className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 truncate">{b.partName}</p>
-                          <p className="text-[8px] font-bold text-gray-400 uppercase truncate">{b.status} • {equipment.find(e=>e.id===b.equipmentId)?.name}</p>
+                          <p className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 truncate">{partName}</p>
+                          <p className="text-[8px] font-bold text-gray-400 uppercase truncate">{status} • {equipment.find(e=>e.id===b.equipmentId)?.name}</p>
                        </div>
                        <ChevronRight size={14} className="text-gray-300 group-hover:text-red-500 shrink-0" />
                     </div>

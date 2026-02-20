@@ -133,7 +133,7 @@ export const Maintenance: React.FC = () => {
     const equipToUpdate = equipment.find(eq => eq.id === selectedMaintenanceEquipId);
     if (!equipToUpdate) return;
     
-    const payload = {
+    const payload: any = {
       equipmentId: selectedMaintenanceEquipId,
       date: breakdownForm.date + 'T00:00:00.000Z',
       status: 'Новая',

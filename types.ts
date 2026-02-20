@@ -70,7 +70,7 @@ export interface MaintenanceRecord {
   type: string;
   hoursAtMaintenance: number;
   performedBy: string;
-  checklistItems: { task: string; completed: boolean }[];
+  checklistItems: { text: string; done: boolean; note?: string }[];
   cost?: number;
   fluids?: FluidRecord[];
 }
