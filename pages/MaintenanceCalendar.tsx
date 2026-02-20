@@ -55,6 +55,7 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
   const getDayEvents = (day: Date) => {
     const dayStr = day.toISOString().split('T')[0];
     const planned = plannedTOs.filter(t => t.date === dayStr && t.status === 'planned');
+    const completed = plannedTOs.filter(t => t.date === dayStr && t.status === 'completed');
     const done = records.filter(r => r.date === dayStr);
     
     const activeBreakdowns = breakdowns.filter(b => {
@@ -65,7 +66,7 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
       return dayStr >= bDate;
     });
 
-    return { planned, done, activeBreakdowns };
+    return { planned, completed, done, activeBreakdowns };
   };
 
   const handleEventClick = (equipmentId: string) => {
@@ -89,6 +90,7 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
            <div className="hidden lg:flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-gray-400">
              <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-red-500 rounded-full" /> Поломка</div>
              <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-orange-500 rounded-full" /> План ТО</div>
+             <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-cyan-500 rounded-full" /> ТО выполнено</div>
            </div>
            {equipment.length > 0 && (
              <button 
@@ -110,7 +112,7 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
             <div key={`empty-${i}`} className="h-16 md:h-32 opacity-10"></div>
           ))}
           {daysInMonth.map(day => {
-            const { planned, done, activeBreakdowns } = getDayEvents(day);
+            const { planned, completed, done, activeBreakdowns } = getDayEvents(day);
             const isToday = new Date().toDateString() === day.toDateString();
             return (
               <div key={day.toISOString()} className={`h-20 md:h-36 p-1 md:p-2 rounded-lg md:rounded-2xl shadow-neo bg-neo-bg relative overflow-hidden group hover:shadow-neo-inset transition-all border border-white/5 dark:border-gray-800/50 ${isToday ? 'ring-2 ring-blue-500/30 ring-inset' : ''}`}>
@@ -122,6 +124,14 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
                       className="text-[6px] md:text-[8px] p-0.5 rounded-sm md:rounded-md bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-black truncate flex items-center gap-0.5 cursor-pointer hover:bg-orange-200 dark:hover:bg-orange-800/40"
                     >
                       <Clock size={8} className="shrink-0" /> <span className="hidden md:inline">{equipment.find(eq => eq.id === e.equipmentId)?.name || 'ТО'}</span>
+                    </div>
+                  ))}
+                  {completed.map(e => (
+                    <div 
+                      key={e.id} onClick={() => handleEventClick(e.equipmentId)}
+                      className="text-[6px] md:text-[8px] p-0.5 rounded-sm md:rounded-md bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-black truncate flex items-center gap-0.5 cursor-pointer hover:bg-cyan-200 dark:hover:bg-cyan-800/40"
+                    >
+                      <CheckCircle2 size={8} className="shrink-0" /> <span className="hidden md:inline">{e.type}</span>
                     </div>
                   ))}
                   {done.map(r => (

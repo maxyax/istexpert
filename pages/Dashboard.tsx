@@ -8,9 +8,30 @@ import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { EquipStatus } from '../types';
 
+const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[]) => {
+  const activeBreakdowns = breakdowns.filter(b => b.equipmentId === equipmentId && b.status !== 'Исправлено');
+  
+  if (activeBreakdowns.length === 0) {
+    const plannedTO = plannedTOs.filter(t => t.equipmentId === equipmentId && t.status === 'planned');
+    if (plannedTO.length > 0) return EquipStatus.MAINTENANCE;
+    return EquipStatus.ACTIVE;
+  }
+  
+  const criticalBreakdowns = activeBreakdowns.filter(b => b.severity === 'Критическая');
+  if (criticalBreakdowns.length > 0) return EquipStatus.REPAIR;
+  
+  const waitingForParts = activeBreakdowns.filter(b => b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены');
+  if (waitingForParts.length > 0) return EquipStatus.WAITING_PARTS;
+  
+  const inWork = activeBreakdowns.filter(b => b.status === 'В работе');
+  if (inWork.length > 0) return EquipStatus.REPAIR;
+  
+  return EquipStatus.ACTIVE;
+};
+
 export const Dashboard: React.FC<any> = ({ onNavigate }) => {
   const { equipment } = useFleetStore();
-  const { breakdowns, records, fuelRecords } = useMaintenanceStore();
+  const { breakdowns, records, fuelRecords, plannedTOs } = useMaintenanceStore();
 
   const stats = [
     { 
@@ -87,16 +108,40 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
            <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-10 flex items-center gap-2">
              <History size={16} className="text-orange-500"/> Живая лента
            </h3>
-           <div className="space-y-4">
-              {breakdowns.length > 0 ? breakdowns.slice(0, 4).map(b => (
-                <div key={b.id} className="p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 border-red-500 flex justify-between items-center group cursor-pointer hover:shadow-neo transition-all">
-                   <div className="overflow-hidden">
-                      <p className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 truncate">{b.partName}</p>
-                      <p className="text-[8px] font-bold text-gray-400 uppercase truncate">{b.status} • {equipment.find(e=>e.id===b.equipmentId)?.name}</p>
-                   </div>
-                   <ChevronRight size={14} className="text-gray-300 group-hover:text-red-500 shrink-0" />
-                </div>
-              )) : (
+           <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">
+              {(breakdowns.length > 0 || records.length > 0) ? [
+                ...breakdowns.slice(0, 4).map(b => ({ type: 'breakdown', data: b })),
+                ...records.slice(0, 4).map(r => ({ type: 'record', data: r }))
+              ].sort((a, b) => {
+                const aDate = a.type === 'breakdown' ? new Date(a.data.date).getTime() : new Date(a.data.date).getTime();
+                const bDate = b.type === 'breakdown' ? new Date(b.data.date).getTime() : new Date(b.data.date).getTime();
+                return bDate - aDate;
+              }).slice(0, 4).map((item, i) => {
+                if (item.type === 'breakdown') {
+                  const b = item.data;
+                  return (
+                    <div key={`b-${b.id}`} className="p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 border-red-500 flex justify-between items-center group cursor-pointer hover:shadow-neo transition-all">
+                       <div className="overflow-hidden">
+                          <p className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 truncate">{b.partName}</p>
+                          <p className="text-[8px] font-bold text-gray-400 uppercase truncate">{b.status} • {equipment.find(e=>e.id===b.equipmentId)?.name}</p>
+                       </div>
+                       <ChevronRight size={14} className="text-gray-300 group-hover:text-red-500 shrink-0" />
+                    </div>
+                  );
+                } else {
+                  const r = item.data;
+                  const isBreakdownRecord = r.type.toLowerCase().includes('поломк') || r.type.toLowerCase().includes('неисправност') || r.type.toLowerCase().includes('акт');
+                  return (
+                    <div key={`r-${r.id}`} className={`p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 ${isBreakdownRecord ? 'border-red-500' : 'border-emerald-500'} flex justify-between items-center group cursor-pointer hover:shadow-neo transition-all`}>
+                       <div className="overflow-hidden">
+                          <p className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 truncate">{r.type}</p>
+                          <p className="text-[8px] font-bold text-gray-400 uppercase truncate">{r.performedBy} • {equipment.find(e=>e.id===r.equipmentId)?.name}</p>
+                       </div>
+                       <ChevronRight size={14} className="text-gray-300 group-hover:text-emerald-500 shrink-0" />
+                    </div>
+                  );
+                }
+              }) : (
                 <p className="text-center py-10 text-[10px] font-black text-gray-400 uppercase">Событий нет</p>
               )}
            </div>

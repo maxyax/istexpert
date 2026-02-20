@@ -4,6 +4,7 @@ import {
   Search, Plus, Truck, X, QrCode, Zap, Gauge, Edit3, Save, Camera, FileText, User, ChevronRight, History, Upload, LayoutGrid, List, Clock, Trash2
 } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
+import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { EquipStatus, Equipment, MaintenanceRegulation } from '../types';
 import QRCode from 'qrcode';
 
@@ -27,8 +28,30 @@ const getInsuranceStatus = (insuranceEnd?: string): { status: 'expired' | 'warni
   return { status: 'ok', daysLeft, message: `Действительна` };
 };
 
+const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[]) => {
+  const activeBreakdowns = breakdowns.filter(b => b.equipmentId === equipmentId && b.status !== 'Исправлено');
+  
+  if (activeBreakdowns.length === 0) {
+    const plannedTO = plannedTOs.filter(t => t.equipmentId === equipmentId && t.status === 'planned');
+    if (plannedTO.length > 0) return EquipStatus.MAINTENANCE;
+    return EquipStatus.ACTIVE;
+  }
+  
+  const criticalBreakdowns = activeBreakdowns.filter(b => b.severity === 'Критическая');
+  if (criticalBreakdowns.length > 0) return EquipStatus.REPAIR;
+  
+  const waitingForParts = activeBreakdowns.filter(b => b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены');
+  if (waitingForParts.length > 0) return EquipStatus.WAITING_PARTS;
+  
+  const inWork = activeBreakdowns.filter(b => b.status === 'В работе');
+  if (inWork.length > 0) return EquipStatus.REPAIR;
+  
+  return EquipStatus.ACTIVE;
+};
+
 export const EquipmentList: React.FC = () => {
   const { equipment, selectEquipment, selectedEquipmentId, updateEquipment, deleteEquipment, addEquipment } = useFleetStore();
+  const { records, breakdowns, plannedTOs } = useMaintenanceStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -36,6 +59,7 @@ export const EquipmentList: React.FC = () => {
   const [qrBase64, setQrBase64] = useState('');
   const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history' | 'regulations'>('main')
   const [isNewEquipment, setIsNewEquipment] = useState(false);
+  const [selectedHistoryRecord, setSelectedHistoryRecord] = useState<any>(null);
 
   const selectedItem = equipment.find(e => e.id === selectedEquipmentId);
   const [editForm, setEditForm] = useState<Partial<Equipment>>({});
@@ -136,6 +160,23 @@ export const EquipmentList: React.FC = () => {
     e.name.toLowerCase().includes(search.toLowerCase()) || 
     e.vin.toLowerCase().includes(search.toLowerCase())
   );
+
+  const statusColorClass = (s: EquipStatus) => {
+    switch (s) {
+      case EquipStatus.ACTIVE:
+        return 'bg-green-50 text-green-700 border border-green-200';
+      case EquipStatus.REPAIR:
+        return 'bg-red-50 text-red-700 border border-red-200';
+      case EquipStatus.MAINTENANCE:
+        return 'bg-orange-50 text-orange-700 border border-orange-200';
+      case EquipStatus.WAITING_PARTS:
+        return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+      case EquipStatus.IDLE:
+        return 'bg-gray-50 text-gray-700 border border-gray-200';
+      default:
+        return 'bg-white/3 text-gray-300';
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-20 px-4 md:px-0">
@@ -272,6 +313,19 @@ export const EquipmentList: React.FC = () => {
                     </div>
                   </div>
                   <div className="lg:col-span-8 space-y-10">
+                    <div className="p-4 rounded-2xl bg-neo-bg border border-white/5 flex items-center justify-between gap-4">
+                      <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.12em]">Операционный статус</h3>
+                      <div className="flex items-center gap-2">
+                        {[EquipStatus.ACTIVE, EquipStatus.REPAIR, EquipStatus.MAINTENANCE, EquipStatus.WAITING_PARTS].map(s => (
+                          <button
+                            key={s}
+                            onClick={() => isEditing && setEditForm({...editForm, status: s})}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase transition-colors ${editForm.status === s ? statusColorClass(s) : 'bg-white/3 text-gray-300 hover:bg-white/5'}`}>
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <EditableBlock label="Марка" value={editForm.make} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, make: v})} />
                       <EditableBlock label="Модель" value={editForm.model} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, model: v})} />
@@ -285,7 +339,7 @@ export const EquipmentList: React.FC = () => {
                       <EditableBlock label="Email контрагента" value={editForm.supplierEmail} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, supplierEmail: v})} />
                     </div>
                     <div className="p-10 rounded-[2.5rem] shadow-neo-inset bg-neo-bg border border-blue-500/10">
-                       <div className="flex items-center justify-between mb-8">
+                       <div className="flex items-center justify-between mb-6">
                          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Данные страхования</h3>
                          {editForm.insurance_end && (() => {
                            const status = getInsuranceStatus(editForm.insurance_end);
@@ -306,14 +360,6 @@ export const EquipmentList: React.FC = () => {
                          <EditableBlock label="Номер страховки" value={editForm.insuranceNumber} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, insuranceNumber: v})} />
                          <EditableBlock label="Дата начала" value={editForm.insuranceStart} isEditing={isEditing} type="date" onChange={(v:string) => setEditForm({...editForm, insuranceStart: v})} />
                          <EditableBlock label="Дата окончания" value={editForm.insurance_end} isEditing={isEditing} type="date" onChange={(v:string) => setEditForm({...editForm, insurance_end: v})} highlight />
-                       </div>
-                    </div>
-                    <div className="p-10 rounded-[2.5rem] shadow-neo-inset bg-neo-bg border border-white/5">
-                       <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-8">Операционный статус</h3>
-                       <div className="flex flex-wrap gap-4">
-                          {[EquipStatus.ACTIVE, EquipStatus.REPAIR, EquipStatus.MAINTENANCE, EquipStatus.WAITING_PARTS].map(s => (
-                            <button key={s} onClick={() => isEditing && setEditForm({...editForm, status: s})} className={`px-8 py-3.5 rounded-2xl font-black uppercase text-[10px] transition-all tracking-widest ${editForm.status === s ? 'bg-neo-bg shadow-neo-inset text-blue-600' : 'shadow-neo text-gray-400 hover:text-gray-600'}`}>{s}</button>
-                          ))}
                        </div>
                     </div>
                     {isEditing && (
@@ -606,11 +652,28 @@ export const EquipmentList: React.FC = () => {
 
               {activeTab === 'history' && (
                 <div className="space-y-6">
-                   <div className="p-20 rounded-[3rem] shadow-neo-inset bg-neo-bg text-center">
-                      <div className="w-20 h-20 rounded-full shadow-neo mx-auto mb-8 flex items-center justify-center text-gray-300"><History size={40}/></div>
-                      <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">История обслуживания пока пуста</p>
-                      <button className="mt-8 px-10 py-4 rounded-2xl shadow-neo text-[10px] font-black uppercase text-blue-600 hover:shadow-neo-inset transition-all active:scale-95 border border-blue-500/10">Скачать отчет PDF</button>
-                   </div>
+                   {records.filter(r => r.equipmentId === selectedItem?.id).length === 0 ? (
+                     <div className="p-20 rounded-[3rem] shadow-neo-inset bg-neo-bg text-center">
+                        <div className="w-20 h-20 rounded-full shadow-neo mx-auto mb-8 flex items-center justify-center text-gray-300"><History size={40}/></div>
+                        <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">История обслуживания пока пуста</p>
+                        <button className="mt-8 px-10 py-4 rounded-2xl shadow-neo text-[10px] font-black uppercase text-blue-600 hover:shadow-neo-inset transition-all active:scale-95 border border-blue-500/10">Скачать отчет PDF</button>
+                     </div>
+                   ) : (
+                     <div className="space-y-4">
+                       {records.filter(r => r.equipmentId === selectedItem?.id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(r => {
+                         const isBreakdown = r.type.toLowerCase().includes('поломк') || r.type.toLowerCase().includes('неисправност') || r.type.toLowerCase().includes('акт');
+                         return (
+                           <div key={r.id} onClick={() => setSelectedHistoryRecord(r)} className={`p-4 md:p-6 rounded-2xl shadow-neo-sm bg-neo-bg flex justify-between items-center border-l-4 ${isBreakdown ? 'border-red-500' : 'border-emerald-500'} group hover:shadow-neo hover:cursor-pointer transition-all`}>
+                             <div className="overflow-hidden">
+                               <p className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate">{r.type}</p>
+                               <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{r.performedBy} • {r.hoursAtMaintenance} м/ч</p>
+                             </div>
+                             <span className="text-[9px] md:text-[10px] font-black text-gray-400 shrink-0 ml-4">{r.date}</span>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   )}
                    {isEditing && (
                      <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
                        <button onClick={() => setShowDeleteConfirm(true)} className="px-10 py-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95">Удалить технику</button>
@@ -632,6 +695,61 @@ export const EquipmentList: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {selectedHistoryRecord && (
+        <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg rounded-[3rem] shadow-neo max-w-2xl w-full p-8 md:p-12 border border-white/20 max-h-[90vh] overflow-y-auto animate-in zoom-in duration-300">
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <h3 className="text-2xl md:text-3xl font-black uppercase text-gray-800 dark:text-gray-200 mb-2">{selectedHistoryRecord.type}</h3>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{selectedHistoryRecord.date}</p>
+              </div>
+              <button onClick={() => setSelectedHistoryRecord(null)} className="p-2 rounded-xl shadow-neo-inset text-gray-400 hover:text-red-500 transition-all"><X size={24}/></button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                <p className="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Исполнитель</p>
+                <p className="text-sm font-black text-gray-800 dark:text-gray-200 uppercase">{selectedHistoryRecord.performedBy || '—'}</p>
+              </div>
+              <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                <p className="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Наработка (м/ч)</p>
+                <p className="text-sm font-black text-gray-800 dark:text-gray-200">{selectedHistoryRecord.hoursAtMaintenance || '—'}</p>
+              </div>
+            </div>
+
+            {selectedHistoryRecord.checklistItems && selectedHistoryRecord.checklistItems.length > 0 && (
+              <div className="mb-8">
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Контрольный список</h4>
+                <div className="space-y-3">
+                  {selectedHistoryRecord.checklistItems.map((item: any, idx: number) => (
+                    <div key={idx} className="p-4 rounded-xl shadow-neo-sm bg-neo-bg border-l-4 border-emerald-500 flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${item.done ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                        {item.done && <span className="text-xs font-black">✓</span>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-black uppercase ${item.done ? 'text-emerald-600 line-through' : 'text-gray-800 dark:text-gray-200'}`}>{item.text}</p>
+                        {item.note && <p className="text-[9px] text-gray-500 mt-2 italic">Примечание: {item.note}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedHistoryRecord.notes && (
+              <div className="mb-8">
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Примечания</h4>
+                <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selectedHistoryRecord.notes}</p>
+                </div>
+              </div>
+            )}
+
+            <button onClick={() => setSelectedHistoryRecord(null)} className="w-full px-8 py-4 rounded-2xl shadow-neo bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] transition-all">Закрыть</button>
           </div>
         </div>
       )}

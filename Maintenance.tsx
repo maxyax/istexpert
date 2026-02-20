@@ -12,6 +12,22 @@ export const Maintenance: React.FC = () => {
 
   const selectedEquip = equipment.find(e => e.id === selectedMaintenanceEquipId);
 
+  const computeNextTO = (e: any) => {
+    if (!e || !e.regulations || e.regulations.length === 0) return null;
+    const curr = e.hours || 0;
+    const candidates = e.regulations.map((r: any) => {
+      const interval = r.intervalHours || r.intervalKm || 0;
+      if (!interval) return null;
+      let next = Math.ceil(curr / interval) * interval;
+      if (next <= curr) next += interval;
+      return { reg: r, next };
+    }).filter(Boolean);
+    if (candidates.length === 0) return null;
+    candidates.sort((a: any,b:any)=> a.next - b.next);
+    const nearest = candidates[0];
+    return { type: nearest.reg.type, next: nearest.next, remaining: nearest.next - curr };
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {!selectedEquip ? (
@@ -38,17 +54,32 @@ export const Maintenance: React.FC = () => {
             <button onClick={() => setIsTOModalOpen(true)} className="p-8 rounded-[2.5rem] shadow-neo bg-blue-500 text-white flex flex-col items-center gap-4 hover:shadow-neo-inset transition-all"><Wrench size={32}/><span className="text-[10px] font-black uppercase tracking-widest">Провести ТО</span></button>
             <button className="p-8 rounded-[2.5rem] shadow-neo bg-red-500 text-white flex flex-col items-center gap-4 hover:shadow-neo-inset transition-all"><AlertTriangle size={32}/><span className="text-[10px] font-black uppercase tracking-widest">Акт поломки</span></button>
             <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-2"><p className="text-[10px] font-black text-gray-400 uppercase">Наработка</p><p className="text-3xl font-black">{selectedEquip.hours} м/ч</p></div>
-            <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-2"><p className="text-[10px] font-black text-gray-400 uppercase">Регламент</p><p className="text-3xl font-black text-orange-500">250</p></div>
+            <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-2">
+              <p className="text-[10px] font-black text-gray-400 uppercase">Регламент</p>
+              {(() => {
+                const n = computeNextTO(selectedEquip);
+                if (!n) return <p className="text-sm text-gray-400">Нет регламента</p>;
+                return (
+                  <div className="text-center">
+                    <p className="text-2xl font-black text-orange-500">{n.next}</p>
+                    <p className="text-[10px] text-gray-500">до следующего: {n.remaining} м/ч</p>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
           <div className="p-10 rounded-[3rem] shadow-neo bg-neo-bg">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-8 flex items-center gap-2"><History size={16} className="text-blue-500"/> Архив обслуживания</h3>
             <div className="space-y-4">
-              {records.filter(r => r.equipmentId === selectedEquip.id).map((r, i) => (
-                <div key={i} className="p-5 rounded-2xl shadow-neo-sm bg-neo-bg flex justify-between items-center border-l-4 border-emerald-500">
-                  <div><p className="text-sm font-black uppercase">{r.type}</p><p className="text-[9px] font-bold text-gray-400 uppercase">{r.performedBy} • {r.hoursAtMaintenance} м/ч</p></div>
-                  <span className="text-[10px] font-black text-gray-400">{r.date}</span>
-                </div>
-              ))}
+              {records.filter(r => r.equipmentId === selectedEquip.id).map((r, i) => {
+                const isBreakdown = r.type.toLowerCase().includes('поломк') || r.type.toLowerCase().includes('неисправност') || r.type.toLowerCase().includes('акт');
+                return (
+                  <div key={i} className={`p-5 rounded-2xl shadow-neo-sm bg-neo-bg flex justify-between items-center border-l-4 ${isBreakdown ? 'border-red-500' : 'border-emerald-500'}`}>
+                    <div><p className="text-sm font-black uppercase">{r.type}</p><p className="text-[9px] font-bold text-gray-400 uppercase">{r.performedBy} • {r.hoursAtMaintenance} м/ч</p></div>
+                    <span className="text-[10px] font-black text-gray-400">{r.date}</span>
+                  </div>
+                );
+              })}
               {records.filter(r => r.equipmentId === selectedEquip.id).length === 0 && <p className="text-center py-10 text-gray-400 text-[10px] font-black uppercase">История пуста</p>}
             </div>
           </div>
