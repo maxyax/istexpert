@@ -20,6 +20,7 @@ export enum EquipStatus {
   MAINTENANCE = 'На ТО',
   REPAIR = 'В ремонте',
   IDLE = 'Простой',
+  ACTIVE_WITH_RESTRICTIONS = 'В работе с ограничениями',
   WAITING_PARTS = 'Ожидание запчастей'
 }
 
