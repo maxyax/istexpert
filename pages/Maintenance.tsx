@@ -15,14 +15,26 @@ const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedT
     return EquipStatus.ACTIVE;
   }
   
+  // Проверка критических поломок
   const criticalBreakdowns = activeBreakdowns.filter(b => b.severity === 'Критическая');
   if (criticalBreakdowns.length > 0) return EquipStatus.REPAIR;
   
+  // Проверка ожидания запчастей
   const waitingForParts = activeBreakdowns.filter(b => b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены');
   if (waitingForParts.length > 0) return EquipStatus.WAITING_PARTS;
   
+  // Проверка поломок в работе
   const inWork = activeBreakdowns.filter(b => b.status === 'В работе');
   if (inWork.length > 0) return EquipStatus.REPAIR;
+  
+  // Проверка незначительных поломок (не критические и не в работе)
+  const minorBreakdowns = activeBreakdowns.filter(b => 
+    b.severity !== 'Критическая' && 
+    b.status !== 'В работе' && 
+    b.status !== 'Запчасти заказаны' && 
+    b.status !== 'Запчасти получены'
+  );
+  if (minorBreakdowns.length > 0) return EquipStatus.ACTIVE_WITH_RESTRICTIONS;
   
   return EquipStatus.ACTIVE;
 };
