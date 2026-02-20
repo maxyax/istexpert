@@ -44,10 +44,10 @@ export const FuelManagement: React.FC = () => {
 
   return (
     <div className="space-y-10 pb-20 animate-in fade-in duration-700 px-4 md:px-0">
-       <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-black uppercase tracking-tight">Мониторинг Топлива</h2>
-          <button onClick={() => setIsModalOpen(true)} className="px-10 py-5 rounded-[2.5rem] bg-blue-500 text-white font-black uppercase text-xs shadow-xl flex items-center gap-4 active:scale-95 transition-all tracking-[0.2em] hover:scale-105">
-            <Plus size={20}/> Регистрация заправки
+       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight whitespace-nowrap">Мониторинг Топлива</h2>
+          <button onClick={() => setIsModalOpen(true)} className="px-6 md:px-10 py-4 md:py-5 rounded-[2.5rem] bg-blue-500 text-white font-black uppercase text-[10px] md:text-xs shadow-xl flex items-center gap-2 md:gap-4 active:scale-95 transition-all tracking-[0.15em] md:tracking-[0.2em] hover:scale-105 whitespace-nowrap">
+            <Plus size={18} className="md:w-5 md:h-5"/> <span className="hidden sm:inline">Регистрация</span> Заправки
           </button>
        </div>
 
