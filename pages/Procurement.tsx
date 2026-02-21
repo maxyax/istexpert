@@ -181,14 +181,14 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   const statusColor = COLUMNS.find(c=>c.id===req.status)?.color || 'bg-gray-400';
                   const borderColor = statusColor.replace('bg-', 'border-');
                   return (
-                  <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className={`p-6 rounded-[2rem] shadow-neo bg-neo-bg group hover:shadow-neo-inset transition-all cursor-pointer border-l-4 border-white/10 relative ${borderColor}`}>
-                    <h5 className="text-[11px] font-black uppercase mb-3 text-gray-700 dark:text-gray-200 tracking-tight group-hover:text-blue-600 transition-colors">{req.title}</h5>
+                  <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className={`p-4 md:p-6 rounded-[2rem] shadow-neo bg-neo-bg group hover:shadow-neo-inset transition-all cursor-pointer border-l-4 border-white/10 relative ${borderColor}`}>
+                    <h5 className="text-[10px] md:text-[11px] font-black uppercase mb-2 md:mb-3 text-gray-700 dark:text-gray-200 tracking-tight group-hover:text-blue-600 transition-colors line-clamp-2">{req.title}</h5>
                     <div className="flex items-center gap-2 mb-4 opacity-70">
                       <Truck size={12} className="text-blue-500"/>
-                      <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase truncate">{equipment.find(e=>e.id===req.equipmentId)?.name || 'Общий'}</span>
+                      <span className="text-[8px] md:text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase truncate">{equipment.find(e=>e.id===req.equipmentId)?.name || 'Общий'}</span>
                     </div>
                     <div className="flex justify-between items-center pt-4 border-t border-gray-200/50 dark:border-gray-800">
-                      <span className="text-[11px] font-black text-emerald-600">{req.cost ? formatMoney(req.cost) : 'Оценка...'}</span>
+                      <span className="text-[9px] md:text-[11px] font-black text-emerald-600">{req.cost ? formatMoney(req.cost) : 'Оценка...'}</span>
                       <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>

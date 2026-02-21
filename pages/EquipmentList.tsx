@@ -398,17 +398,17 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                             <p className="text-[9px] text-gray-400 uppercase font-bold">{e.vin}</p>
                          </div>
                       </td>
-                      <td className="px-6 py-6">
+                      <td className="px-4 py-4 md:px-6 md:py-6">
                         <div className="space-y-1">
-                          <span className={`text-[8px] md:text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-neo-sm whitespace-nowrap ${
+                          <span className={`text-[7px] md:text-[9px] font-black uppercase px-2 py-1 rounded-full shadow-neo-sm whitespace-nowrap ${
                             computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' :
                             computedStatus.status === EquipStatus.REPAIR ? 'bg-red-100 text-red-700' :
                             computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-100 text-orange-700' :
                             computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-100 text-yellow-700' :
                             'bg-blue-100 text-blue-700'
-                          }`}>{computedStatus.status}</span>
+                          }`}>{computedStatus.status.length > 15 ? computedStatus.status.substring(0, 15) + '...' : computedStatus.status}</span>
                           {computedStatus.reason && computedStatus.status !== EquipStatus.ACTIVE && (
-                            <p className="text-[7px] text-gray-500 truncate">{computedStatus.reason}</p>
+                            <p className="text-[6px] md:text-[7px] text-gray-500 truncate max-w-[120px]">{computedStatus.reason}</p>
                           )}
                         </div>
                       </td>
