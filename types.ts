@@ -105,6 +105,7 @@ export interface BreakdownRecord {
   photos?: string[];
   hoursAtFix?: number;
   mileageAtFix?: number;
+  fixNotes?: string;
 }
 
 export type ProcurementStatus = 'Новая' | 'Поиск' | 'Оплачено' | 'В пути' | 'На складе';

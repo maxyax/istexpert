@@ -117,7 +117,7 @@ export const Maintenance: React.FC = () => {
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [selectedRecordDetail, setSelectedRecordDetail] = useState<any>(null);
   const [selectedBreakdownDetail, setSelectedBreakdownDetail] = useState<any>(null);
-  const [breakdownStatusForm, setBreakdownStatusForm] = useState({ status: 'Новая' as any, fixedDate: new Date().toISOString().slice(0, 10), hoursAtFix: undefined as number | undefined, mileageAtFix: undefined as number | undefined });
+  const [breakdownStatusForm, setBreakdownStatusForm] = useState({ status: 'Новая' as any, fixedDate: new Date().toISOString().slice(0, 10), hoursAtFix: undefined as number | undefined, mileageAtFix: undefined as number | undefined, fixNotes: '' as string });
 
   const selectedEquip = equipment.find(e => e.id === selectedMaintenanceEquipId);
 
@@ -369,7 +369,7 @@ export const Maintenance: React.FC = () => {
                         <button
                           onClick={() => {
                             setSelectedBreakdownDetail(b);
-                            setBreakdownStatusForm({ status: 'В работе', fixedDate: new Date().toISOString().slice(0, 10), hoursAtFix: undefined, mileageAtFix: undefined });
+                            setBreakdownStatusForm({ status: 'В работе', fixedDate: new Date().toISOString().slice(0, 10), hoursAtFix: undefined, mileageAtFix: undefined, fixNotes: '' });
                           }}
                           className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-black uppercase text-[8px] hover:bg-emerald-700 transition-all"
                         >
@@ -934,8 +934,13 @@ export const Maintenance: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      updateBreakdownStatus(selectedBreakdownDetail.id, 'Исправлено', new Date().toISOString().slice(0, 10));
-                      setSelectedBreakdownDetail(null);
+                      setBreakdownStatusForm({ 
+                        status: 'Исправлено', 
+                        fixedDate: new Date().toISOString().slice(0, 10), 
+                        hoursAtFix: selectedBreakdownDetail.hoursAtBreakdown,
+                        mileageAtFix: undefined,
+                        fixNotes: ''
+                      });
                     }}
                     className="w-full py-4 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all hover:bg-emerald-700"
                   >
@@ -946,7 +951,7 @@ export const Maintenance: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setBreakdownStatusForm({ status: selectedBreakdownDetail.status, fixedDate: selectedBreakdownDetail.fixedDate || new Date().toISOString().slice(0, 10), hoursAtFix: undefined, mileageAtFix: undefined });
+                    setBreakdownStatusForm({ status: selectedBreakdownDetail.status, fixedDate: selectedBreakdownDetail.fixedDate || new Date().toISOString().slice(0, 10), hoursAtFix: undefined, mileageAtFix: undefined, fixNotes: '' });
                   }}
                   className="w-full py-4 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all border border-blue-500/10 hover:shadow-neo-inset"
                 >
@@ -975,7 +980,8 @@ export const Maintenance: React.FC = () => {
                   breakdownStatusForm.status,
                   breakdownStatusForm.fixedDate,
                   (breakdownStatusForm as any).hoursAtFix,
-                  (breakdownStatusForm as any).mileageAtFix
+                  (breakdownStatusForm as any).mileageAtFix,
+                  (breakdownStatusForm as any).fixNotes
                 );
                 setSelectedBreakdownDetail(null);
               }
@@ -1082,6 +1088,15 @@ export const Maintenance: React.FC = () => {
                         className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none"
                       />
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Примечания к исправлению</label>
+                    <textarea
+                      value={(breakdownStatusForm as any).fixNotes || ''}
+                      onChange={e => setBreakdownStatusForm({...breakdownStatusForm, fixNotes: e.target.value} as any)}
+                      placeholder="Опишите выполненные работы, замененные детали, рекомендации..."
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none h-24 resize-none"
+                    />
                   </div>
                   <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
                     <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Примечание</p>
