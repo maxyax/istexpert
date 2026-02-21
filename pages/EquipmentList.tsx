@@ -405,7 +405,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                             computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-500 text-white' :
                             computedStatus.status === EquipStatus.REPAIR ? 'bg-red-500 text-white' :
                             computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-500 text-white' :
-                            computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-500 text-white' :
+                            computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-400 text-yellow-900' :
                             'bg-blue-500 text-white'
                           }`}>{computedStatus.status.length > 15 ? computedStatus.status.substring(0, 15) + '...' : computedStatus.status}</span>
                           {computedStatus.reason && computedStatus.status !== EquipStatus.ACTIVE && (
