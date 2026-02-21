@@ -6,6 +6,7 @@ import {
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { EquipStatus, Equipment, MaintenanceRegulation } from '../types';
+import { formatNumber } from '../utils/format';
 import QRCode from 'qrcode';
 
 // Функция проверки срока страховки
@@ -251,7 +252,7 @@ export const EquipmentList: React.FC = () => {
               <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 space-y-4">
                  <div className="flex justify-between items-center text-[10px] font-black uppercase text-gray-400">
                     <div className="flex items-center gap-2"><Gauge size={14} className="text-blue-600"/> Наработка</div>
-                    <span className="text-gray-800 font-bold">{e.hours} м/ч</span>
+                    <span className="text-gray-800 font-bold">{formatNumber(e.hours)} м/ч</span>
                  </div>
                  {e.insurance_end && (
                    <div className={`flex justify-between items-center text-[10px] font-black uppercase p-3 rounded-xl ${
@@ -292,7 +293,7 @@ export const EquipmentList: React.FC = () => {
                          </div>
                       </td>
                       <td className="px-6 py-6"><span className={`text-[10px] md:text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-neo-sm whitespace-nowrap ${e.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{e.status}</span></td>
-                      <td className="px-6 py-6 text-sm font-black text-gray-700">{e.hours} м/ч</td>
+                      <td className="px-6 py-6 text-sm font-black text-gray-700">{formatNumber(e.hours)} м/ч</td>
                       <td className="px-6 py-6 text-sm font-black text-gray-400 uppercase">{e.driver || '—'}</td>
                       <td className="px-6 py-6 text-right"><ChevronRight size={18} className="text-gray-300 group-hover:text-blue-600 transition-all"/></td>
                    </tr>
@@ -508,7 +509,7 @@ export const EquipmentList: React.FC = () => {
                                               className="w-24 text-sm font-black text-blue-600 bg-neo-bg shadow-neo-inset px-3 py-1 rounded-lg border-none outline-none"
                                             />
                                           ) : (
-                                            <span className="text-sm font-black text-gray-700">{reg.intervalKm} км</span>
+                                            <span className="text-sm font-black text-gray-700">{formatNumber(reg.intervalKm)} км</span>
                                           )}
                                         </div>
                                       )}

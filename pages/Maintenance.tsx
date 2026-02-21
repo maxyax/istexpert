@@ -6,6 +6,7 @@ import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useProcurementStore } from '../store/useProcurementStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { EquipStatus } from '../types';
+import { formatNumber } from '../utils/format';
 
 const breakdownBorderClass = (status?: string) => {
   switch (status) {
@@ -307,7 +308,7 @@ export const Maintenance: React.FC = () => {
                   <div key={r.id} onClick={() => setSelectedRecordDetail(r)} className={`p-4 md:p-6 rounded-2xl shadow-neo-sm bg-neo-bg flex justify-between items-center border-l-4 ${isBreakdown ? 'border-red-500' : 'border-emerald-500'} group hover:shadow-neo hover:cursor-pointer transition-all`}>
                     <div className="overflow-hidden">
                       <p className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate">{r.type}</p>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{r.performedBy} • {r.hoursAtMaintenance} м/ч</p>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{r.performedBy} • {formatNumber(r.hoursAtMaintenance)} м/ч</p>
                     </div>
                     <span className="text-[9px] md:text-[10px] font-black text-gray-400 shrink-0 ml-4">{r.date}</span>
                   </div>
@@ -418,7 +419,7 @@ export const Maintenance: React.FC = () => {
                 </div>
                 <div className="p-4 rounded-xl bg-neo-bg border border-white/10">
                   <p className="text-[9px] font-black text-gray-400 uppercase">Наработка</p>
-                  <p className="text-sm font-black text-gray-700 dark:text-gray-200">{selectedRecordDetail.hoursAtMaintenance} м/ч</p>
+                  <p className="text-sm font-black text-gray-700 dark:text-gray-200">{formatNumber(selectedRecordDetail.hoursAtMaintenance)} м/ч</p>
                 </div>
                 <div className="p-4 rounded-xl bg-neo-bg border border-white/10">
                   <p className="text-[9px] font-black text-gray-400 uppercase">Исполнитель</p>
