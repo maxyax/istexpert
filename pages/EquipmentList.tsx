@@ -175,7 +175,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
   const { records, breakdowns, plannedTOs } = useMaintenanceStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [isEditing, setIsEditing] = useState(false);
   const [qrBase64, setQrBase64] = useState('');
   const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history' | 'regulations'>('main')
@@ -382,6 +382,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                     <th className="px-6 py-5 w-48">Статус</th>
                     <th className="px-6 py-5">Наработка</th>
                     <th className="px-6 py-5">Водитель</th>
+                    <th className="px-6 py-5">ОСАГО</th>
                     <th className="px-6 py-5"></th>
                  </tr>
               </thead>
@@ -413,6 +414,29 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                       </td>
                       <td className="px-6 py-6 text-sm font-black text-gray-700">{formatNumber(e.hours)} м/ч</td>
                       <td className="px-6 py-6 text-sm font-black text-gray-400 uppercase">{e.driver || '—'}</td>
+                      <td className="px-6 py-6">
+                        {e.insurance_end ? (() => {
+                          const insuranceStatus = getInsuranceStatus(e.insurance_end);
+                          return (
+                            <div className="flex flex-col gap-1">
+                              <span className={`text-[7px] md:text-[8px] font-black uppercase px-2 py-0.5 rounded inline-block w-fit ${
+                                insuranceStatus.status === 'expired' ? 'bg-red-500 text-white' :
+                                insuranceStatus.status === 'critical' ? 'bg-orange-500 text-white' :
+                                insuranceStatus.status === 'warning' ? 'bg-yellow-500 text-white' :
+                                'bg-green-500 text-white'
+                              }`}>
+                                {formatToDDMMYYYY(e.insurance_end)}
+                              </span>
+                              {insuranceStatus.status === 'expired' && (
+                                <span className="text-[7px] font-black text-red-600">Просрочено на {Math.abs(insuranceStatus.daysLeft)} дн.</span>
+                              )}
+                              {insuranceStatus.status === 'critical' && (
+                                <span className="text-[7px] font-black text-orange-600">Осталось {insuranceStatus.daysLeft} дн.</span>
+                              )}
+                            </div>
+                          );
+                        })() : <span className="text-[8px] text-gray-400">—</span>}
+                      </td>
                       <td className="px-6 py-6 text-right"><ChevronRight size={18} className="text-gray-300 group-hover:text-blue-600 transition-all"/></td>
                    </tr>
                    );
@@ -1071,7 +1095,25 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                         <p className="text-sm font-black text-gray-700">{selectedHistoryRecord.reportedBy}</p>
                       </div>
                     )}
+                    {(selectedHistoryRecord as any).hoursAtFix && (
+                      <div>
+                        <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Наработка при исправлении</p>
+                        <p className="text-sm font-black text-emerald-600">{(selectedHistoryRecord as any).hoursAtFix} м/ч</p>
+                      </div>
+                    )}
+                    {(selectedHistoryRecord as any).mileageAtFix && (
+                      <div>
+                        <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Пробег при исправлении</p>
+                        <p className="text-sm font-black text-emerald-600">{(selectedHistoryRecord as any).mileageAtFix} км</p>
+                      </div>
+                    )}
                   </div>
+                  {(selectedHistoryRecord as any).fixNotes && (
+                    <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                      <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-2">Примечания к исправлению</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{(selectedHistoryRecord as any).fixNotes}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Лог изменений */}

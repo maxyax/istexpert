@@ -87,7 +87,7 @@ const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedT
   return EquipStatus.ACTIVE;
 };
 
-export const Maintenance: React.FC = () => {
+export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => {
   const { equipment } = useFleetStore();
   const { selectedMaintenanceEquipId, setSelectedMaintenanceEquipId, addMaintenance, addBreakdown, records, breakdowns, plannedTOs, updateBreakdownStatus } = useMaintenanceStore();
   const { user } = useAuthStore();
@@ -267,6 +267,57 @@ export const Maintenance: React.FC = () => {
       {!selectedEquip ? (
         <div className="space-y-6">
           <h2 className="text-2xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">ТО и Ремонт</h2>
+          
+          {/* Быстрые действия */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            <button
+              onClick={() => setIsBreakdownModalOpen(true)}
+              className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
+                  <AlertTriangle size={24}/>
+                </div>
+                <div className="text-left">
+                  <h4 className="text-sm font-black uppercase tracking-widest">Акт поломки</h4>
+                  <p className="text-[8px] font-bold text-white/80 uppercase">Зафиксировать неисправность</p>
+                </div>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => setSelectedMaintenanceEquipId(equipment[0]?.id || null)}
+              className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
+                  <Wrench size={24}/>
+                </div>
+                <div className="text-left">
+                  <h4 className="text-sm font-black uppercase tracking-widest">Провести ТО</h4>
+                  <p className="text-[8px] font-bold text-white/80 uppercase">Выбрать технику</p>
+                </div>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => {
+                if (onNavigate) onNavigate('procurement');
+              }}
+              className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
+                  <Package size={24}/>
+                </div>
+                <div className="text-left">
+                  <h4 className="text-sm font-black uppercase tracking-widest">Снабжение</h4>
+                  <p className="text-[8px] font-bold text-white/80 uppercase">Заявки и запчасти</p>
+                </div>
+              </div>
+            </button>
+          </div>
+          
           <div className="flex items-center justify-between">
             <div className="flex p-1.5 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5">
               <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-neo-bg shadow-neo text-blue-600' : 'text-gray-400 hover:text-blue-500'}`}><List size={18}/></button>
