@@ -66,7 +66,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
   const [quickProcurementForm, setQuickProcurementForm] = React.useState({
     equipmentId: '',
     title: '',
-    items: [{ sku: '', name: '', quantity: '1', unitPriceWithVAT: 0 }]
+    items: [{ sku: '', name: '', quantity: '1' }]
   });
   
   // Форма быстрой поломки
@@ -119,10 +119,6 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
     e.preventDefault();
     if (!quickProcurementForm.equipmentId || !quickProcurementForm.title) return;
     
-    const totalCost = quickProcurementForm.items.reduce((sum, item) => {
-      return sum + (parseFloat(item.quantity) || 0) * (item.unitPriceWithVAT || 0);
-    }, 0);
-    
     // Генерируем номер заявки
     const currentRequests = useProcurementStore.getState().requests;
     const requestNumber = `З-${String(currentRequests.length + 1).padStart(4, '0')}`;
@@ -136,16 +132,16 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         sku: item.sku,
         name: item.name,
         quantity: item.quantity,
-        unitPriceWithVAT: item.unitPriceWithVAT,
-        total: (parseFloat(item.quantity) || 0) * (item.unitPriceWithVAT || 0)
+        unitPriceWithVAT: 0,
+        total: 0
       })),
-      cost: totalCost,
+      cost: 0,
       createdAt: new Date().toISOString(),
       equipmentId: quickProcurementForm.equipmentId,
       statusHistory: [{ status: 'Новая', date: new Date().toISOString(), user: useAuthStore.getState().user?.full_name }]
     });
     
-    setQuickProcurementForm({ equipmentId: '', title: '', items: [{ sku: '', name: '', quantity: '1', unitPriceWithVAT: 0 }] });
+    setQuickProcurementForm({ equipmentId: '', title: '', items: [{ sku: '', name: '', quantity: '1' }] });
     setQuickProcurementStep('select');
     setIsQuickProcurementOpen(false);
   };
@@ -712,7 +708,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                   type="button"
                   onClick={() => setQuickProcurementForm({
                     ...quickProcurementForm,
-                    items: [...quickProcurementForm.items, { sku: '', name: '', quantity: '1', unitPriceWithVAT: 0 }]
+                    items: [...quickProcurementForm.items, { sku: '', name: '', quantity: '1' }]
                   })}
                   className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-[8px] font-black uppercase hover:bg-emerald-700"
                 >
@@ -722,9 +718,9 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               
               {quickProcurementForm.items.map((item, idx) => (
                 <div key={idx} className="p-4 rounded-2xl shadow-neo-sm bg-neo-bg space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex gap-3">
                     <input
-                      className="p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none text-sm text-gray-700 outline-none"
+                      className="flex-1 p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none text-sm text-gray-700 outline-none"
                       placeholder="Артикул / каталожный №"
                       value={item.sku}
                       onChange={e => {
@@ -733,19 +729,6 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                         setQuickProcurementForm({...quickProcurementForm, items: newItems});
                       }}
                     />
-                    <input
-                      type="number"
-                      className="p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none text-sm text-gray-700 outline-none"
-                      placeholder="Цена с НДС"
-                      value={item.unitPriceWithVAT || ''}
-                      onChange={e => {
-                        const newItems = [...quickProcurementForm.items];
-                        newItems[idx].unitPriceWithVAT = parseFloat(e.target.value) || 0;
-                        setQuickProcurementForm({...quickProcurementForm, items: newItems});
-                      }}
-                    />
-                  </div>
-                  <div className="flex gap-3">
                     <input
                       className="flex-1 p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none text-sm text-gray-700 outline-none"
                       placeholder="Наименование запчасти"
