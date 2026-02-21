@@ -30,18 +30,38 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-neo-bg border-r border-gray-200 dark:border-gray-800 transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-6 flex flex-col h-full">
           <div className="flex items-center space-x-3 mb-10 px-2">
-            <Truck className="text-blue-500" size={28} />
+            <div className="p-2 rounded-xl shadow-neo bg-white dark:bg-neo-bg">
+              <Truck className="text-blue-500" size={24} />
+            </div>
             <span className="text-xl font-black tracking-tight">ISTExpert</span>
           </div>
-          <nav className="flex-1 space-y-4">
+          <nav className="flex-1 space-y-3">
             {navItems.map(item => (
-              <button key={item.id} onClick={() => { onNavigate(item.id); setIsMobileMenuOpen(false); }} className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all ${activePage === item.id ? 'shadow-neo-inset text-blue-500 font-bold' : 'shadow-neo hover:shadow-neo-inset text-gray-500'}`}>
-                <item.icon size={20} /> <span className="text-sm font-bold">{item.label}</span>
+              <button 
+                key={item.id} 
+                onClick={() => { onNavigate(item.id); setIsMobileMenuOpen(false); }} 
+                className={`w-full flex items-center space-x-3 p-3.5 rounded-2xl transition-all duration-300 group ${
+                  activePage === item.id 
+                    ? 'shadow-neo-inset bg-white/50 dark:bg-white/5 text-blue-600' 
+                    : 'shadow-neo hover:shadow-neo-inset text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                }`}
+              >
+                <div className={`p-2 rounded-xl transition-all ${
+                  activePage === item.id 
+                    ? 'bg-blue-500 text-white shadow-md' 
+                    : 'bg-white dark:bg-neo-bg text-gray-500 dark:text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400'
+                }`}>
+                  <item.icon size={18} strokeWidth={activePage === item.id ? 2.5 : 2} />
+                </div>
+                <span className={`text-sm font-bold ${activePage === item.id ? 'text-blue-600 dark:text-blue-400' : ''}`}>{item.label}</span>
               </button>
             ))}
           </nav>
-          <button onClick={logout} className="mt-10 flex items-center space-x-3 p-4 rounded-2xl shadow-neo text-red-500 font-bold text-sm hover:shadow-neo-inset transition-all">
-            <LogOut size={18} /> <span>Выйти</span>
+          <button onClick={logout} className="mt-8 flex items-center space-x-3 p-3.5 rounded-2xl shadow-neo text-red-500 font-bold text-sm hover:shadow-neo-inset hover:bg-red-50 dark:hover:bg-red-900/10 transition-all group">
+            <div className="p-2 rounded-xl bg-white dark:bg-neo-bg group-hover:bg-red-100 dark:group-hover:bg-red-900/20 transition-all">
+              <LogOut size={18} />
+            </div>
+            <span>Выйти</span>
           </button>
         </div>
       </aside>
