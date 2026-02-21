@@ -400,8 +400,8 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                          </div>
                       </td>
                       <td className="px-3 md:px-4 py-4 md:py-6">
-                        <div className="space-y-1">
-                          <span className={`text-[8px] md:text-[9px] font-semibold uppercase px-3 py-1 rounded-full shadow-sm ${
+                        <div className="space-y-1.5">
+                          <span className={`text-xs md:text-sm font-semibold uppercase px-3 py-1.5 rounded-full shadow-sm ${
                             computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-500 text-white' :
                             computedStatus.status === EquipStatus.REPAIR ? 'bg-red-500 text-white' :
                             computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-500 text-white' :
@@ -409,7 +409,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                             'bg-blue-500 text-white'
                           }`}>{computedStatus.status.length > 15 ? computedStatus.status.substring(0, 15) + '...' : computedStatus.status}</span>
                           {computedStatus.reason && computedStatus.status !== EquipStatus.ACTIVE && (
-                            <p className="text-[7px] md:text-[8px] text-gray-600 dark:text-gray-300 truncate max-w-[120px]">{computedStatus.reason}</p>
+                            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 truncate max-w-[150px]">{computedStatus.reason}</p>
                           )}
                         </div>
                       </td>
@@ -419,8 +419,8 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                         {e.insurance_end ? (() => {
                           const insuranceStatus = getInsuranceStatus(e.insurance_end);
                           return (
-                            <div className="flex flex-col gap-0.5">
-                              <span className={`text-[6px] md:text-[7px] font-black uppercase px-1.5 py-0.5 rounded inline-block w-fit ${
+                            <div className="flex flex-col gap-1">
+                              <span className={`text-xs md:text-sm font-semibold uppercase px-2 py-1 rounded inline-block w-fit ${
                                 insuranceStatus.status === 'expired' ? 'bg-red-500 text-white' :
                                 insuranceStatus.status === 'critical' ? 'bg-orange-500 text-white' :
                                 insuranceStatus.status === 'warning' ? 'bg-yellow-500 text-white' :
@@ -429,14 +429,14 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                                 {formatToDDMMYYYY(e.insurance_end)}
                               </span>
                               {insuranceStatus.status === 'expired' && (
-                                <span className="text-[5px] md:text-[6px] font-black text-red-600">Просрочено</span>
+                                <span className="text-xs md:text-sm font-semibold text-red-500">Просрочено</span>
                               )}
                               {insuranceStatus.status === 'critical' && (
-                                <span className="text-[5px] md:text-[6px] font-black text-orange-600">{insuranceStatus.daysLeft} дн.</span>
+                                <span className="text-xs md:text-sm font-semibold text-orange-500">{insuranceStatus.daysLeft} дн.</span>
                               )}
                             </div>
                           );
-                        })() : <span className="text-[7px] md:text-[8px] text-gray-400">—</span>}
+                        })() : <span className="text-xs md:text-sm text-gray-400">—</span>}
                       </td>
                       <td className="px-3 md:px-4 py-4 md:py-6 text-right"><ChevronRight size={16} className="md:w-4 md:h-4 text-gray-400 group-hover:text-blue-600 transition-all"/></td>
                    </tr>
