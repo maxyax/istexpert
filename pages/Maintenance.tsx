@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera, Package, CheckCircle2, Wallet } from 'lucide-react';
+import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera, Package, CheckCircle2, Wallet, ChevronRight } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useProcurementStore } from '../store/useProcurementStore';
@@ -113,6 +113,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
   
   // Для выбора техники перед созданием поломки
   const [isBreakdownEquipSelectOpen, setIsBreakdownEquipSelectOpen] = useState(false);
+  
+  // Для выбора акта при создании заявки
+  const [isBreakdownSelectOpen, setIsBreakdownSelectOpen] = useState(false);
 
   const [toChecklist, setToChecklist] = useState<{ text: string; done: boolean; note?: string }[]>([]);
   const [toTypeLabel, setToTypeLabel] = useState<string>('');
@@ -650,9 +653,81 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
         </div>
       )}
 
-        
+      {/* Модальное окно выбора акта для заявки снабжения */}
+      {isBreakdownSelectOpen && (
+        <div className="fixed inset-0 z-[215] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-3xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-blue-500">
+                  <Package size={24}/>
+                </div>
+                <h2 className="text-xl font-black uppercase text-gray-800 dark:text-gray-100">Выберите акт поломки</h2>
+              </div>
+              <button onClick={() => setIsBreakdownSelectOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+                <X size={20}/>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 text-center py-4">Выберите акт для создания заявки в снабжение:</p>
+              <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                {(() => {
+                  // Показываем только активные поломки без созданных заявок
+                  const activeBreakdowns = breakdowns.filter(b => {
+                    const hasRequest = useProcurementStore.getState().requests.some(r => r.breakdownId === b.id);
+                    return b.status !== 'Исправлено' && !hasRequest;
+                  });
+                  
+                  if (activeBreakdowns.length === 0) {
+                    return (
+                      <div className="text-center py-10">
+                        <p className="text-sm text-gray-500">Нет активных актов без заявок</p>
+                      </div>
+                    );
+                  }
+                  
+                  return activeBreakdowns.map(b => {
+                    const equip = equipment.find(e => e.id === b.equipmentId);
+                    return (
+                      <button
+                        key={b.id}
+                        onClick={() => {
+                          setSelectedBreakdownDetail(b);
+                          setIsBreakdownSelectOpen(false);
+                          setIsCreateRequestOpen(true);
+                        }}
+                        className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="p-3 rounded-xl bg-neo-bg text-red-600 group-hover:scale-110 transition-transform">
+                            <AlertTriangle size={20}/>
+                          </div>
+                          <div className="text-left flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{b.partName}</p>
+                              <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded ${
+                                b.severity === 'Критическая' ? 'bg-red-500 text-white' :
+                                b.severity === 'Средняя' ? 'bg-orange-500 text-white' :
+                                'bg-yellow-500 text-white'
+                              }`}>{b.severity}</span>
+                            </div>
+                            <p className="text-[8px] text-gray-400">{equip?.name || 'Техника'} • {b.node}</p>
+                            <p className="text-[7px] text-gray-500">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
+                          </div>
+                        </div>
+                        <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                      </button>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-        {isCreateRequestOpen && selectedBreakdownDetail && (
+      {isCreateRequestOpen && selectedBreakdownDetail && (
           <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
             <div className="bg-neo-bg w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[85vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6 md:mb-8 sticky top-0 bg-neo-bg">
@@ -971,7 +1046,13 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               {/* Действия */}
               <div className="flex gap-3">
                 {!relatedRequest ? (
-                  <button type="button" onClick={() => setIsCreateRequestOpen(true)} className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs leading-tight shadow-neo hover:shadow-neo-inset transition-all">Создать заявку снабжения</button>
+                  <button
+                    type="button"
+                    onClick={() => setIsBreakdownSelectOpen(true)}
+                    className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs leading-tight shadow-neo hover:shadow-neo-inset transition-all"
+                  >
+                    Создать заявку снабжения
+                  </button>
                 ) : (
                   <button type="button" onClick={() => {
                     setSelectedBreakdownDetail(null);
