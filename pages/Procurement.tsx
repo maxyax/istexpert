@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
-import { Package, ChevronRight, Truck, LayoutGrid, List, Layers, X, CheckCircle2, ArrowRight, Wallet, AlertTriangle } from 'lucide-react';
+import { Package, ChevronRight, Truck, LayoutGrid, List, Layers, X, CheckCircle2, ArrowRight, Wallet, AlertTriangle, Plus } from 'lucide-react';
 import { useProcurementStore } from '../store/useProcurementStore';
 import { useFleetStore } from '../store/useFleetStore';
+import { useMaintenanceStore } from '../store/useMaintenanceStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { ProcurementStatus } from '../types';
 import { formatNumber, formatMoney, formatDate, formatDateTime } from '../utils/format';
 
@@ -15,10 +17,20 @@ const COLUMNS: {id: ProcurementStatus, title: string, color: string}[] = [
 ];
 
 export const Procurement: React.FC = () => {
-  const { requests, updateRequestStatus, updateRequest, selectedRequestId, setSelectedRequestId } = useProcurementStore();
-  const { equipment } = useFleetStore();
+  const { requests, updateRequestStatus, updateRequest, selectedRequestId, setSelectedRequestId, addRequest } = useProcurementStore();
+  const { equipment, selectEquipment } = useFleetStore();
+  const { breakdowns, updateBreakdownStatus } = useMaintenanceStore();
   const [viewMode, setViewMode] = useState<'kanban' | 'list' | 'table'>('table');
   const [readOnlyMode, setReadOnlyMode] = useState(false);
+  
+  // Для создания новой заявки
+  const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
+  const [isBreakdownSelectOpen, setIsBreakdownSelectOpen] = useState(false);
+  const [selectedBreakdown, setSelectedBreakdown] = useState<any>(null);
+  const [newRequestForm, setNewRequestForm] = useState({
+    title: '',
+    items: [{ sku: '', name: '', quantity: '1', unitPriceWithVAT: 0 }]
+  });
 
   const selectedReq = requests.find(r => r.id === selectedRequestId);
   const [editReq, setEditReq] = useState<any>(null);
@@ -84,6 +96,13 @@ export const Procurement: React.FC = () => {
               <button onClick={() => setViewMode('table')} title="Реестр (Гант)" className={`p-2.5 rounded-xl transition-all ${viewMode === 'table' ? 'bg-neo-bg shadow-neo text-blue-600' : 'text-gray-400 hover:text-blue-500'}`}><Layers size={18}/></button>
            </div>
         </div>
+        <button
+          onClick={() => setIsBreakdownSelectOpen(true)}
+          className="px-6 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs shadow-neo hover:bg-emerald-700 transition-all flex items-center gap-2"
+        >
+          <Plus size={18}/>
+          Создать заявку
+        </button>
       </div>
 
       {/* Отображение: КАНБАН */}
@@ -406,6 +425,273 @@ export const Procurement: React.FC = () => {
                    )}
                  </div>
            </div>
+        </div>
+      )}
+
+      {/* Модальное окно выбора акта для новой заявки */}
+      {isBreakdownSelectOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-3xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-blue-500">
+                  <Package size={24}/>
+                </div>
+                <h2 className="text-xl font-black uppercase text-gray-800 dark:text-gray-100">Выберите акт поломки</h2>
+              </div>
+              <button onClick={() => setIsBreakdownSelectOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+                <X size={20}/>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 text-center py-4">Выберите акт для создания заявки в снабжение:</p>
+              <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                {(() => {
+                  // Показываем только активные поломки без созданных заявок
+                  const activeBreakdowns = breakdowns.filter(b => {
+                    const hasRequest = requests.some(r => r.breakdownId === b.id);
+                    return b.status !== 'Исправлено' && !hasRequest;
+                  });
+                  
+                  if (activeBreakdowns.length === 0) {
+                    return (
+                      <div className="text-center py-10">
+                        <p className="text-sm text-gray-500">Нет активных актов без заявок</p>
+                      </div>
+                    );
+                  }
+                  
+                  return activeBreakdowns.map(b => {
+                    const equip = equipment.find(e => e.id === b.equipmentId);
+                    return (
+                      <button
+                        key={b.id}
+                        onClick={() => {
+                          setSelectedBreakdown(b);
+                          setNewRequestForm({
+                            title: `Запрос по акту ${b.actNumber || 'АКТ-001'}: ${b.partName}`,
+                            items: [{ sku: '', name: b.partName, quantity: '1', unitPriceWithVAT: 0 }]
+                          });
+                          setIsBreakdownSelectOpen(false);
+                          setIsCreateRequestOpen(true);
+                        }}
+                        className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="p-3 rounded-xl bg-neo-bg text-red-600 group-hover:scale-110 transition-transform">
+                            <AlertTriangle size={20}/>
+                          </div>
+                          <div className="text-left flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{b.partName}</p>
+                              <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded ${
+                                b.severity === 'Критическая' ? 'bg-red-500 text-white' :
+                                b.severity === 'Средняя' ? 'bg-orange-500 text-white' :
+                                'bg-yellow-500 text-white'
+                              }`}>{b.severity}</span>
+                            </div>
+                            <p className="text-[8px] text-gray-400">{equip?.name || 'Техника'} • {b.node}</p>
+                            <p className="text-[7px] text-gray-500">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
+                          </div>
+                        </div>
+                        <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                      </button>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно создания новой заявки */}
+      {isCreateRequestOpen && selectedBreakdown && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-3xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-4">
+                <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Package size={28}/></div>
+                <div>
+                  <h3 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Заявка снабжения</h3>
+                  <p className="text-[8px] font-black text-gray-400 uppercase">Акт: {selectedBreakdown.actNumber || 'АКТ-001'}</p>
+                </div>
+              </div>
+              <button onClick={() => { setIsCreateRequestOpen(false); setSelectedBreakdown(null); }} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+                <X size={20}/>
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const totalCost = newRequestForm.items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0) * (item.unitPriceWithVAT || 0), 0);
+              const requestNumber = `З-${String(requests.length + 1).padStart(4, '0')}`;
+              
+              addRequest({
+                id: `pr-${Date.now()}`,
+                title: `${requestNumber}: ${newRequestForm.title}`,
+                status: 'Новая',
+                items: newRequestForm.items.map(item => ({
+                  id: `i-${Date.now()}-${item.sku || item.name}`,
+                  sku: item.sku,
+                  name: item.name,
+                  quantity: item.quantity,
+                  unitPriceWithVAT: item.unitPriceWithVAT,
+                  total: (parseFloat(item.quantity) || 0) * (item.unitPriceWithVAT || 0)
+                })),
+                cost: totalCost,
+                createdAt: new Date().toISOString(),
+                equipmentId: selectedBreakdown.equipmentId,
+                breakdownId: selectedBreakdown.id,
+                breakdownActNumber: selectedBreakdown.actNumber,
+                breakdownName: selectedBreakdown.partName,
+                breakdownDescription: selectedBreakdown.description,
+                breakdownNode: selectedBreakdown.node,
+                statusHistory: [{ status: 'Новая', date: new Date().toISOString(), user: useAuthStore.getState().user?.full_name }]
+              });
+              
+              // Обновляем статус поломки
+              updateBreakdownStatus(selectedBreakdown.id, 'Запчасти заказаны');
+              
+              setNewRequestForm({ title: '', items: [{ sku: '', name: '', quantity: '1', unitPriceWithVAT: 0 }] });
+              setSelectedBreakdown(null);
+              setIsCreateRequestOpen(false);
+            }} className="space-y-6">
+              {/* Информация о поломке */}
+              <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-red-500/20 space-y-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle size={18} className="text-red-500"/>
+                  <p className="text-[8px] font-black text-red-400 uppercase tracking-widest">Акт поломки</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400">Техника</p>
+                    <p className="text-sm font-black text-gray-700">{equipment.find(e => e.id === selectedBreakdown.equipmentId)?.name || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400">Узел</p>
+                    <p className="text-sm font-black text-gray-700">{selectedBreakdown.node}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[8px] font-black text-gray-400">Наименование поломки</p>
+                  <p className="text-base font-black text-gray-800">{selectedBreakdown.partName}</p>
+                </div>
+                {selectedBreakdown.description && (
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400">Описание</p>
+                    <p className="text-sm text-gray-600">{selectedBreakdown.description}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400 ml-2">Наименование заявки</label>
+                <input
+                  className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 outline-none"
+                  value={newRequestForm.title}
+                  onChange={e => setNewRequestForm({...newRequestForm, title: e.target.value})}
+                  required
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-gray-400 ml-2">Позиции</label>
+                  <button
+                    type="button"
+                    onClick={() => setNewRequestForm({
+                      ...newRequestForm,
+                      items: [...newRequestForm.items, { sku: '', name: '', quantity: '1', unitPriceWithVAT: 0 }]
+                    })}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-[8px] font-black uppercase hover:bg-emerald-700"
+                  >
+                    + Добавить
+                  </button>
+                </div>
+
+                {newRequestForm.items.map((item, idx) => (
+                  <div key={idx} className="p-4 rounded-2xl shadow-neo-sm bg-neo-bg space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        className="p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none text-sm text-gray-700 outline-none"
+                        placeholder="Артикул / каталожный №"
+                        value={item.sku}
+                        onChange={e => {
+                          const newItems = [...newRequestForm.items];
+                          newItems[idx].sku = e.target.value;
+                          setNewRequestForm({...newRequestForm, items: newItems});
+                        }}
+                      />
+                      <input
+                        type="number"
+                        className="p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none text-sm text-gray-700 outline-none"
+                        placeholder="Цена с НДС"
+                        value={item.unitPriceWithVAT || ''}
+                        onChange={e => {
+                          const newItems = [...newRequestForm.items];
+                          newItems[idx].unitPriceWithVAT = parseFloat(e.target.value) || 0;
+                          setNewRequestForm({...newRequestForm, items: newItems});
+                        }}
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <input
+                        className="flex-1 p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none text-sm text-gray-700 outline-none"
+                        placeholder="Наименование запчасти"
+                        value={item.name}
+                        onChange={e => {
+                          const newItems = [...newRequestForm.items];
+                          newItems[idx].name = e.target.value;
+                          setNewRequestForm({...newRequestForm, items: newItems});
+                        }}
+                        required
+                      />
+                      <input
+                        type="number"
+                        className="w-24 p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none text-sm text-gray-700 outline-none"
+                        placeholder="Кол-во"
+                        value={item.quantity}
+                        onChange={e => {
+                          const newItems = [...newRequestForm.items];
+                          newItems[idx].quantity = e.target.value;
+                          setNewRequestForm({...newRequestForm, items: newItems});
+                        }}
+                        min="1"
+                        required
+                      />
+                      {newRequestForm.items.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newItems = newRequestForm.items.filter((_, i) => i !== idx);
+                            setNewRequestForm({...newRequestForm, items: newItems});
+                          }}
+                          className="p-3 rounded-xl bg-red-500 text-white hover:bg-red-600"
+                        >
+                          <X size={18}/>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setIsCreateRequestOpen(false); setSelectedBreakdown(null); }}
+                  className="flex-1 py-4 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs"
+                >
+                  Назад
+                </button>
+                <button type="submit" className="flex-1 py-4 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all">
+                  Отправить в снабжение
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
