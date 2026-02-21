@@ -694,9 +694,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               </div>
               <form onSubmit={handleSaveBreakdown} className="space-y-5 md:space-y-6">
                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 ml-2">Техника</label>
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Техника</label>
                     <select
-                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input"
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-white dark:bg-neo-bg border border-gray-200 dark:border-none text-gray-900 dark:text-gray-200 outline-none app-input font-semibold"
                       value={selectedMaintenanceEquipId || ''}
                       onChange={e => setSelectedMaintenanceEquipId(e.target.value)}
                       required
@@ -708,51 +708,51 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     </select>
                  </div>
                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 ml-2">Узел техники</label>
-                    <select className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" value={breakdownForm.node} onChange={e=>setBreakdownForm({...breakdownForm, node: e.target.value})}>
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Узел техники</label>
+                    <select className="w-full p-4 rounded-2xl shadow-neo-inset bg-white dark:bg-neo-bg border border-gray-200 dark:border-none text-gray-900 dark:text-gray-200 outline-none app-input font-semibold" value={breakdownForm.node} onChange={e=>setBreakdownForm({...breakdownForm, node: e.target.value})}>
                        <option>Двигатель</option><option>Гидравлика</option><option>Ходовая часть</option><option>Электроника</option><option>Кузов</option>
                     </select>
                  </div>
                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 ml-2">Деталь / Запчасть</label>
-                    <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" placeholder="Введите название..." value={breakdownForm.partName} onChange={e=>setBreakdownForm({...breakdownForm, partName: e.target.value})} required />
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Деталь / Запчасть</label>
+                    <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-white dark:bg-neo-bg border border-gray-200 dark:border-none text-gray-900 dark:text-gray-200 outline-none app-input font-semibold placeholder-gray-400" placeholder="Введите название..." value={breakdownForm.partName} onChange={e=>setBreakdownForm({...breakdownForm, partName: e.target.value})} required />
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <div className="space-y-2">
-                     <label className="text-xs font-bold text-gray-400 ml-2">Дата поломки</label>
-                     <input type="date" value={breakdownForm.date} onChange={e=>setBreakdownForm({...breakdownForm, date: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" />
+                     <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Дата поломки</label>
+                     <input type="date" value={breakdownForm.date} onChange={e=>setBreakdownForm({...breakdownForm, date: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-white dark:bg-neo-bg border border-gray-200 dark:border-none text-gray-900 dark:text-gray-200 outline-none app-input font-semibold" />
                    </div>
                    <div className="space-y-2">
-                     <label className="text-xs font-bold text-gray-400 ml-2">Пробег / Наработка</label>
-                     <input type="number" value={breakdownForm.hoursAtBreakdown as any || ''} onChange={e=>setBreakdownForm({...breakdownForm, hoursAtBreakdown: e.target.value ? parseInt(e.target.value) : undefined})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" />
+                     <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Пробег / Наработка</label>
+                     <input type="number" value={breakdownForm.hoursAtBreakdown as any || ''} onChange={e=>setBreakdownForm({...breakdownForm, hoursAtBreakdown: e.target.value ? parseInt(e.target.value) : undefined})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-white dark:bg-neo-bg border border-gray-200 dark:border-none text-gray-900 dark:text-gray-200 outline-none app-input font-semibold" />
                    </div>
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <input placeholder="ФИО механика" value={breakdownForm.mechanic} onChange={e=>setBreakdownForm({...breakdownForm, mechanic: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" />
-                   <input placeholder="Кто обнаружил (водитель)" value={breakdownForm.driver} onChange={e=>setBreakdownForm({...breakdownForm, driver: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" />
+                   <input placeholder="ФИО механика" value={breakdownForm.mechanic} onChange={e=>setBreakdownForm({...breakdownForm, mechanic: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-white dark:bg-neo-bg border border-gray-200 dark:border-none text-gray-900 dark:text-gray-200 outline-none app-input font-semibold placeholder-gray-400" />
+                   <input placeholder="Кто обнаружил (водитель)" value={breakdownForm.driver} onChange={e=>setBreakdownForm({...breakdownForm, driver: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-white dark:bg-neo-bg border border-gray-200 dark:border-none text-gray-900 dark:text-gray-200 outline-none app-input font-semibold placeholder-gray-400" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 ml-2">Серьезность</label>
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Серьезность</label>
                     <div className="flex gap-3">
                        {['Низкая', 'Средняя', 'Критическая'].map(s => (
-                         <button key={s} type="button" onClick={()=>setBreakdownForm({...breakdownForm, severity: s as any})} className={`flex-1 py-3 rounded-xl text-xs font-semibold transition-all ${
-                           breakdownForm.severity === s 
-                             ? s === 'Критическая' ? 'bg-red-500 text-white shadow-lg' 
+                         <button key={s} type="button" onClick={()=>setBreakdownForm({...breakdownForm, severity: s as any})} className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
+                           breakdownForm.severity === s
+                             ? s === 'Критическая' ? 'bg-red-500 text-white shadow-lg'
                                : s === 'Средняя' ? 'bg-orange-500 text-white shadow-lg'
                                : 'bg-yellow-500 text-white shadow-lg'
-                             : s === 'Критическая' ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                               : s === 'Средняя' ? 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
-                               : 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
+                             : s === 'Критическая' ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                               : s === 'Средняя' ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                               : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
                          }`}>{s}</button>
                        ))}
                     </div>
                  </div>
                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 ml-2">Примечания</label>
-                    <textarea value={breakdownForm.description} onChange={e=>setBreakdownForm({...breakdownForm, description: e.target.value})} placeholder="Описание и примечания" className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none h-24 text-gray-700 dark:text-gray-200 outline-none app-input" />
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Примечания</label>
+                    <textarea value={breakdownForm.description} onChange={e=>setBreakdownForm({...breakdownForm, description: e.target.value})} placeholder="Описание и примечания" className="w-full p-4 rounded-2xl shadow-neo-inset bg-white dark:bg-neo-bg border border-gray-200 dark:border-none h-24 text-gray-900 dark:text-gray-200 outline-none app-input font-semibold placeholder-gray-400" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 ml-2">Фотографии (узел/шильдик/маркировка)</label>
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Фотографии (узел/шильдик/маркировка)</label>
                     <div className="flex gap-3 items-center">
                       <div className="flex-1 grid grid-cols-3 gap-2">
                         {(breakdownForm.photos || []).map((p, i) => (
