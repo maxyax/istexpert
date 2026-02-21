@@ -1367,10 +1367,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       {/* Форма обновления статуса */}
       {selectedBreakdownDetail && (
         <div className="fixed inset-0 z-[215] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md pointer-events-none">
-          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20 pointer-events-auto max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg z-10">
-              <h2 className="text-lg md:text-xl font-bold uppercase text-gray-800 dark:text-gray-100">Обновить статус</h2>
-              <button onClick={() => setSelectedBreakdownDetail(null)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-4 md:p-6 animate-in zoom-in border border-white/20 pointer-events-auto max-h-[85vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-4 sticky top-0 bg-neo-bg z-10 pb-2">
+              <h2 className="text-base md:text-lg font-bold uppercase text-gray-800 dark:text-gray-100">Обновить статус</h2>
+              <button onClick={() => setSelectedBreakdownDetail(null)} className="p-2 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={18}/></button>
             </div>
             <form onSubmit={(e) => {
               e.preventDefault();
@@ -1385,7 +1385,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 );
                 setSelectedBreakdownDetail(null);
               }
-            }} className="space-y-4">
+            }} className="space-y-3 pb-4">
               <div className="space-y-2">
                 <p className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Деталь</p>
                 <p className="text-sm font-black text-gray-700 dark:text-gray-200">{selectedBreakdownDetail.partName}</p>
@@ -1432,7 +1432,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               <div className="space-y-2">
                 <label className="text-[9px] font-bold text-gray-400 ml-2">Новый статус</label>
                 <select
-                  className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm uppercase text-gray-700 dark:text-gray-200 outline-none"
+                  className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm uppercase text-gray-700 dark:text-gray-200 outline-none"
                   value={breakdownStatusForm.status}
                   onChange={e => {
                     const newStatus = e.target.value as any;
@@ -1461,10 +1461,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 })()}
               </div>
               {breakdownStatusForm.status === 'Исправлено' && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="space-y-2">
                     <label className="text-[9px] font-bold text-gray-400 ml-2">Дата ввода в эксплуатацию</label>
-                    <input type="date" value={breakdownStatusForm.fixedDate} onChange={e=>setBreakdownStatusForm({...breakdownStatusForm, fixedDate: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none" />
+                    <input type="date" value={breakdownStatusForm.fixedDate} onChange={e=>setBreakdownStatusForm({...breakdownStatusForm, fixedDate: e.target.value})} className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
@@ -1474,7 +1474,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         value={(breakdownStatusForm as any).hoursAtFix || ''}
                         onChange={e => setBreakdownStatusForm({...breakdownStatusForm, hoursAtFix: e.target.value ? parseInt(e.target.value) : undefined} as any)}
                         placeholder={selectedBreakdownDetail.hoursAtBreakdown?.toString() || '0'}
-                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none"
+                        className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none"
                       />
                       <p className="text-[8px] text-gray-400">На момент поломки: {selectedBreakdownDetail.hoursAtBreakdown || '—'} м/ч</p>
                     </div>
@@ -1485,7 +1485,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         value={(breakdownStatusForm as any).mileageAtFix || ''}
                         onChange={e => setBreakdownStatusForm({...breakdownStatusForm, mileageAtFix: e.target.value ? parseInt(e.target.value) : undefined} as any)}
                         placeholder="0"
-                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none"
+                        className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none"
                       />
                     </div>
                   </div>
@@ -1495,16 +1495,16 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       value={(breakdownStatusForm as any).fixNotes || ''}
                       onChange={e => setBreakdownStatusForm({...breakdownStatusForm, fixNotes: e.target.value} as any)}
                       placeholder="Опишите выполненные работы, замененные детали, рекомендации..."
-                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none h-24 resize-none"
+                      className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none h-20 resize-none"
                     />
                   </div>
-                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                  <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
                     <p className="text-[9px] font-bold text-blue-400 uppercase">Примечание</p>
                     <p className="text-xs text-gray-600 dark:text-gray-300">Заполните наработку/пробег если поломка была не критической и техника продолжала работать</p>
                   </div>
                 </div>
               )}
-              <button type="submit" className="w-full py-4 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold uppercase text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all">Сохранить</button>
+              <button type="submit" className="w-full py-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold uppercase text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all">Сохранить</button>
             </form>
           </div>
         </div>
