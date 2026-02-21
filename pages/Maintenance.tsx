@@ -24,19 +24,6 @@ const breakdownBorderClass = (status?: string) => {
   }
 };
 
-const severityColorClass = (severity?: string) => {
-  switch (severity) {
-    case 'Критическая':
-      return 'bg-red-500 text-white';
-    case 'Средняя':
-      return 'bg-orange-500 text-white';
-    case 'Низкая':
-      return 'bg-yellow-500 text-white';
-    default:
-      return 'bg-gray-400 text-white';
-  }
-};
-
 const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[], equipment: any[]) => {
   const activeBreakdowns = breakdowns.filter(b => b.equipmentId === equipmentId && b.status !== 'Исправлено');
   const equip = equipment.find(e => e.id === equipmentId);
@@ -479,7 +466,11 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       <div className="overflow-hidden flex-1 cursor-pointer" onClick={() => setSelectedBreakdownDetail(b)}>
                         <div className="flex items-center gap-2 mb-1">
                           <p className="text-base md:text-lg font-semibold text-gray-800 dark:text-gray-100 truncate">{b.partName}</p>
-                          <span className={`text-[9px] md:text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${severityColorClass(b.severity)}`}>{b.severity}</span>
+                          <span className={`text-[9px] md:text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${
+                            b.severity === 'Критическая' ? 'bg-red-500 text-white' :
+                            b.severity === 'Средняя' ? 'bg-orange-500 text-white' :
+                            'bg-yellow-500 text-white'
+                          }`}>{b.severity}</span>
                         </div>
                         <p className="text-sm md:text-base font-medium text-gray-600 dark:text-gray-300">{b.status} • {b.node}</p>
                       </div>
@@ -503,37 +494,49 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     {/* Прогресс-бар статусов снабжения */}
                     {relatedRequest && !isReadyToWork && (
                       <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <div className={`flex-1 h-2 rounded-full ${
-                            ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
-                          }`}/>
-                          <div className={`flex-1 h-2 rounded-full ${
-                            ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
-                          }`}/>
-                          <div className={`flex-1 h-2 rounded-full ${
-                            ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
-                          }`}/>
-                          <div className={`flex-1 h-2 rounded-full ${
-                            ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
-                          }`}/>
-                          <div className={`flex-1 h-2 rounded-full ${
-                            ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'
-                          }`}/>
+                        <div className="relative mb-2">
+                          {/* Линия прогресса */}
+                          <div className="flex items-center gap-1.5">
+                            <div className={`flex-1 h-2 rounded-full ${
+                              ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
+                            }`}/>
+                            <div className={`flex-1 h-2 rounded-full ${
+                              ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
+                            }`}/>
+                            <div className={`flex-1 h-2 rounded-full ${
+                              ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
+                            }`}/>
+                            <div className={`flex-1 h-2 rounded-full ${
+                              ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
+                            }`}/>
+                            <div className={`flex-1 h-2 rounded-full ${
+                              ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'
+                            }`}/>
+                          </div>
+                          {/* Подписи статусов */}
+                          <div className="flex justify-between mt-2 text-[9px] font-semibold uppercase">
+                            <span className={`text-center w-[18%] ${
+                              ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'text-emerald-500' : 'text-gray-500 dark:text-gray-400'
+                            }`}>Новая</span>
+                            <span className={`text-center w-[18%] ${
+                              ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500 text-white px-1 rounded' : 'text-gray-500 dark:text-gray-400'
+                            }`}>Поиск</span>
+                            <span className={`text-center w-[18%] ${
+                              ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500 text-white px-1 rounded' : 'text-gray-500 dark:text-gray-400'
+                            }`}>Оплачено</span>
+                            <span className={`text-center w-[18%] ${
+                              ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500 text-white px-1 rounded' : 'text-gray-500 dark:text-gray-400'
+                            }`}>В пути</span>
+                            <span className={`text-center w-[18%] ${
+                              ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600 text-white px-1 rounded' : 'text-gray-500 dark:text-gray-400'
+                            }`}>Склад</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className={`text-sm font-semibold uppercase ${
-                            relatedRequest.status === 'На складе' ? 'text-emerald-600 dark:text-emerald-400' :
-                            relatedRequest.status === 'В пути' ? 'text-indigo-600 dark:text-indigo-400' :
-                            relatedRequest.status === 'Оплачено' ? 'text-orange-600 dark:text-orange-400' :
-                            relatedRequest.status === 'Поиск' ? 'text-blue-600 dark:text-blue-400' :
-                            'text-gray-500 dark:text-gray-400'
-                          }`}>{relatedRequest.status}</span>
-                          {relatedRequest.status === 'На складе' && (
-                            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                              <CheckCircle2 size={14}/> Готово к работе
-                            </span>
-                          )}
-                        </div>
+                        {relatedRequest.status === 'На складе' && (
+                          <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                            <CheckCircle2 size={14}/> Готово к работе
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -662,7 +665,15 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     <label className="text-xs font-bold text-gray-400 ml-2">Серьезность</label>
                     <div className="flex gap-3">
                        {['Низкая', 'Средняя', 'Критическая'].map(s => (
-                         <button key={s} type="button" onClick={()=>setBreakdownForm({...breakdownForm, severity: s as any})} className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${breakdownForm.severity === s ? 'bg-neo-bg shadow-neo-inset text-red-600 border border-red-500/20' : 'shadow-neo text-gray-400 hover:text-gray-600'}`}>{s}</button>
+                         <button key={s} type="button" onClick={()=>setBreakdownForm({...breakdownForm, severity: s as any})} className={`flex-1 py-3 rounded-xl text-xs font-semibold transition-all ${
+                           breakdownForm.severity === s 
+                             ? s === 'Критическая' ? 'bg-red-500 text-white shadow-lg' 
+                               : s === 'Средняя' ? 'bg-orange-500 text-white shadow-lg'
+                               : 'bg-yellow-500 text-white shadow-lg'
+                             : s === 'Критическая' ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                               : s === 'Средняя' ? 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
+                               : 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
+                         }`}>{s}</button>
                        ))}
                     </div>
                  </div>
@@ -683,7 +694,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       <button type="button" onClick={handleUploadBreakdownPhoto} className="p-3 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset"><Camera size={18}/></button>
                     </div>
                  </div>
-                <button type="submit" className="w-full py-5 rounded-2xl bg-neo-bg shadow-neo text-red-600 font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-4 border border-red-500/10 hover:shadow-neo-inset">Создать акт неисправности</button>
+                <button type="submit" className="w-full py-5 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold uppercase text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all mt-4">Создать акт неисправности</button>
               </form>
            </div>
         </div>
