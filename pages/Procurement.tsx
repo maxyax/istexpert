@@ -149,7 +149,9 @@ export const Procurement: React.FC = () => {
                     <div className="flex gap-1.5 h-2 w-48 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden mb-2 shadow-inner">
                       {COLUMNS.map((c, i) => {
                         const activeIndex = COLUMNS.findIndex(col => col.id === req.status);
-                        return <div key={i} className={`flex-1 transition-all duration-500 ${i <= activeIndex ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-transparent'}`} />
+                        const isActive = i <= activeIndex;
+                        const colorClass = isActive ? c.color : 'bg-gray-300 dark:bg-gray-700';
+                        return <div key={i} className={`flex-1 transition-all duration-500 ${colorClass}`} />
                       })}
                     </div>
                     <span className={`text-[9px] font-black uppercase px-2 py-1 rounded ${statusColor} text-white tracking-widest`}>{req.status}</span>
@@ -197,9 +199,9 @@ export const Procurement: React.FC = () => {
                      <div className="space-y-3">
                        {(editReq.items || []).map((it: any, idx: number) => (
                          <div key={it.id || idx} className="grid grid-cols-12 gap-2 items-center">
-                           <input className="col-span-5 p-2 rounded-xl bg-neo-bg border border-white/5 app-input" placeholder="Наименование" value={it.name} onChange={e=>{ const arr = [...editReq.items]; arr[idx].name = e.target.value; setEditReq({...editReq, items: arr}); }} />
-                           <input className="col-span-2 p-2 rounded-xl bg-neo-bg border border-white/5 app-input" placeholder="Кол-во" value={it.quantity} onChange={e=>{ const arr=[...editReq.items]; arr[idx].quantity = e.target.value; setEditReq({...editReq, items: arr}); }} />
-                           <input className="col-span-3 p-2 rounded-xl bg-neo-bg border border-white/5 app-input" placeholder="Цена с НДС" value={it.unitPriceWithVAT || ''} onChange={e=>{ const arr=[...editReq.items]; arr[idx].unitPriceWithVAT = parseFloat(e.target.value || '0'); arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (arr[idx].unitPriceWithVAT || 0); setEditReq({...editReq, items: arr}); }} />
+                           <input className="col-span-5 p-2 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 app-input" placeholder="Наименование" value={it.name} onChange={e=>{ const arr = [...editReq.items]; arr[idx].name = e.target.value; setEditReq({...editReq, items: arr}); }} />
+                           <input className="col-span-2 p-2 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 app-input" placeholder="Кол-во" value={it.quantity} onChange={e=>{ const arr=[...editReq.items]; arr[idx].quantity = e.target.value; arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (arr[idx].unitPriceWithVAT || 0); setEditReq({...editReq, items: arr}); }} />
+                           <input className="col-span-3 p-2 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 app-input" placeholder="Цена с НДС" value={it.unitPriceWithVAT || ''} onChange={e=>{ const arr=[...editReq.items]; arr[idx].unitPriceWithVAT = parseFloat(e.target.value || '0'); arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (arr[idx].unitPriceWithVAT || 0); setEditReq({...editReq, items: arr}); }} />
                            <div className="col-span-1 text-xs font-black">{(it.total || 0).toFixed(2)}</div>
                            <button className="col-span-1 text-red-500" onClick={() => { const arr = [...editReq.items]; arr.splice(idx,1); setEditReq({...editReq, items: arr}); }}>×</button>
                          </div>
@@ -209,21 +211,21 @@ export const Procurement: React.FC = () => {
                    </div>
 
                    <div className="grid grid-cols-2 gap-3">
-                     <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
+                     <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
                        <label className="text-xs font-bold text-gray-400">Перевозчик</label>
-                       <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.carrierName || ''} onChange={e=>setEditReq({...editReq, carrierName: e.target.value})} />
+                       <input className="w-full p-2 rounded-lg shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.carrierName || ''} onChange={e=>setEditReq({...editReq, carrierName: e.target.value})} />
                        <label className="text-xs font-bold text-gray-400 mt-2">Трек/накладная</label>
-                       <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
+                       <input className="w-full p-2 rounded-lg shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
                      </div>
-                     <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
+                     <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
                        <label className="text-xs font-bold text-gray-400">Ответственный</label>
-                       <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.responsible || ''} onChange={e=>setEditReq({...editReq, responsible: e.target.value})} />
+                       <input className="w-full p-2 rounded-lg shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.responsible || ''} onChange={e=>setEditReq({...editReq, responsible: e.target.value})} />
                        <label className="text-xs font-bold text-gray-400 mt-2">Сумма всех позиций</label>
                        <div className="text-2xl font-black text-emerald-600">{((editReq.items||[]).reduce((s:any,it:any)=>s + (it.total||0),0) || 0).toFixed(2)} ₽</div>
                      </div>
                    </div>
 
-                   <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
+                   <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
                      <label className="text-xs font-bold text-gray-400">Прикрепить счет / спецификацию</label>
                      <div className="flex items-center gap-3 mt-2">
                        <input type="file" id="req-file-input" className="hidden" onChange={(ev:any)=>{
