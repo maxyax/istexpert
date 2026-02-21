@@ -110,8 +110,14 @@ export interface ProcurementRequest {
   id: string;
   title: string;
   status: ProcurementStatus;
-  items: { id: string; name: string; quantity: string }[];
+  items: { id: string; name: string; quantity: string; unitPriceWithVAT?: number; total?: number }[];
   cost?: number;
+  contractorName?: string;
+  invoiceNumber?: string;
+  carrierName?: string;
+  trackingNumber?: string;
+  responsible?: string;
+  attachments?: { id: string; name: string; url: string; type?: string }[];
   createdAt: string;
   completedAt?: string;
   equipmentId: string;

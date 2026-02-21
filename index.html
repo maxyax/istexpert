@@ -58,16 +58,16 @@
       body { background-color: var(--neo-bg); transition: 0.3s ease; }
       .custom-scrollbar::-webkit-scrollbar { width: 5px; }
       .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-      /* Unified readable form inputs across the app */
+      /* Unified readable form inputs across the app — match Company Settings address style (bold, text-xs) */
       input, textarea, select {
         font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
+        font-weight: 700;
+        font-size: 12px;
         text-transform: none;
         letter-spacing: 0;
       }
-      /* helper class for Tailwind-heavy markup where adding utility classes is noisy */
-      .app-input { font-weight: 500 !important; font-size: 14px !important; text-transform: none !important; }
+      /* helper class for Tailwind-heavy markup to enforce this style */
+      .app-input { font-weight: 700 !important; font-size: 12px !important; text-transform: none !important; }
     </style>
   <script type="importmap">
 {

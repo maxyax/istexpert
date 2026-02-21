@@ -14,11 +14,29 @@ const COLUMNS: {id: ProcurementStatus, title: string, color: string}[] = [
 ];
 
 export const Procurement: React.FC = () => {
-  const { requests, updateRequestStatus, selectedRequestId, setSelectedRequestId } = useProcurementStore();
+  const { requests, updateRequestStatus, updateRequest, selectedRequestId, setSelectedRequestId } = useProcurementStore();
   const { equipment } = useFleetStore();
   const [viewMode, setViewMode] = useState<'kanban' | 'list' | 'table'>('table');
 
   const selectedReq = requests.find(r => r.id === selectedRequestId);
+  const [editReq, setEditReq] = useState<any>(null);
+
+  React.useEffect(() => {
+    setEditReq(selectedReq ? { ...selectedReq } : null);
+  }, [selectedReq]);
+
+  // sorted for list/table: non-completed first, completed ('На складе') moved down sorted by completedAt desc
+  const sortedRequests = [...requests].sort((a, b) => {
+    const aDone = a.status === 'На складе' ? 1 : 0;
+    const bDone = b.status === 'На складе' ? 1 : 0;
+    if (aDone !== bDone) return aDone - bDone;
+    if (aDone === 1 && bDone === 1) {
+      const da = a.completedAt ? new Date(a.completedAt).getTime() : 0;
+      const db = b.completedAt ? new Date(b.completedAt).getTime() : 0;
+      return db - da;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   const handleStatusChange = (status: ProcurementStatus) => {
     if (selectedRequestId) {
@@ -74,9 +92,9 @@ export const Procurement: React.FC = () => {
       )}
 
       {/* Отображение: СПИСОК */}
-      {viewMode === 'list' && (
+          {viewMode === 'list' && (
         <div className="space-y-4 overflow-y-auto custom-scrollbar pr-2 flex-1 px-1">
-          {requests.map(req => (
+          {sortedRequests.map(req => (
             <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-6 rounded-[2rem] shadow-neo bg-neo-bg flex items-center justify-between group cursor-pointer hover:shadow-neo-inset transition-all border border-white/5">
               <div className="flex items-center gap-4 md:gap-8">
                 <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500 shrink-0"><Package size={24}/></div>
@@ -99,7 +117,7 @@ export const Procurement: React.FC = () => {
       )}
 
       {/* Отображение: ТАБЛИЦА (ГАНТ) */}
-      {viewMode === 'table' && (
+        {viewMode === 'table' && (
         <div className="bg-neo-bg rounded-[2.5rem] shadow-neo-inset p-4 overflow-x-auto border border-white/5 flex-1 custom-scrollbar">
           <table className="w-full text-left min-w-[800px]">
             <thead className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800">
@@ -111,7 +129,7 @@ export const Procurement: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {requests.map(req => (
+              {sortedRequests.map(req => (
                 <tr key={req.id} onClick={() => setSelectedRequestId(req.id)} className="hover:bg-white/5 transition-colors cursor-pointer group">
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
@@ -138,7 +156,7 @@ export const Procurement: React.FC = () => {
       )}
 
       {/* МОДАЛКА УПРАВЛЕНИЯ ЗАЯВКОЙ (Смена статусов здесь) */}
-      {selectedReq && (
+      {selectedReq && editReq && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
            <div className="bg-neo-bg w-full max-w-xl rounded-[3rem] shadow-neo p-8 md:p-12 animate-in zoom-in border border-white/20">
               <div className="flex justify-between items-center mb-10">
@@ -149,50 +167,87 @@ export const Procurement: React.FC = () => {
                  <button onClick={() => setSelectedRequestId(null)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={24}/></button>
               </div>
               
-              <div className="space-y-8">
-                 <div className="p-8 rounded-[2rem] shadow-neo-inset bg-neo-bg border border-white/5">
-                    <p className="text-[9px] font-black text-gray-400 uppercase mb-3 tracking-widest">Наименование позиции</p>
-                    <p className="text-sm md:text-base font-black uppercase text-gray-700 dark:text-gray-300 leading-tight">{selectedReq.title}</p>
-                 </div>
-
-                 <div className="grid grid-cols-2 gap-6 md:gap-8">
-                    <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
-                       <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-2">Объект</p>
-                       <div className="flex items-center gap-2">
-                          <Truck size={14} className="text-blue-500"/>
-                          <p className="text-[10px] md:text-xs font-black uppercase text-gray-700 dark:text-gray-300 truncate">{equipment.find(e=>e.id===selectedReq.equipmentId)?.name || 'Общий'}</p>
-                       </div>
-                    </div>
-                    <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
-                       <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-2">Бюджет</p>
-                       <div className="flex items-center gap-2">
-                          <Wallet size={14} className="text-emerald-500"/>
-                          <p className="text-sm md:text-lg font-black text-emerald-600">{selectedReq.cost?.toLocaleString() || '0'} ₽</p>
-                       </div>
-                    </div>
-                 </div>
-
                  <div className="space-y-6">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 flex items-center gap-2">
-                       <ArrowRight size={14} className="text-blue-500"/> Сменить статус закупки:
-                    </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
-                       {COLUMNS.map(c => (
-                         <button 
-                            key={c.id} 
-                            onClick={() => handleStatusChange(c.id)} 
-                            className={`px-4 py-4 rounded-xl shadow-neo text-[9px] font-black uppercase transition-all active:scale-95 border border-white/5 tracking-widest ${selectedReq.status === c.id ? 'bg-neo-bg shadow-neo-inset text-blue-600 ring-1 ring-blue-500/20' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 hover:shadow-neo-inset'}`}
-                         >
-                           {c.title}
-                         </button>
-                       ))}
-                    </div>
-                 </div>
+                   <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
+                     <label className="text-[9px] font-black text-gray-400 uppercase">Наименование</label>
+                     <input className="w-full p-3 rounded-lg bg-neo-bg outline-none app-input" value={editReq.title} onChange={e=>setEditReq({...editReq, title: e.target.value})} />
 
-                 <button className="w-full py-5 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-xs tracking-widest hover:shadow-neo-inset transition-all active:scale-95 border border-blue-500/10">
-                    Прикрепить документы (УПД/Счет)
-                 </button>
-              </div>
+                     <div className="grid grid-cols-2 gap-3">
+                       <div>
+                         <label className="text-[9px] font-black text-gray-400 uppercase">Контрагент</label>
+                         <input className="w-full p-3 rounded-lg bg-neo-bg outline-none app-input" value={editReq.contractorName || ''} onChange={e=>setEditReq({...editReq, contractorName: e.target.value})} />
+                       </div>
+                       <div>
+                         <label className="text-[9px] font-black text-gray-400 uppercase">Номер счета / спецификации</label>
+                         <input className="w-full p-3 rounded-lg bg-neo-bg outline-none app-input" value={editReq.invoiceNumber || ''} onChange={e=>setEditReq({...editReq, invoiceNumber: e.target.value})} />
+                       </div>
+                     </div>
+                   </div>
+
+                   <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                     <p className="text-[9px] font-black text-gray-400 uppercase mb-2">Позиции</p>
+                     <div className="space-y-3">
+                       {(editReq.items || []).map((it: any, idx: number) => (
+                         <div key={it.id || idx} className="grid grid-cols-12 gap-2 items-center">
+                           <input className="col-span-5 p-2 rounded-xl bg-neo-bg border border-white/5 app-input" placeholder="Наименование" value={it.name} onChange={e=>{ const arr = [...editReq.items]; arr[idx].name = e.target.value; setEditReq({...editReq, items: arr}); }} />
+                           <input className="col-span-2 p-2 rounded-xl bg-neo-bg border border-white/5 app-input" placeholder="Кол-во" value={it.quantity} onChange={e=>{ const arr=[...editReq.items]; arr[idx].quantity = e.target.value; setEditReq({...editReq, items: arr}); }} />
+                           <input className="col-span-3 p-2 rounded-xl bg-neo-bg border border-white/5 app-input" placeholder="Цена с НДС" value={it.unitPriceWithVAT || ''} onChange={e=>{ const arr=[...editReq.items]; arr[idx].unitPriceWithVAT = parseFloat(e.target.value || '0'); arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (arr[idx].unitPriceWithVAT || 0); setEditReq({...editReq, items: arr}); }} />
+                           <div className="col-span-1 text-xs font-black">{(it.total || 0).toFixed(2)}</div>
+                           <button className="col-span-1 text-red-500" onClick={() => { const arr = [...editReq.items]; arr.splice(idx,1); setEditReq({...editReq, items: arr}); }}>×</button>
+                         </div>
+                       ))}
+                       <button onClick={()=> setEditReq({...editReq, items: [...(editReq.items||[]), { id: `i-${Date.now()}`, name: '', quantity: '1', unitPriceWithVAT: 0, total: 0 }]})} className="mt-2 px-3 py-2 rounded-xl bg-neo-bg border border-white/5 font-black">Добавить позицию</button>
+                     </div>
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-3">
+                     <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
+                       <label className="text-[9px] font-black text-gray-400 uppercase">Перевозчик</label>
+                       <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.carrierName || ''} onChange={e=>setEditReq({...editReq, carrierName: e.target.value})} />
+                       <label className="text-[9px] font-black text-gray-400 uppercase mt-2">Трек/накладная</label>
+                       <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
+                     </div>
+                     <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
+                       <label className="text-[9px] font-black text-gray-400 uppercase">Ответственный</label>
+                       <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.responsible || ''} onChange={e=>setEditReq({...editReq, responsible: e.target.value})} />
+                       <label className="text-[9px] font-black text-gray-400 uppercase mt-2">Сумма всех позиций</label>
+                       <div className="text-2xl font-black text-emerald-600">{((editReq.items||[]).reduce((s:any,it:any)=>s + (it.total||0),0) || 0).toFixed(2)} ₽</div>
+                     </div>
+                   </div>
+
+                   <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
+                     <label className="text-[9px] font-black text-gray-400 uppercase">Прикрепить счет / спецификацию</label>
+                     <div className="flex items-center gap-3 mt-2">
+                       <input type="file" id="req-file-input" className="hidden" onChange={(ev:any)=>{
+                         const file = ev.target.files && ev.target.files[0];
+                         if (!file) return;
+                         const reader = new FileReader();
+                         reader.onload = (e) => {
+                           const url = e.target?.result as string;
+                           const att = { id: `a-${Date.now()}`, name: file.name, url, type: file.type };
+                           setEditReq((prev:any)=> ({ ...prev, attachments: [...(prev.attachments||[]), att] }));
+                         };
+                         reader.readAsDataURL(file);
+                       }} />
+                       <button onClick={() => { const el = document.getElementById('req-file-input'); if (el) (el as HTMLInputElement).click(); }} className="px-3 py-2 rounded-xl bg-neo-bg border border-white/5 font-black">Загрузить файл</button>
+                       <div className="flex gap-2">
+                         {(editReq.attachments||[]).map((a:any)=> (
+                           <a key={a.id} href={a.url} target="_blank" className="text-sm font-black text-blue-600">{a.name}</a>
+                         ))}
+                       </div>
+                     </div>
+                   </div>
+
+                   <div className="flex gap-3">
+                     <button onClick={() => {
+                       // save updates
+                       const totalCost = (editReq.items||[]).reduce((s:any,it:any)=> s + (it.total||0), 0);
+                       updateRequest(editReq.id, { ...editReq, cost: totalCost });
+                       setSelectedRequestId(null);
+                     }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs">Сохранить</button>
+                     <button onClick={() => setSelectedRequestId(null)} className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs">Отмена</button>
+                   </div>
+                 </div>
            </div>
         </div>
       )}

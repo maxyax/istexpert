@@ -9,6 +9,7 @@ interface ProcurementState {
   setSelectedRequestId: (id: string | null) => void;
   addRequest: (req: ProcurementRequest) => void;
   updateRequestStatus: (id: string, status: ProcurementStatus) => void;
+  updateRequest: (id: string, updates: Partial<ProcurementRequest>) => void;
 }
 
 export const useProcurementStore = create<ProcurementState>((set) => ({
@@ -36,17 +37,21 @@ export const useProcurementStore = create<ProcurementState>((set) => ({
   setSelectedRequestId: (id) => set({ selectedRequestId: id }),
   addRequest: (req) => set((state) => ({ requests: [req, ...state.requests] })),
   updateRequestStatus: (id, status) => set((state) => {
-    const updated = state.requests.map(r => r.id === id ? { ...r, status } : r);
-    // propagate to linked breakdown if present
+    const updated = state.requests.map(r => r.id === id ? { ...r, status, completedAt: status === 'На складе' ? new Date().toISOString() : r.completedAt } : r);
     const req = state.requests.find(r => r.id === id);
     if (req && req.breakdownId) {
-      // map procurement statuses to breakdown statuses
+      // when procurement marks 'На складе' -> mark breakdown as 'В работе'
       if (status === 'На складе') {
-        useMaintenanceStore.getState().updateBreakdownStatus(req.breakdownId, 'Запчасти получены');
-      } else if (status === 'Новая') {
+        useMaintenanceStore.getState().updateBreakdownStatus(req.breakdownId, 'В работе');
+      }
+      // when moved back to 'Новая' or similar, set to 'Запчасти заказаны'
+      if (status === 'Новая') {
         useMaintenanceStore.getState().updateBreakdownStatus(req.breakdownId, 'Запчасти заказаны');
       }
     }
     return { requests: updated };
   }),
+  updateRequest: (id, updates) => set((state) => ({
+    requests: state.requests.map(r => r.id === id ? { ...r, ...updates } : r)
+  })),
 }));
