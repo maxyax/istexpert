@@ -116,6 +116,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
   
   // Для выбора акта при создании заявки
   const [isBreakdownSelectOpen, setIsBreakdownSelectOpen] = useState(false);
+  
+  // Для выбора техники для ТО
+  const [isTOEquipSelectOpen, setIsTOEquipSelectOpen] = useState(false);
 
   const [toChecklist, setToChecklist] = useState<{ text: string; done: boolean; note?: string }[]>([]);
   const [toTypeLabel, setToTypeLabel] = useState<string>('');
@@ -223,6 +226,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       checklistItems: [{ text: `Поломка: ${breakdownForm.partName} (${breakdownForm.node})`, done: false, note: breakdownForm.description }]
     });
     setIsBreakdownModalOpen(false);
+    setSelectedMaintenanceEquipId(null);
     setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: undefined, mechanic: '', driver: '', photos: [] });
   };
 
@@ -354,8 +358,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => openTOForEquip(e)} className="px-4 py-2 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-[10px]">Провести ТО</button>
+                    <button onClick={() => setIsTOEquipSelectOpen(true)} className="px-4 py-2 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-[10px]">Провести ТО</button>
                     <button onClick={() => setIsBreakdownEquipSelectOpen(true)} className="px-4 py-2 rounded-2xl bg-neo-bg shadow-neo text-red-600 font-black uppercase text-[10px]">Акт поломки</button>
+                    <button onClick={() => setIsBreakdownSelectOpen(true)} className="px-4 py-2 rounded-2xl bg-neo-bg shadow-neo text-emerald-600 font-black uppercase text-[10px]">Заявка снабжения</button>
                   </div>
                 </div>
               ))}
@@ -370,11 +375,14 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-            <button onClick={() => openTOForEquip(selectedEquip)} className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg text-blue-600 flex flex-col items-center gap-3 md:gap-4 hover:shadow-neo-inset transition-all border border-blue-500/10 active:scale-95 group">
+            <button onClick={() => setIsTOEquipSelectOpen(true)} className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg text-blue-600 flex flex-col items-center gap-3 md:gap-4 hover:shadow-neo-inset transition-all border border-blue-500/10 active:scale-95 group">
               <Wrench size={32} className="group-hover:rotate-12 transition-transform"/><span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300">Провести ТО</span>
             </button>
             <button onClick={() => setIsBreakdownEquipSelectOpen(true)} className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg text-red-600 flex flex-col items-center gap-3 md:gap-4 hover:shadow-neo-inset transition-all border border-red-500/10 active:scale-95 group">
               <AlertTriangle size={32} className="group-hover:scale-110 transition-transform"/><span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300">Акт поломки</span>
+            </button>
+            <button onClick={() => setIsBreakdownSelectOpen(true)} className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg text-emerald-600 flex flex-col items-center gap-3 md:gap-4 hover:shadow-neo-inset transition-all border border-emerald-500/10 active:scale-95 group">
+              <Package size={32} className="group-hover:scale-110 transition-transform"/><span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300">Заявка снабжения</span>
             </button>
             <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center justify-center gap-1 md:gap-2 border border-white/5">
               <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase">Наработка</p>
@@ -531,6 +539,20 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               </div>
               <form onSubmit={handleSaveBreakdown} className="space-y-5 md:space-y-6">
                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 ml-2">Техника</label>
+                    <select
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input"
+                      value={selectedMaintenanceEquipId || ''}
+                      onChange={e => setSelectedMaintenanceEquipId(e.target.value)}
+                      required
+                    >
+                      <option value="">Выберите технику...</option>
+                      {equipment.map(eq => (
+                        <option key={eq.id} value={eq.id}>{eq.name} ({eq.vin})</option>
+                      ))}
+                    </select>
+                 </div>
+                 <div className="space-y-2">
                     <label className="text-xs font-bold text-gray-400 ml-2">Узел техники</label>
                     <select className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" value={breakdownForm.node} onChange={e=>setBreakdownForm({...breakdownForm, node: e.target.value})}>
                        <option>Двигатель</option><option>Гидравлика</option><option>Ходовая часть</option><option>Электроника</option><option>Кузов</option>
@@ -678,48 +700,72 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     const hasRequest = useProcurementStore.getState().requests.some(r => r.breakdownId === b.id);
                     return b.status !== 'Исправлено' && !hasRequest;
                   });
-                  
+
                   if (activeBreakdowns.length === 0) {
                     return (
                       <div className="text-center py-10">
-                        <p className="text-sm text-gray-500">Нет активных актов без заявок</p>
+                        <p className="text-sm text-gray-500 mb-4">Нет активных актов без заявок</p>
+                        <button
+                          onClick={() => {
+                            setIsBreakdownSelectOpen(false);
+                            setIsCreateRequestOpen(true);
+                            setSelectedBreakdownDetail(null);
+                          }}
+                          className="px-6 py-3 rounded-2xl bg-emerald-600 text-white text-xs font-black uppercase hover:bg-emerald-700"
+                        >
+                          Создать заявку без акта
+                        </button>
                       </div>
                     );
                   }
-                  
-                  return activeBreakdowns.map(b => {
-                    const equip = equipment.find(e => e.id === b.equipmentId);
-                    return (
+
+                  return (
+                    <>
+                      {activeBreakdowns.map(b => {
+                        const equip = equipment.find(e => e.id === b.equipmentId);
+                        return (
+                          <button
+                            key={b.id}
+                            onClick={() => {
+                              setSelectedBreakdownDetail(b);
+                              setIsBreakdownSelectOpen(false);
+                              setIsCreateRequestOpen(true);
+                            }}
+                            className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                          >
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className="p-3 rounded-xl bg-neo-bg text-red-600 group-hover:scale-110 transition-transform">
+                                <AlertTriangle size={20}/>
+                              </div>
+                              <div className="text-left flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{b.partName}</p>
+                                  <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded ${
+                                    b.severity === 'Критическая' ? 'bg-red-500 text-white' :
+                                    b.severity === 'Средняя' ? 'bg-orange-500 text-white' :
+                                    'bg-yellow-500 text-white'
+                                  }`}>{b.severity}</span>
+                                </div>
+                                <p className="text-[8px] text-gray-400">{equip?.name || 'Техника'} • {b.node}</p>
+                                <p className="text-[7px] text-gray-500">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
+                              </div>
+                            </div>
+                            <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                          </button>
+                        );
+                      })}
                       <button
-                        key={b.id}
                         onClick={() => {
-                          setSelectedBreakdownDetail(b);
                           setIsBreakdownSelectOpen(false);
                           setIsCreateRequestOpen(true);
+                          setSelectedBreakdownDetail(null);
                         }}
-                        className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                        className="w-full p-4 rounded-2xl shadow-neo bg-emerald-600 text-white font-black uppercase text-xs hover:bg-emerald-700 transition-all"
                       >
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="p-3 rounded-xl bg-neo-bg text-red-600 group-hover:scale-110 transition-transform">
-                            <AlertTriangle size={20}/>
-                          </div>
-                          <div className="text-left flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{b.partName}</p>
-                              <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded ${
-                                b.severity === 'Критическая' ? 'bg-red-500 text-white' :
-                                b.severity === 'Средняя' ? 'bg-orange-500 text-white' :
-                                'bg-yellow-500 text-white'
-                              }`}>{b.severity}</span>
-                            </div>
-                            <p className="text-[8px] text-gray-400">{equip?.name || 'Техника'} • {b.node}</p>
-                            <p className="text-[7px] text-gray-500">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
-                          </div>
-                        </div>
-                        <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                        + Создать заявку без акта
                       </button>
-                    );
-                  });
+                    </>
+                  );
                 })()}
               </div>
             </div>
@@ -727,27 +773,107 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
         </div>
       )}
 
-      {isCreateRequestOpen && selectedBreakdownDetail && (
+      {/* Модальное окно выбора техники для ТО */}
+      {isTOEquipSelectOpen && (
+        <div className="fixed inset-0 z-[215] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-3xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-blue-500">
+                  <Wrench size={24}/>
+                </div>
+                <h2 className="text-xl font-black uppercase text-gray-800 dark:text-gray-100">Выберите технику для ТО</h2>
+              </div>
+              <button onClick={() => setIsTOEquipSelectOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+                <X size={20}/>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 text-center py-4">Выберите технику для проведения ТО:</p>
+              <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                {equipment.map(e => (
+                  <button
+                    key={e.id}
+                    onClick={() => {
+                      openTOForEquip(e);
+                      setIsTOEquipSelectOpen(false);
+                    }}
+                    className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform">
+                        <Truck size={20}/>
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{e.name}</p>
+                        <p className="text-[8px] text-gray-400">{e.vin} • {e.hours} м/ч</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCreateRequestOpen && (
           <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
             <div className="bg-neo-bg w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[85vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6 md:mb-8 sticky top-0 bg-neo-bg">
                 <div className="flex items-center gap-4">
                   <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Truck size={28}/></div>
-                  <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Заявка снабжения</h3>
+                  <div>
+                    <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Заявка снабжения</h3>
+                    {selectedBreakdownDetail && (
+                      <p className="text-[8px] font-black text-gray-400 uppercase">Акт: {selectedBreakdownDetail.actNumber || 'АКТ-001'}</p>
+                    )}
+                  </div>
                 </div>
-                <button onClick={() => setIsCreateRequestOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+                <button onClick={() => { setIsCreateRequestOpen(false); setRequestItems([]); setRequestPhotos([]); }} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
               </div>
-              
+
               <div className="space-y-6">
+                {/* Выбор техники если нет акта */}
+                {!selectedBreakdownDetail && (
+                  <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-blue-500/20 space-y-3">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-400">Техника</label>
+                      <select
+                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 outline-none"
+                        value={selectedMaintenanceEquipId || ''}
+                        onChange={e => setSelectedMaintenanceEquipId(e.target.value)}
+                        required
+                      >
+                        <option value="">Выберите технику...</option>
+                        {equipment.map(eq => (
+                          <option key={eq.id} value={eq.id}>{eq.name} ({eq.vin})</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
                 <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400">Номер акта</label>
-                    <div className="text-xl font-black text-blue-600">{selectedBreakdownDetail.actNumber || 'АКТ-001'}</div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400">Наименование заявки</label>
-                    <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder={`Запрос по акту: ${selectedBreakdownDetail.partName || 'Запчасть'}`} />
-                  </div>
+                  {selectedBreakdownDetail && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400">Номер акта</label>
+                        <div className="text-xl font-black text-blue-600">{selectedBreakdownDetail.actNumber || 'АКТ-001'}</div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400">Наименование заявки</label>
+                        <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder={`Запрос по акту: ${selectedBreakdownDetail.partName || 'Запчасть'}`} />
+                      </div>
+                    </>
+                  )}
+                  {!selectedBreakdownDetail && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-400">Наименование заявки</label>
+                      <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Например: Комплект фильтров ТО-1000" />
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
@@ -795,19 +921,22 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       status: 'Новая' as any,
                       items: requestItems.map((it, idx) => ({ id: `i-${idx}-${Date.now()}`, name: it.name, quantity: it.quantity, unitPriceWithVAT: 0, total: 0 })),
                       createdAt: new Date().toISOString(),
-                      equipmentId: selectedBreakdownDetail.equipmentId,
-                      breakdownId: selectedBreakdownDetail.id,
-                      breakdownActNumber: selectedBreakdownDetail.actNumber,
-                      breakdownName: selectedBreakdownDetail.partName,
-                      breakdownDescription: selectedBreakdownDetail.description,
-                      breakdownNode: selectedBreakdownDetail.node,
+                      equipmentId: selectedBreakdownDetail ? selectedBreakdownDetail.equipmentId : selectedMaintenanceEquipId,
+                      breakdownId: selectedBreakdownDetail ? selectedBreakdownDetail.id : undefined,
+                      breakdownActNumber: selectedBreakdownDetail ? selectedBreakdownDetail.actNumber : undefined,
+                      breakdownName: selectedBreakdownDetail ? selectedBreakdownDetail.partName : undefined,
+                      breakdownDescription: selectedBreakdownDetail ? selectedBreakdownDetail.description : undefined,
+                      breakdownNode: selectedBreakdownDetail ? selectedBreakdownDetail.node : undefined,
                       breakdownPhotos: requestPhotos.map((url, i) => ({ id: `p-${i}`, name: `Фото ${i + 1} (акт)`, url, type: 'image' }))
                     };
                     addRequest(req as any);
-                    // set breakdown status to 'Запчасти заказаны'
-                    updateBreakdownStatus(selectedBreakdownDetail.id, 'Запчасти заказаны');
+                    // set breakdown status to 'Запчасти заказаны' if linked to breakdown
+                    if (selectedBreakdownDetail) {
+                      updateBreakdownStatus(selectedBreakdownDetail.id, 'Запчасти заказаны');
+                    }
                     setIsCreateRequestOpen(false);
                     setSelectedBreakdownDetail(null);
+                    setSelectedMaintenanceEquipId(null);
                     setRequestItems([]);
                     setRequestPhotos([]);
                   }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs shadow-neo hover:shadow-neo-inset transition-all">Отправить в снабжение</button>
