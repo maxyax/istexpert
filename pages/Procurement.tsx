@@ -72,8 +72,11 @@ export const Procurement: React.FC = () => {
                 <span className="text-[10px] font-black text-blue-500 bg-neo-bg px-2 py-1 rounded-lg shadow-neo-sm border border-white/5">{requests.filter(r=>r.status===col.id).length}</span>
               </div>
               <div className="flex-1 bg-neo-bg rounded-[2.5rem] p-4 shadow-neo-inset overflow-y-auto space-y-4 border border-white/5">
-                {requests.filter(r=>r.status===col.id).map(req => (
-                  <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-6 rounded-[2rem] shadow-neo bg-neo-bg group hover:shadow-neo-inset transition-all cursor-pointer border border-white/10 relative">
+                {requests.filter(r=>r.status===col.id).map(req => {
+                  const statusColor = COLUMNS.find(c=>c.id===req.status)?.color || 'bg-gray-400';
+                  const borderColor = statusColor.replace('bg-', 'border-');
+                  return (
+                  <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className={`p-6 rounded-[2rem] shadow-neo bg-neo-bg group hover:shadow-neo-inset transition-all cursor-pointer border-l-4 border-white/10 relative ${borderColor}`}>
                     <h5 className="text-[11px] font-black uppercase mb-3 text-gray-700 dark:text-gray-200 tracking-tight group-hover:text-blue-600 transition-colors">{req.title}</h5>
                     <div className="flex items-center gap-2 mb-4 opacity-70">
                       <Truck size={12} className="text-blue-500"/>
@@ -84,7 +87,8 @@ export const Procurement: React.FC = () => {
                       <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -129,8 +133,11 @@ export const Procurement: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {sortedRequests.map(req => (
-                <tr key={req.id} onClick={() => setSelectedRequestId(req.id)} className="hover:bg-white/5 transition-colors cursor-pointer group">
+              {sortedRequests.map(req => {
+                const statusColor = COLUMNS.find(c=>c.id===req.status)?.color || 'bg-gray-400';
+                const borderColor = statusColor.replace('bg-', 'border-');
+                return (
+                <tr key={req.id} onClick={() => setSelectedRequestId(req.id)} className={`border-l-4 ${borderColor} hover:bg-white/5 transition-colors cursor-pointer group`}>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
                       <div className="p-2.5 rounded-xl shadow-neo-sm bg-neo-bg text-blue-500 group-hover:scale-110 transition-transform"><Package size={18}/></div>
@@ -145,11 +152,12 @@ export const Procurement: React.FC = () => {
                         return <div key={i} className={`flex-1 transition-all duration-500 ${i <= activeIndex ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-transparent'}`} />
                       })}
                     </div>
-                    <span className="text-[9px] font-black uppercase text-blue-600 tracking-widest">{req.status}</span>
+                    <span className={`text-[9px] font-black uppercase px-2 py-1 rounded ${statusColor} text-white tracking-widest`}>{req.status}</span>
                   </td>
                   <td className="px-8 py-6 text-right font-black text-emerald-600 text-base">{req.cost?.toLocaleString() || '—'}</td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

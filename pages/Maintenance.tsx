@@ -587,8 +587,8 @@ export const Maintenance: React.FC = () => {
                 </div>
               )}
               <div className="flex gap-3">
-                <button type="button" onClick={() => setIsCreateRequestOpen(true)} className="py-3 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs">Создать заявку снабжения</button>
-                <button type="button" onClick={() => { navigator.clipboard?.writeText(selectedBreakdownDetail.partName || ''); alert('Название скопировано'); }} className="py-3 px-4 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs">Копировать название</button>
+                <button type="button" onClick={() => setIsCreateRequestOpen(true)} className="flex-1 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs leading-tight">Создать заявку снабжения</button>
+                <button type="button" onClick={() => { navigator.clipboard?.writeText(selectedBreakdownDetail.partName || ''); alert('Название скопировано'); }} className="flex-1 py-3 px-4 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs leading-tight">Копировать название</button>
               </div>
               <div className="space-y-2">
                 <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Новый статус</label>
