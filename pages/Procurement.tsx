@@ -84,6 +84,58 @@ export const Procurement: React.FC = () => {
     }
   };
 
+  // Функция для просмотра файлов
+  const viewFile = (url: string, name: string) => {
+    if (!url) return;
+    
+    // Проверяем тип файла
+    const isImage = url.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
+    const isPDF = url.startsWith('data:application/pdf') || /\.pdf$/i.test(name);
+    
+    if (isImage) {
+      // Для изображений открываем в модальном окне
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md';
+      modal.innerHTML = `
+        <div class="relative max-w-5xl max-h-[90vh]">
+          <button class="absolute -top-10 right-0 p-3 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all" onclick="this.closest('.fixed').remove()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <img src="${url}" alt="${name}" class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl" />
+          <a href="${url}" download="${name}" class="absolute -bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-black uppercase text-xs hover:bg-emerald-700 transition-all">
+            Скачать
+          </a>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    } else if (isPDF) {
+      // Для PDF открываем в новой вкладке с возможностью скачать
+      const newWindow = window.open(url, '_blank');
+      if (newWindow) {
+        setTimeout(() => {
+          const downloadBtn = document.createElement('a');
+          downloadBtn.href = url;
+          downloadBtn.download = name;
+          downloadBtn.style.display = 'none';
+          document.body.appendChild(downloadBtn);
+          downloadBtn.click();
+          document.body.removeChild(downloadBtn);
+        }, 1000);
+      }
+    } else {
+      // Для остальных файлов - скачивание
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col space-y-6 overflow-hidden animate-in fade-in duration-700 px-2 md:px-0">
       {/* Шапка с переключателем видов */}
@@ -341,10 +393,13 @@ export const Procurement: React.FC = () => {
                      <div className="flex gap-3 items-center mt-3">
                        <div className="flex-1 grid grid-cols-3 gap-2">
                          {(editReq.breakdownPhotos||[]).map((p:any, i:number) => (
-                           <div key={p.id || i} className="w-full h-20 rounded-lg overflow-hidden relative border border-white/10 cursor-pointer hover:border-blue-500 transition-colors group" onClick={() => window.open(p.url, '_blank')}>
+                           <div key={p.id || i} className="w-full h-20 rounded-lg overflow-hidden relative border border-white/10 cursor-pointer hover:border-blue-500 transition-colors group" onClick={() => viewFile(p.url, p.name || `Фото ${i + 1}`)}>
                              <img src={p.url} className="w-full h-full object-cover" />
                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                               <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-bold">Открыть</span>
+                               <div className="text-center">
+                                 <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-bold block">Просмотр</span>
+                                 <span className="text-white/80 opacity-0 group-hover:opacity-100 text-[7px] block">кликните</span>
+                               </div>
                              </div>
                            </div>
                          ))}
@@ -369,9 +424,26 @@ export const Procurement: React.FC = () => {
                        <button onClick={() => { const el = document.getElementById('req-file-input'); if (el) (el as HTMLInputElement).click(); }} className="px-4 py-3 rounded-2xl bg-neo-bg border border-white/5 font-bold text-xs shadow-neo hover:shadow-neo-inset transition-all">+ Добавить документ</button>
                        <div className="flex-1 flex flex-col gap-2">
                          {(editReq.invoiceFiles||[]).map((a:any)=> (
-                           <div key={a.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
-                             <a href={a.url} target="_blank" className="text-sm font-black text-blue-600 hover:text-blue-500 truncate">{a.name}</a>
-                             <button onClick={() => { const arr = [...(editReq.invoiceFiles||[])]; arr.splice(arr.indexOf(a), 1); setEditReq({...editReq, invoiceFiles: arr}); }} className="text-red-500 hover:text-red-600 font-bold">×</button>
+                           <div key={a.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 group hover:border-blue-500/50 transition-all">
+                             <button onClick={() => viewFile(a.url, a.name)} className="flex-1 text-left text-sm font-black text-blue-600 hover:text-blue-500 truncate flex items-center gap-2">
+                               <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 uppercase">{a.name.split('.').pop()}</span>
+                               {a.name}
+                             </button>
+                             <div className="flex items-center gap-2">
+                               <a href={a.url} download={a.name} className="p-2 rounded-lg bg-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all" title="Скачать">
+                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                   <polyline points="7 10 12 15 17 10"></polyline>
+                                   <line x1="12" y1="15" x2="12" y2="3"></line>
+                                 </svg>
+                               </a>
+                               <button onClick={() => { const arr = [...(editReq.invoiceFiles||[])]; arr.splice(arr.indexOf(a), 1); setEditReq({...editReq, invoiceFiles: arr}); }} className="p-2 rounded-lg bg-red-500/20 text-red-600 hover:bg-red-500 hover:text-white transition-all" title="Удалить">
+                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                   <polyline points="3 6 5 6 21 6"></polyline>
+                                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                 </svg>
+                               </button>
+                             </div>
                            </div>
                          ))}
                        </div>
