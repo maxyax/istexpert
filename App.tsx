@@ -27,7 +27,7 @@ const App: React.FC = () => {
       case 'equipment': return <EquipmentList onNavigate={setCurrentPage} />;
       case 'maintenance': return <Maintenance onNavigate={setCurrentPage} />;
       case 'calendar': return <MaintenanceCalendar onNavigate={setCurrentPage} />;
-      case 'procurement': return <Procurement />;
+      case 'procurement': return <Procurement onNavigate={setCurrentPage} />;
       case 'fuel': return <FuelManagement />;
       case 'settings': return <CompanySettings />;
       default: return <Dashboard onNavigate={setCurrentPage} />;

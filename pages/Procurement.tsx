@@ -16,7 +16,7 @@ const COLUMNS: {id: ProcurementStatus, title: string, color: string}[] = [
   { id: 'На складе', title: 'Склад', color: 'bg-indigo-500' },
 ];
 
-export const Procurement: React.FC = () => {
+export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => {
   const { requests, updateRequestStatus, updateRequest, selectedRequestId, setSelectedRequestId, addRequest } = useProcurementStore();
   const { equipment, selectEquipment } = useFleetStore();
   const { breakdowns, updateBreakdownStatus } = useMaintenanceStore();
@@ -149,7 +149,14 @@ export const Procurement: React.FC = () => {
            </div>
         </div>
         <button
-          onClick={() => setIsBreakdownSelectOpen(true)}
+          onClick={() => {
+            if (onNavigate) onNavigate('maintenance');
+            // Небольшая задержка чтобы открылась вкладка
+            setTimeout(() => {
+              // Здесь можно было бы установить isBreakdownSelectOpen=true
+              // но для этого нужен доступ к состоянию Maintenance
+            }, 100);
+          }}
           className="px-6 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs shadow-neo hover:bg-emerald-700 transition-all flex items-center gap-2"
         >
           <Plus size={18}/>
