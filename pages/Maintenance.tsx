@@ -390,46 +390,52 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   {/* Прогресс-бары по заявкам */}
                   {relatedRequests.length > 0 && (
                     <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      {relatedRequests.map(req => {
-                        const breakdown = breakdowns.find(b => b.id === req.breakdownId);
-                        if (!breakdown) return null;
-                        const statusOrder = ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'];
-                        const currentIndex = statusOrder.indexOf(req.status);
-                        return (
-                          <button
-                            key={req.id}
-                            onClick={() => {
-                              setSelectedMaintenanceEquipId(e.id);
-                              setSelectedBreakdownDetail(breakdown);
-                            }}
-                            className="w-full text-left group"
-                          >
-                            <div className="relative h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                              <div className={`absolute top-0 left-0 h-full transition-all duration-500 ${
-                                req.status === 'На складе' ? 'w-full bg-emerald-500' :
-                                req.status === 'В пути' ? 'w-[80%] bg-indigo-500' :
-                                req.status === 'Оплачено' ? 'w-[60%] bg-orange-500' :
-                                req.status === 'Поиск' ? 'w-[40%] bg-blue-500' :
-                                'w-[20%] bg-purple-500'
-                              }`}/>
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                              <p className="text-[8px] md:text-[9px] font-semibold text-gray-500 dark:text-gray-400 truncate flex-1">
-                                {breakdown.partName}
-                              </p>
-                              <span className={`text-[8px] md:text-[9px] font-semibold ml-2 whitespace-nowrap ${
-                                req.status === 'На складе' ? 'text-emerald-500' :
-                                req.status === 'В пути' ? 'text-indigo-500' :
-                                req.status === 'Оплачено' ? 'text-orange-500' :
-                                req.status === 'Поиск' ? 'text-blue-500' :
-                                'text-purple-500'
-                              }`}>
-                                {req.status}
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
+                      {relatedRequests
+                        .filter(req => {
+                          const breakdown = breakdowns.find(b => b.id === req.breakdownId);
+                          // Показываем только если поломка не исправлена
+                          return breakdown && breakdown.status !== 'Исправлено';
+                        })
+                        .map(req => {
+                          const breakdown = breakdowns.find(b => b.id === req.breakdownId);
+                          if (!breakdown) return null;
+                          const statusOrder = ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'];
+                          const currentIndex = statusOrder.indexOf(req.status);
+                          return (
+                            <button
+                              key={req.id}
+                              onClick={() => {
+                                setSelectedMaintenanceEquipId(e.id);
+                                setSelectedBreakdownDetail(breakdown);
+                              }}
+                              className="w-full text-left group"
+                            >
+                              <div className="relative h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div className={`absolute top-0 left-0 h-full transition-all duration-500 ${
+                                  req.status === 'На складе' ? 'w-full bg-emerald-500' :
+                                  req.status === 'В пути' ? 'w-[80%] bg-indigo-500' :
+                                  req.status === 'Оплачено' ? 'w-[60%] bg-orange-500' :
+                                  req.status === 'Поиск' ? 'w-[40%] bg-blue-500' :
+                                  'w-[20%] bg-purple-500'
+                                }`}/>
+                              </div>
+                              <div className="flex items-center justify-between mt-1">
+                                <p className="text-[8px] md:text-[9px] font-semibold text-gray-500 dark:text-gray-400 truncate flex-1">
+                                  {breakdown.partName}
+                                </p>
+                                <span className={`text-[8px] md:text-[9px] font-semibold ml-2 whitespace-nowrap ${
+                                  req.status === 'На складе' ? 'text-emerald-500' :
+                                  req.status === 'В пути' ? 'text-indigo-500' :
+                                  req.status === 'Оплачено' ? 'text-orange-500' :
+                                  req.status === 'Поиск' ? 'text-blue-500' :
+                                  'text-purple-500'
+                                }`}>
+                                  {req.status}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
                     </div>
                   )}
                 </div>
@@ -1499,7 +1505,6 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     setBreakdownStatusForm({...breakdownStatusForm, status: newStatus});
                   }}
                 >
-                  <option>Новая</option>
                   {(() => {
                     const relatedReq = useProcurementStore.getState().requests.find(r => r.breakdownId === selectedBreakdownDetail.id);
                     const canTakeToWork = relatedReq && relatedReq.status === 'На складе';
