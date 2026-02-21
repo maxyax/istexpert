@@ -202,23 +202,22 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
       {/* Отображение: СПИСОК */}
           {viewMode === 'list' && (
-        <div className="space-y-4 overflow-y-auto custom-scrollbar pr-2 flex-1 px-1">
+        <div className="space-y-3 overflow-y-auto custom-scrollbar pr-2 flex-1 px-1">
           {sortedRequests.map(req => (
-            <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-6 rounded-[2rem] shadow-neo bg-neo-bg flex items-center justify-between group cursor-pointer hover:shadow-neo-inset transition-all border border-white/5">
-              <div className="flex items-center gap-4 md:gap-8">
-                <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500 shrink-0"><Package size={24}/></div>
-                <div className="overflow-hidden">
-                  <h4 className="text-sm md:text-base font-black uppercase text-gray-700 dark:text-gray-200 truncate">{req.title}</h4>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded ${COLUMNS.find(c=>c.id===req.status)?.color || 'bg-gray-300'} text-white`}>{req.status}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate">{equipment.find(e=>e.id===req.equipmentId)?.name}</span>
+            <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-4 md:p-6 rounded-[2rem] shadow-neo bg-neo-bg flex flex-col gap-3 group cursor-pointer hover:shadow-neo-inset transition-all border border-white/5 min-w-0">
+              <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                <div className="p-3 md:p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500 shrink-0"><Package size={20} className="md:w-6 md:h-6"/></div>
+                <div className="overflow-hidden flex-1 min-w-0">
+                  <h4 className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate line-clamp-2">{req.title}</h4>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <span className={`text-[7px] md:text-[9px] font-bold uppercase px-2 py-0.5 rounded ${COLUMNS.find(c=>c.id===req.status)?.color || 'bg-gray-300'} text-white`}>{req.status}</span>
+                    <span className="text-[7px] md:text-[9px] text-gray-400 font-bold uppercase truncate flex-1 min-w-0">{equipment.find(e=>e.id===req.equipmentId)?.name || 'Общий'}</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 md:gap-10 shrink-0">
-                <p className="text-base md:text-xl font-black text-emerald-600 whitespace-nowrap">{req.cost ? formatMoney(req.cost) : '—'}</p>
-                <div className="p-2 rounded-xl shadow-neo text-gray-300 group-hover:text-blue-600"><ChevronRight size={20}/></div>
+              <div className="flex items-center justify-between gap-3 md:gap-10">
+                <p className="text-sm md:text-lg font-black text-emerald-600 whitespace-nowrap">{req.cost ? formatMoney(req.cost) : '—'}</p>
+                <div className="p-2 rounded-xl shadow-neo text-gray-300 group-hover:text-blue-600"><ChevronRight size={18} className="md:w-5 md:h-5"/></div>
               </div>
             </div>
           ))}

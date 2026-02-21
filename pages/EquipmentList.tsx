@@ -375,51 +375,52 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
         </div>
       ) : (
         <div className="bg-neo-bg rounded-[2.5rem] shadow-neo-inset p-4 overflow-hidden border border-white/10">
-           <table className="w-full text-left">
-              <thead className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800">
+           <table className="w-full text-left min-w-[600px]">
+              <thead className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800">
                  <tr>
-                    <th className="px-8 py-5">Единица техники</th>
-                    <th className="px-6 py-5 w-48">Статус</th>
-                    <th className="px-6 py-5">Наработка</th>
-                    <th className="px-6 py-5">Водитель</th>
-                    <th className="px-6 py-5">ОСАГО</th>
-                    <th className="px-6 py-5"></th>
+                    <th className="px-3 md:px-6 py-4 md:py-5">Единица техники</th>
+                    <th className="px-3 md:px-4 py-4 md:py-5 w-28 md:w-48">Статус</th>
+                    <th className="px-3 md:px-4 py-4 md:py-5 hidden md:table-cell">Наработка</th>
+                    <th className="px-3 md:px-4 py-4 md:py-5 hidden lg:table-cell">Водитель</th>
+                    <th className="px-3 md:px-4 py-4 md:py-5 hidden md:table-cell">ОСАГО</th>
+                    <th className="px-3 md:px-4 py-4 md:py-5"></th>
                  </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                  {filtered.map(e => {
                    const computedStatus = computeEquipmentStatus(e.id, breakdowns, plannedTOs, equipment);
+                   const insuranceStatus = getInsuranceStatus(e.insurance_end);
                    return (
                    <tr key={e.id} onClick={() => selectEquipment(e.id)} className="hover:bg-white/5 transition-colors cursor-pointer group">
-                      <td className="px-8 py-6 flex items-center gap-4">
-                         <div className="p-3 rounded-xl shadow-neo-sm bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform"><Truck size={20}/></div>
-                         <div>
-                            <p className="text-sm font-black uppercase text-gray-800 group-hover:text-blue-600 transition-colors">{e.name}</p>
-                            <p className="text-[9px] text-gray-400 uppercase font-bold">{e.vin}</p>
+                      <td className="px-3 md:px-6 py-4 md:py-6 flex items-center gap-3 md:gap-4 min-w-[180px]">
+                         <div className="p-2 md:p-3 rounded-xl shadow-neo-sm bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform shrink-0"><Truck size={18} className="md:w-5 md:h-5"/></div>
+                         <div className="min-w-0 flex-1">
+                            <p className="text-xs md:text-sm font-black uppercase text-gray-800 group-hover:text-blue-600 transition-colors truncate">{e.name}</p>
+                            <p className="text-[8px] md:text-[9px] text-gray-400 uppercase font-bold truncate">{e.vin}</p>
                          </div>
                       </td>
-                      <td className="px-4 py-4 md:px-6 md:py-6">
+                      <td className="px-3 md:px-4 py-4 md:py-6">
                         <div className="space-y-1">
-                          <span className={`text-[7px] md:text-[9px] font-black uppercase px-2 py-1 rounded-full shadow-neo-sm whitespace-nowrap ${
+                          <span className={`text-[6px] md:text-[8px] font-black uppercase px-2 py-1 rounded-full shadow-neo-sm whitespace-nowrap ${
                             computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' :
                             computedStatus.status === EquipStatus.REPAIR ? 'bg-red-100 text-red-700' :
                             computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-100 text-orange-700' :
                             computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-100 text-yellow-700' :
                             'bg-blue-100 text-blue-700'
-                          }`}>{computedStatus.status.length > 15 ? computedStatus.status.substring(0, 15) + '...' : computedStatus.status}</span>
+                          }`}>{computedStatus.status.length > 12 ? computedStatus.status.substring(0, 12) + '...' : computedStatus.status}</span>
                           {computedStatus.reason && computedStatus.status !== EquipStatus.ACTIVE && (
-                            <p className="text-[6px] md:text-[7px] text-gray-500 truncate max-w-[120px]">{computedStatus.reason}</p>
+                            <p className="text-[5px] md:text-[6px] text-gray-500 truncate max-w-[100px]">{computedStatus.reason}</p>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-6 text-sm font-black text-gray-700">{formatNumber(e.hours)} м/ч</td>
-                      <td className="px-6 py-6 text-sm font-black text-gray-400 uppercase">{e.driver || '—'}</td>
-                      <td className="px-6 py-6">
+                      <td className="px-3 md:px-4 py-4 md:py-6 text-xs md:text-sm font-black text-gray-700 whitespace-nowrap hidden md:table-cell">{formatNumber(e.hours)} м/ч</td>
+                      <td className="px-3 md:px-4 py-4 md:py-6 text-xs md:text-sm font-black text-gray-400 uppercase whitespace-nowrap hidden lg:table-cell">{e.driver || '—'}</td>
+                      <td className="px-3 md:px-4 py-4 md:py-6 hidden md:table-cell">
                         {e.insurance_end ? (() => {
                           const insuranceStatus = getInsuranceStatus(e.insurance_end);
                           return (
-                            <div className="flex flex-col gap-1">
-                              <span className={`text-[7px] md:text-[8px] font-black uppercase px-2 py-0.5 rounded inline-block w-fit ${
+                            <div className="flex flex-col gap-0.5">
+                              <span className={`text-[6px] md:text-[7px] font-black uppercase px-1.5 py-0.5 rounded inline-block w-fit ${
                                 insuranceStatus.status === 'expired' ? 'bg-red-500 text-white' :
                                 insuranceStatus.status === 'critical' ? 'bg-orange-500 text-white' :
                                 insuranceStatus.status === 'warning' ? 'bg-yellow-500 text-white' :
@@ -428,16 +429,16 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                                 {formatToDDMMYYYY(e.insurance_end)}
                               </span>
                               {insuranceStatus.status === 'expired' && (
-                                <span className="text-[7px] font-black text-red-600">Просрочено на {Math.abs(insuranceStatus.daysLeft)} дн.</span>
+                                <span className="text-[5px] md:text-[6px] font-black text-red-600">Просрочено</span>
                               )}
                               {insuranceStatus.status === 'critical' && (
-                                <span className="text-[7px] font-black text-orange-600">Осталось {insuranceStatus.daysLeft} дн.</span>
+                                <span className="text-[5px] md:text-[6px] font-black text-orange-600">{insuranceStatus.daysLeft} дн.</span>
                               )}
                             </div>
                           );
-                        })() : <span className="text-[8px] text-gray-400">—</span>}
+                        })() : <span className="text-[7px] md:text-[8px] text-gray-400">—</span>}
                       </td>
-                      <td className="px-6 py-6 text-right"><ChevronRight size={18} className="text-gray-300 group-hover:text-blue-600 transition-all"/></td>
+                      <td className="px-3 md:px-4 py-4 md:py-6 text-right"><ChevronRight size={16} className="md:w-4 md:h-4 text-gray-300 group-hover:text-blue-600 transition-all"/></td>
                    </tr>
                    );
                  })}

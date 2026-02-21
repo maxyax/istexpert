@@ -351,28 +351,20 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 overflow-x-auto scrollbar-hide pb-2">
               {equipment.map(e => (
-                <div key={e.id} className="p-4 rounded-xl shadow-neo bg-neo-bg flex items-center justify-between border border-white/5 min-w-[320px]">
-                  <div className="flex items-center gap-4 cursor-pointer" onClick={() => setSelectedMaintenanceEquipId(e.id)}>
-                    <div className="w-12 h-12 rounded-lg bg-neo-bg flex items-center justify-center text-blue-600 shrink-0"><Wrench size={22}/></div>
-                    <div className="min-w-0">
-                      <div className="font-black uppercase text-sm text-gray-700 truncate">{e.name}</div>
-                      <div className="text-[11px] text-gray-400 truncate">{e.make} {e.model} • {e.hours} м/ч</div>
+                <div key={e.id} className="p-4 rounded-xl shadow-neo bg-neo-bg flex flex-col gap-3 border border-white/5 min-w-[280px]">
+                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedMaintenanceEquipId(e.id)}>
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-neo-bg flex items-center justify-center text-blue-600 shrink-0"><Wrench size={20} className="md:w-5 md:h-5"/></div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-black uppercase text-xs md:text-sm text-gray-700 truncate">{e.name}</div>
+                      <div className="text-[9px] md:text-[11px] text-gray-400 truncate">{e.make} {e.model} • {e.hours} м/ч</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button onClick={() => setIsTOEquipSelectOpen(true)} className="px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-[9px] whitespace-nowrap">Провести ТО</button>
-                    <button onClick={() => setIsBreakdownEquipSelectOpen(true)} className="px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-red-600 font-black uppercase text-[9px] whitespace-nowrap">Акт</button>
-                    <button
-                      onClick={() => {
-                        setRequestEquipmentId(e.id);
-                        setIsBreakdownSelectOpen(true);
-                      }}
-                      className="px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-emerald-600 font-black uppercase text-[9px] whitespace-nowrap"
-                    >
-                      Заявка
-                    </button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button onClick={() => setIsTOEquipSelectOpen(true)} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-[8px] md:text-[9px] text-center">Провести ТО</button>
+                    <button onClick={() => setIsBreakdownEquipSelectOpen(true)} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-red-600 font-black uppercase text-[8px] md:text-[9px] text-center">Акт</button>
+                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-emerald-600 font-black uppercase text-[8px] md:text-[9px] text-center">Заявка</button>
                   </div>
                 </div>
               ))}
