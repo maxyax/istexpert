@@ -158,19 +158,19 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <Fuel size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Топливо за месяц</h3>
-              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">{new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
+              <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Топливо за месяц</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">{new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
             </div>
           </div>
           <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 mb-4">{formatMoney(fuelCostThisMonth)}</div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-[9px] uppercase">
-              <span className="text-gray-600 dark:text-gray-300">Заправок</span>
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{fuelThisMonth.length}</span>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заправок</span>
+              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{fuelThisMonth.length}</span>
             </div>
-            <div className="flex justify-between text-[9px] uppercase">
-              <span className="text-gray-600 dark:text-gray-300">Объем</span>
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{fuelThisMonth.reduce((s, f) => s + f.quantity, 0)} л</span>
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Объем</span>
+              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{fuelThisMonth.reduce((s, f) => s + f.quantity, 0)} л</span>
             </div>
           </div>
         </div>
@@ -182,15 +182,15 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <DollarSign size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Оплачено заявок</h3>
-              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Ожидание доставки</p>
+              <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Оплачено заявок</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">Ожидание доставки</p>
             </div>
           </div>
           <div className="text-3xl font-bold text-blue-700 dark:text-blue-400 mb-4">{formatMoney(requestsPaidAmount)}</div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-[9px] uppercase">
-              <span className="text-gray-600 dark:text-gray-300">Заявок</span>
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{requestsPaid.length}</span>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заявок</span>
+              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{requestsPaid.length}</span>
             </div>
           </div>
         </div>
@@ -202,15 +202,15 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <Package size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Поступило на склад</h3>
-              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Готово к выдаче</p>
+              <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Поступило на склад</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">Готово к выдаче</p>
             </div>
           </div>
           <div className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-4">{formatMoney(requestsInWarehouseAmount)}</div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-[9px] uppercase">
-              <span className="text-gray-600 dark:text-gray-300">Заявок</span>
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{requestsInWarehouse.length}</span>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заявок</span>
+              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{requestsInWarehouse.length}</span>
             </div>
           </div>
         </div>
@@ -225,24 +225,24 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                 <AlertTriangle size={24}/>
               </div>
               <div>
-                <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Акты поломок</h3>
-                <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">За этот месяц</p>
+                <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Акты поломок</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">За этот месяц</p>
               </div>
             </div>
             <div className="text-2xl font-bold text-red-700 dark:text-red-400">{breakdownsThisMonth.length}</div>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[9px] uppercase text-gray-600 dark:text-gray-300">Критические</span>
-              <span className="font-semibold text-red-700 dark:text-red-400">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Критические</span>
+              <span className="text-lg font-bold text-red-700 dark:text-red-400">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[9px] uppercase text-gray-600 dark:text-gray-300">Средние</span>
-              <span className="font-semibold text-orange-600 dark:text-orange-400">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Средние</span>
+              <span className="text-lg font-bold text-orange-600 dark:text-orange-400">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[9px] uppercase text-gray-600 dark:text-gray-300">Низкие</span>
-              <span className="font-semibold text-yellow-600 dark:text-yellow-400">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Низкие</span>
+              <span className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
             </div>
           </div>
         </div>
@@ -254,15 +254,15 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <TrendingUp size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Частые поломки</h3>
-              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Топ-5 за месяц</p>
+              <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Частые поломки</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">Топ-5 за месяц</p>
             </div>
           </div>
           <div className="space-y-3">
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+              <div key={idx} className="flex justify-between items-center p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                 <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold ${
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
                     idx === 0 ? 'bg-red-500 text-white' :
                     idx === 1 ? 'bg-orange-500 text-white' :
                     idx === 2 ? 'bg-yellow-500 text-white' :
@@ -271,18 +271,18 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                     {idx + 1}
                   </div>
                   <div>
-                    <p className="text-[9px] font-semibold text-gray-800 dark:text-gray-200">{item.equipment.name}</p>
-                    <p className="text-[7px] text-gray-500 dark:text-gray-400">{item.equipment.vin}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{item.equipment.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.equipment.vin}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-red-700 dark:text-red-400">{item.breakdowns}</p>
-                  <p className="text-[7px] text-gray-500 dark:text-gray-400 uppercase">поломок</p>
+                  <p className="text-lg font-bold text-red-700 dark:text-red-400">{item.breakdowns}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">поломок</p>
                 </div>
               </div>
             ))}
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).length === 0 && (
-              <p className="text-center py-10 text-[9px] font-medium text-gray-500 dark:text-gray-400 uppercase">Поломок за месяц не было</p>
+              <p className="text-center py-10 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Поломок за месяц не было</p>
             )}
           </div>
         </div>
