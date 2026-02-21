@@ -419,13 +419,22 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                               onClick={handleProgressClick}
                               className="w-full text-left group"
                             >
-                              <div className="relative h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                <div className={`absolute top-0 left-0 h-full transition-all duration-500 ${
-                                  req.status === 'На складе' ? 'w-full bg-emerald-500' :
-                                  req.status === 'В пути' ? 'w-[80%] bg-indigo-500' :
-                                  req.status === 'Оплачено' ? 'w-[60%] bg-orange-500' :
-                                  req.status === 'Поиск' ? 'w-[40%] bg-blue-500' :
-                                  'w-[20%] bg-purple-500'
+                              {/* Разделенная шкала статусов */}
+                              <div className="flex gap-0.5 mb-1">
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  statusOrder.indexOf(req.status) >= 0 ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-700'
+                                }`}/>
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  statusOrder.indexOf(req.status) >= 1 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
+                                }`}/>
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  statusOrder.indexOf(req.status) >= 2 ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
+                                }`}/>
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  statusOrder.indexOf(req.status) >= 3 ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
+                                }`}/>
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  statusOrder.indexOf(req.status) >= 4 ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
                                 }`}/>
                               </div>
                               <div className="flex items-center justify-between mt-1">

@@ -423,13 +423,22 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                               const progressPercent = (currentIndex + 1) * 20;
                               return (
                                 <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                  <div className="relative h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                    <div className={`absolute top-0 left-0 h-full transition-all duration-500 ${
-                                      relatedRequest.status === 'На складе' ? 'w-full bg-emerald-500' :
-                                      relatedRequest.status === 'В пути' ? 'w-[80%] bg-indigo-500' :
-                                      relatedRequest.status === 'Оплачено' ? 'w-[60%] bg-orange-500' :
-                                      relatedRequest.status === 'Поиск' ? 'w-[40%] bg-blue-500' :
-                                      'w-[20%] bg-purple-500'
+                                  {/* Разделенная шкала статусов */}
+                                  <div className="flex gap-0.5 mb-1">
+                                    <div className={`flex-1 h-1.5 rounded-full ${
+                                      currentIndex >= 0 ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-700'
+                                    }`}/>
+                                    <div className={`flex-1 h-1.5 rounded-full ${
+                                      currentIndex >= 1 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
+                                    }`}/>
+                                    <div className={`flex-1 h-1.5 rounded-full ${
+                                      currentIndex >= 2 ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
+                                    }`}/>
+                                    <div className={`flex-1 h-1.5 rounded-full ${
+                                      currentIndex >= 3 ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
+                                    }`}/>
+                                    <div className={`flex-1 h-1.5 rounded-full ${
+                                      currentIndex >= 4 ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
                                     }`}/>
                                   </div>
                                   <p className="text-[8px] md:text-[9px] font-semibold uppercase mt-1 text-gray-500 dark:text-gray-400">
