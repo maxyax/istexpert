@@ -187,11 +187,11 @@ export const Procurement: React.FC = () => {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-400">Контрагент</label>
-                         <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" value={editReq.contractorName || ''} onChange={e=>setEditReq({...editReq, contractorName: e.target.value})} />
+                         <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input" value={editReq.contractorName || ''} onChange={e=>setEditReq({...editReq, contractorName: e.target.value})} />
                        </div>
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-400">Номер счета / спецификации</label>
-                         <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" value={editReq.invoiceNumber || ''} onChange={e=>setEditReq({...editReq, invoiceNumber: e.target.value})} />
+                         <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input" value={editReq.invoiceNumber || ''} onChange={e=>setEditReq({...editReq, invoiceNumber: e.target.value})} />
                        </div>
                      </div>
 
@@ -268,6 +268,12 @@ export const Procurement: React.FC = () => {
                      <button onClick={() => {
                        // save updates
                        const totalCost = (editReq.items||[]).reduce((s:any,it:any)=> s + (it.total||0), 0);
+                       const statusChanged = selectedReq.status !== editReq.status;
+                       // if status changed, use updateRequestStatus to trigger side effects
+                       if (statusChanged) {
+                         updateRequestStatus(editReq.id, editReq.status);
+                       }
+                       // update other fields
                        updateRequest(editReq.id, { ...editReq, cost: totalCost });
                        setSelectedRequestId(null);
                      }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs">Сохранить</button>
