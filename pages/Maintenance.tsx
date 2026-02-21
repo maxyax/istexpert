@@ -345,11 +345,13 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           {viewMode === 'tiles' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {equipment.map(e => (
-                <div key={e.id} onClick={() => setSelectedMaintenanceEquipId(e.id)} className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all flex items-center gap-6 border border-white/5 group">
-                  <div className="w-14 h-14 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform"><Wrench size={28}/></div>
+                <div key={e.id} onClick={() => setSelectedMaintenanceEquipId(e.id)} className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-white dark:bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all flex items-center gap-6 group">
+                  <div className="w-16 h-16 rounded-2xl shadow-neo bg-white dark:bg-neo-bg flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                    <Wrench size={30} strokeWidth={2.5}/>
+                  </div>
                   <div className="overflow-hidden">
-                     <h3 className="font-black uppercase text-sm text-gray-800 dark:text-gray-200 truncate">{e.name}</h3>
-                     <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400">{e.hours} м/ч</p>
+                     <h3 className="font-bold uppercase text-sm text-gray-800 dark:text-gray-200 truncate">{e.name}</h3>
+                     <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400">{e.hours} м/ч</p>
                   </div>
                 </div>
               ))}
@@ -365,25 +367,27 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 });
 
                 return (
-                <div key={e.id} className="p-4 rounded-xl shadow-neo bg-neo-bg flex flex-col gap-3 border border-white/5 min-w-[280px]">
+                <div key={e.id} className="p-4 rounded-xl shadow-neo bg-white dark:bg-neo-bg flex flex-col gap-3 min-w-[280px]">
                   <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedMaintenanceEquipId(e.id)}>
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-neo-bg flex items-center justify-center text-blue-600 shrink-0"><Wrench size={20} className="md:w-5 md:h-5"/></div>
+                    <div className="w-12 h-12 rounded-xl shadow-neo bg-white dark:bg-neo-bg flex items-center justify-center text-blue-600 shrink-0">
+                      <Wrench size={22} strokeWidth={2.5}/>
+                    </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-xs md:text-sm text-gray-800 dark:text-gray-100 truncate">{e.name}</div>
-                      <div className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 truncate">{e.vin}</div>
+                      <div className="font-bold text-sm text-gray-800 dark:text-gray-100 truncate">{e.name}</div>
+                      <div className="text-[9px] font-medium text-gray-500 dark:text-gray-400 truncate">{e.vin}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); openTOForEquip(e); }} className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <Wrench size={10} className="md:w-3 md:h-3"/>
+                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); openTOForEquip(e); }} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <Wrench size={12}/>
                       <span>ТО</span>
                     </button>
-                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '' }); setIsBreakdownModalOpen(true); }} className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <AlertTriangle size={10} className="md:w-3 md:h-3"/>
+                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '' }); setIsBreakdownModalOpen(true); }} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <AlertTriangle size={12}/>
                       <span>Акт</span>
                     </button>
-                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <Package size={10} className="md:w-3 md:h-3"/>
+                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <Package size={12}/>
                       <span>Заявка</span>
                     </button>
                   </div>
