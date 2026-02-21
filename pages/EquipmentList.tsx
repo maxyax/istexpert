@@ -401,20 +401,20 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                       </td>
                       <td className="px-3 md:px-4 py-4 md:py-6">
                         <div className="space-y-1">
-                          <span className={`text-[6px] md:text-[8px] font-black uppercase px-2 py-1 rounded-full shadow-neo-sm whitespace-nowrap ${
-                            computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' :
-                            computedStatus.status === EquipStatus.REPAIR ? 'bg-red-100 text-red-700' :
-                            computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-100 text-orange-700' :
-                            computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-blue-100 text-blue-700'
-                          }`}>{computedStatus.status.length > 12 ? computedStatus.status.substring(0, 12) + '...' : computedStatus.status}</span>
+                          <span className={`text-[8px] md:text-[9px] font-semibold uppercase px-3 py-1 rounded-full shadow-sm ${
+                            computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-500 text-white' :
+                            computedStatus.status === EquipStatus.REPAIR ? 'bg-red-500 text-white' :
+                            computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-500 text-white' :
+                            computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-500 text-white' :
+                            'bg-blue-500 text-white'
+                          }`}>{computedStatus.status.length > 15 ? computedStatus.status.substring(0, 15) + '...' : computedStatus.status}</span>
                           {computedStatus.reason && computedStatus.status !== EquipStatus.ACTIVE && (
-                            <p className="text-[5px] md:text-[6px] text-gray-500 truncate max-w-[100px]">{computedStatus.reason}</p>
+                            <p className="text-[7px] md:text-[8px] text-gray-600 dark:text-gray-300 truncate max-w-[120px]">{computedStatus.reason}</p>
                           )}
                         </div>
                       </td>
                       <td className="px-3 md:px-4 py-4 md:py-6 text-xs md:text-sm font-black text-gray-700 whitespace-nowrap hidden md:table-cell">{formatNumber(e.hours)} м/ч</td>
-                      <td className="px-3 md:px-4 py-4 md:py-6 text-xs md:text-sm font-black text-gray-400 uppercase whitespace-nowrap hidden lg:table-cell">{e.driver || '—'}</td>
+                      <td className="px-3 md:px-4 py-4 md:py-6 text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase whitespace-nowrap hidden lg:table-cell">{e.driver || '—'}</td>
                       <td className="px-3 md:px-4 py-4 md:py-6 hidden md:table-cell">
                         {e.insurance_end ? (() => {
                           const insuranceStatus = getInsuranceStatus(e.insurance_end);
@@ -438,7 +438,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                           );
                         })() : <span className="text-[7px] md:text-[8px] text-gray-400">—</span>}
                       </td>
-                      <td className="px-3 md:px-4 py-4 md:py-6 text-right"><ChevronRight size={16} className="md:w-4 md:h-4 text-gray-300 group-hover:text-blue-600 transition-all"/></td>
+                      <td className="px-3 md:px-4 py-4 md:py-6 text-right"><ChevronRight size={16} className="md:w-4 md:h-4 text-gray-400 group-hover:text-blue-600 transition-all"/></td>
                    </tr>
                    );
                  })}
