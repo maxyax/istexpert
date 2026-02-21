@@ -1,3 +1,4 @@
+```tsx
 
 import React, { useState } from 'react';
 /* Added Truck and X to imports from lucide-react */
@@ -107,3 +108,5 @@ export const Maintenance: React.FC = () => {
     </div>
   );
 };
+
+```

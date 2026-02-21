@@ -1,3 +1,4 @@
+```typescript
 
 import { create } from 'zustand';
 
@@ -11,3 +12,5 @@ export const useNotificationStore = create<any>((set) => ({
   })),
   clearAll: () => set({ notifications: [] }),
 }));
+
+```

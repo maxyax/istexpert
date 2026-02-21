@@ -1,6 +1,0 @@
-
-{
-  "name": "ISTExpert.ru",
-  "description": "Система учета спецтехники с Neumorphic UI",
-  "requestFramePermissions": ["camera"]
-}

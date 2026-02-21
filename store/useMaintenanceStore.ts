@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { MaintenanceRecord, BreakdownRecord, BreakdownStatus, PlannedTO, PlannedTOStatus, BreakdownSeverity, FuelRecord } from '../types';
+import { MaintenanceRecord, BreakdownRecord, BreakdownStatus, PlannedTO, PlannedTOStatus, BreakdownSeverity, FuelRecord, EquipStatus } from '../types';
 import { useNotificationStore } from './useNotificationStore';
 import { useFleetStore } from './useFleetStore';
 
@@ -18,6 +18,7 @@ interface MaintenanceState {
   updatePlannedTO: (id: string, updates: Partial<PlannedTO>) => void;
   removePlannedTO: (id: string) => void;
   addFuelRecord: (record: FuelRecord) => void;
+  _recalculateEquipmentStatus?: (equipmentId: string) => void;
 }
 
 export const useMaintenanceStore = create<MaintenanceState>((set) => ({
@@ -68,18 +69,29 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
     set((state) => ({
       breakdowns: [{ ...record, id }, ...state.breakdowns]
     }));
+    // After adding breakdown, recalculate equipment status
+    const calc = useMaintenanceStore.getState()._recalculateEquipmentStatus;
+    if (calc) calc(record.equipmentId);
   },
-  updateBreakdownStatus: (id, status, fixedDate) => set((state) => ({
-    breakdowns: state.breakdowns.map(b => {
-      if (b.id !== id) return b;
-      return { 
-        ...b, 
-        status, 
-        // Fixed comparison to match BreakdownStatus type
-        fixedDate: status === 'Исправлено' ? (fixedDate || new Date().toISOString()) : b.fixedDate 
-      };
-    })
-  })),
+  updateBreakdownStatus: (id, status, fixedDate) => {
+    set((state) => ({
+      breakdowns: state.breakdowns.map(b => {
+        if (b.id !== id) return b;
+        return { 
+          ...b, 
+          status, 
+          // Fixed comparison to match BreakdownStatus type
+          fixedDate: status === 'Исправлено' ? (fixedDate || new Date().toISOString()) : b.fixedDate 
+        };
+      })
+    }));
+    // After updating, find equipment id and recalc status
+    const b = useMaintenanceStore.getState().breakdowns.find(bb => bb.id === id);
+    if (b) {
+      const calc = useMaintenanceStore.getState()._recalculateEquipmentStatus;
+      if (calc) calc(b.equipmentId);
+    }
+  },
   addPlannedTO: (to) => set((state) => ({
     plannedTOs: [...state.plannedTOs, { ...to, id: `pto-${Math.random().toString(36).substr(2, 9)}` }]
   })),
@@ -92,4 +104,38 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
   addFuelRecord: (record) => set((state) => ({
     fuelRecords: [record, ...state.fuelRecords]
   })),
+  // helper to compute and set equipment status based on breakdowns and planned TOs
+  _recalculateEquipmentStatus: (equipmentId: string) => {
+    const state = useMaintenanceStore.getState();
+    const fleet = useFleetStore.getState();
+    const breakdowns = state.breakdowns.filter(b => b.equipmentId === equipmentId);
+    const active = breakdowns.filter(b => b.status !== 'Исправлено');
+
+    if (active.length === 0) {
+      const hasPlanned = state.plannedTOs.some(t => t.equipmentId === equipmentId && t.status === 'planned');
+      const newStatus = hasPlanned ? EquipStatus.MAINTENANCE : EquipStatus.ACTIVE;
+      fleet.updateEquipment(equipmentId, { status: newStatus });
+      return;
+    }
+
+    if (active.some(b => b.severity === 'Критическая')) {
+      fleet.updateEquipment(equipmentId, { status: EquipStatus.REPAIR });
+      return;
+    }
+
+    if (active.some(b => b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены')) {
+      fleet.updateEquipment(equipmentId, { status: EquipStatus.WAITING_PARTS });
+      return;
+    }
+
+    // default for non-critical active breakdowns
+    fleet.updateEquipment(equipmentId, { status: EquipStatus.ACTIVE_WITH_RESTRICTIONS });
+  }
 }));
+
+// initialize equipment statuses from existing breakdowns/planned TOs
+setTimeout(() => {
+  const s = useMaintenanceStore.getState();
+  const equipmentIds = Array.from(new Set([...s.breakdowns.map(b => b.equipmentId), ...s.plannedTOs.map(t => t.equipmentId)]));
+  equipmentIds.forEach(id => s._recalculateEquipmentStatus && s._recalculateEquipmentStatus(id));
+}, 0);

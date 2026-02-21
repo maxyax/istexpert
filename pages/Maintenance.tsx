@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3 } from 'lucide-react';
+import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
+import { useProcurementStore } from '../store/useProcurementStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { EquipStatus } from '../types';
 
@@ -55,8 +56,12 @@ export const Maintenance: React.FC = () => {
     date: new Date().toISOString().slice(0, 10),
     hoursAtBreakdown: undefined as number | undefined,
     mechanic: '',
-    driver: ''
+    driver: '',
+    photos: [] as string[]
   });
+
+  const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
+  const [requestItems, setRequestItems] = useState<{ sku?: string; name: string; quantity: string }[]>([]);
 
   const [toChecklist, setToChecklist] = useState<{ text: string; done: boolean; note?: string }[]>([]);
   const [toTypeLabel, setToTypeLabel] = useState<string>('');
@@ -133,6 +138,7 @@ export const Maintenance: React.FC = () => {
       description: '',
       date: new Date().toISOString().slice(0, 10),
       hoursAtBreakdown: e.hours,
+      photos: [] as string[],
       mechanic: user?.full_name || '',
       driver: ''
     });
@@ -163,7 +169,49 @@ export const Maintenance: React.FC = () => {
       checklistItems: [{ text: `Поломка: ${breakdownForm.partName} (${breakdownForm.node})`, done: false, note: breakdownForm.description }]
     });
     setIsBreakdownModalOpen(false);
-    setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: undefined, mechanic: '', driver: '' });
+    setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: undefined, mechanic: '', driver: '', photos: [] });
+  };
+
+  const handleUploadBreakdownPhoto = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (ev: any) => {
+      const file = ev.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const url = event.target?.result as string;
+        setBreakdownForm(prev => ({ ...prev, photos: [...(prev.photos || []), url] }));
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
+
+  const { addRequest } = useProcurementStore();
+
+  const viewImage = (url: string) => {
+    if (!url) return;
+    if (url.startsWith('data:')) {
+      // open blob
+      try {
+        const base64Data = url.split(',')[1];
+        const mimeType = url.split(':')[1].split(';')[0];
+        const binaryString = window.atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+        const blob = new Blob([bytes], { type: mimeType });
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      } catch (err) {
+        console.error(err);
+        window.open(url, '_blank');
+      }
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   return (
@@ -318,6 +366,19 @@ export const Maintenance: React.FC = () => {
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Примечания</label>
                     <textarea value={breakdownForm.description} onChange={e=>setBreakdownForm({...breakdownForm, description: e.target.value})} placeholder="Описание и примечания" className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none h-24 font-black text-xs uppercase text-gray-700 dark:text-gray-200 outline-none" />
                  </div>
+                 <div className="space-y-2">
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Фотографии (узел/шильдик/маркировка)</label>
+                    <div className="flex gap-3 items-center">
+                      <div className="flex-1 grid grid-cols-3 gap-2">
+                        {(breakdownForm.photos || []).map((p, i) => (
+                          <div key={i} className="w-full h-20 rounded-lg overflow-hidden relative border border-white/10">
+                            <img src={p} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                      <button type="button" onClick={handleUploadBreakdownPhoto} className="p-3 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset"><Camera size={18}/></button>
+                    </div>
+                 </div>
                  <button type="submit" className="w-full py-5 rounded-2xl bg-neo-bg shadow-neo text-red-600 font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-4 border border-red-500/10 hover:shadow-neo-inset">Создать акт неисправности</button>
               </form>
            </div>
@@ -371,10 +432,73 @@ export const Maintenance: React.FC = () => {
                   </div>
                 </div>
               )}
+              {selectedRecordDetail.photos && selectedRecordDetail.photos.length > 0 && (
+                <div className="p-4 md:p-6 rounded-2xl bg-neo-bg border border-white/10 mt-4">
+                  <h3 className="text-xs font-black text-gray-400 uppercase mb-4">Фотографии акта</h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    {selectedRecordDetail.photos.map((p: string, i: number) => (
+                      <div key={i} className="rounded-xl overflow-hidden border border-white/5">
+                        <img src={p} onClick={() => viewImage(p)} className="w-full h-28 object-cover cursor-pointer" />
+                        <div className="p-2 flex justify-between items-center">
+                          <button onClick={() => viewImage(p)} className="text-[10px] font-black text-blue-600">Открыть</button>
+                          <a href={p} download={`photo-${i}.jpg`} className="text-[10px] font-black text-gray-500">Скачать</a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
+
+        
+
+        {isCreateRequestOpen && selectedBreakdownDetail && (
+          <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <div className="bg-neo-bg w-full max-w-xl rounded-[2.5rem] shadow-neo p-6 animate-in zoom-in border border-white/20">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-black uppercase">Создать заявку снабжения</h3>
+                <button onClick={() => setIsCreateRequestOpen(false)} className="p-2 rounded-xl text-gray-400"><X size={18}/></button>
+              </div>
+              <div className="space-y-3">
+                {requestItems.map((it, idx) => (
+                  <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                    <input className="col-span-3 p-2 rounded-xl bg-neo-bg border border-white/5" placeholder="Артикул" value={it.sku || ''} onChange={e => { const arr = [...requestItems]; arr[idx].sku = e.target.value; setRequestItems(arr); }} />
+                    <input className="col-span-7 p-2 rounded-xl bg-neo-bg border border-white/5" placeholder="Наименование" value={it.name} onChange={e => { const arr=[...requestItems]; arr[idx].name = e.target.value; setRequestItems(arr); }} />
+                    <input className="col-span-2 p-2 rounded-xl bg-neo-bg border border-white/5" placeholder="Кол-во" value={it.quantity} onChange={e => { const arr=[...requestItems]; arr[idx].quantity = e.target.value; setRequestItems(arr); }} />
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <button onClick={() => setRequestItems([...requestItems, { name: '', quantity: '1' }])} className="py-2 px-3 rounded-xl bg-neo-bg border border-white/5 font-black">Добавить позицию</button>
+                  <button onClick={() => setRequestItems(requestItems.slice(0, -1))} className="py-2 px-3 rounded-xl bg-neo-bg border border-white/5 font-black">Удалить позицию</button>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => {
+                    // submit request
+                    const title = requestItems.map(i => `${i.name} x${i.quantity}`).slice(0,3).join(', ') || `Запрос по акту ${selectedBreakdownDetail.id}`;
+                    const req = {
+                      id: `pr-${Math.random().toString(36).substr(2,9)}`,
+                      title,
+                      status: 'Новая' as any,
+                      items: requestItems.map((it, idx) => ({ id: `i-${idx}-${Date.now()}`, name: it.name, quantity: it.quantity })),
+                      createdAt: new Date().toISOString(),
+                      equipmentId: selectedBreakdownDetail.equipmentId,
+                      breakdownId: selectedBreakdownDetail.id
+                    };
+                    addRequest(req as any);
+                    // set breakdown status to 'Запчасти заказаны'
+                    updateBreakdownStatus(selectedBreakdownDetail.id, 'Запчасти заказаны');
+                    setIsCreateRequestOpen(false);
+                    setSelectedBreakdownDetail(null);
+                  }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs">Отправить в снабжение</button>
+                  <button onClick={() => setIsCreateRequestOpen(false)} className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs">Отмена</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* Модалка ТО */}
       {isTOModalOpen && (
@@ -433,6 +557,22 @@ export const Maintenance: React.FC = () => {
               <div className="space-y-2">
                 <p className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Деталь</p>
                 <p className="text-sm font-black text-gray-700 dark:text-gray-200 uppercase">{selectedBreakdownDetail.partName}</p>
+              </div>
+              {selectedBreakdownDetail.photos && selectedBreakdownDetail.photos.length > 0 && (
+                <div className="p-4 rounded-xl bg-neo-bg border border-white/10">
+                  <h3 className="text-xs font-black text-gray-400 uppercase mb-3">Фотографии</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {selectedBreakdownDetail.photos.map((p: string, i: number) => (
+                      <div key={i} className="rounded-lg overflow-hidden border">
+                        <img src={p} onClick={() => viewImage(p)} className="w-full h-24 object-cover cursor-pointer" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setIsCreateRequestOpen(true)} className="py-3 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs">Создать заявку снабжения</button>
+                <button type="button" onClick={() => { navigator.clipboard?.writeText(selectedBreakdownDetail.partName || ''); alert('Название скопировано'); }} className="py-3 px-4 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs">Копировать название</button>
               </div>
               <div className="space-y-2">
                 <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Новый статус</label>

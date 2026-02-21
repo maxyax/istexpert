@@ -1,3 +1,4 @@
+```typescript
 
 import { create } from 'zustand';
 import { Equipment, EquipStatus, MaintenanceRegulation } from './types';
@@ -48,3 +49,5 @@ export const useFleetStore = create<FleetState>((set) => ({
     equipment: state.equipment.map(e => e.id === id ? { ...e, regulations: regs } : e)
   })),
 }));
+
+```

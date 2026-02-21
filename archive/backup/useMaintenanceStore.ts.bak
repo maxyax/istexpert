@@ -1,3 +1,4 @@
+```typescript
 
 import { create } from 'zustand';
 import { MaintenanceRecord, BreakdownRecord, FuelRecord } from './types';
@@ -27,3 +28,5 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
   })),
   addFuelRecord: (record) => set((state) => ({ fuelRecords: [record, ...state.fuelRecords] })),
 }));
+
+```

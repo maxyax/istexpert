@@ -9,14 +9,40 @@ import { EquipStatus, Equipment, MaintenanceRegulation } from '../types';
 import QRCode from 'qrcode';
 
 // Функция проверки срока страховки
+const parseDateFlexible = (s?: string): Date | null => {
+  if (!s) return null;
+  // dd.mm.yyyy
+  const ddmmy = s.trim();
+  const dotMatch = ddmmy.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (dotMatch) {
+    const d = parseInt(dotMatch[1], 10);
+    const m = parseInt(dotMatch[2], 10) - 1;
+    const y = parseInt(dotMatch[3], 10);
+    return new Date(y, m, d);
+  }
+  // try ISO / other
+  const dt = new Date(s);
+  if (!isNaN(dt.getTime())) return dt;
+  return null;
+};
+
+const formatToDDMMYYYY = (s?: string) => {
+  const d = parseDateFlexible(s);
+  if (!d) return s || '';
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+};
+
 const getInsuranceStatus = (insuranceEnd?: string): { status: 'expired' | 'warning' | 'critical' | 'ok', daysLeft: number, message: string } => {
   if (!insuranceEnd) return { status: 'ok', daysLeft: 999, message: '' };
-  
+
   const today = new Date();
-  const endDate = new Date(insuranceEnd);
+  const endDate = parseDateFlexible(insuranceEnd) || new Date(insuranceEnd);
   const diffTime = endDate.getTime() - today.getTime();
   const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (daysLeft < 0) {
     return { status: 'expired', daysLeft, message: `Страховка истекла ${Math.abs(daysLeft)} дн. назад` };
   } else if (daysLeft <= 7) {
@@ -24,7 +50,7 @@ const getInsuranceStatus = (insuranceEnd?: string): { status: 'expired' | 'warni
   } else if (daysLeft <= 30) {
     return { status: 'warning', daysLeft, message: `Осталось ${daysLeft} дн.` };
   }
-  
+
   return { status: 'ok', daysLeft, message: `Действительна` };
 };
 
@@ -235,7 +261,7 @@ export const EquipmentList: React.FC = () => {
                      'bg-green-500/10 text-green-600'
                    }`}>
                       <div className="flex items-center gap-2">ОСАГО</div>
-                      <span className="font-bold">{insuranceStatus.message}</span>
+                      <span className="font-bold">{formatToDDMMYYYY(e.insurance_end)}</span>
                    </div>
                  )}
               </div>
@@ -370,8 +396,8 @@ export const EquipmentList: React.FC = () => {
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                          <EditableBlock label="Страховая компания" value={editForm.insuranceCompany} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, insuranceCompany: v})} />
                          <EditableBlock label="Номер страховки" value={editForm.insuranceNumber} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, insuranceNumber: v})} />
-                         <EditableBlock label="Дата начала" value={editForm.insuranceStart} isEditing={isEditing} type="date" onChange={(v:string) => setEditForm({...editForm, insuranceStart: v})} />
-                         <EditableBlock label="Дата окончания" value={editForm.insurance_end} isEditing={isEditing} type="date" onChange={(v:string) => setEditForm({...editForm, insurance_end: v})} highlight />
+                         <EditableBlock label="Дата начала" value={editForm.insuranceStart} isEditing={isEditing} type="text" onChange={(v:string) => setEditForm({...editForm, insuranceStart: v})} />
+                         <EditableBlock label="Дата окончания" value={editForm.insurance_end} isEditing={isEditing} type="text" onChange={(v:string) => setEditForm({...editForm, insurance_end: v})} highlight />
                        </div>
                     </div>
                     {isEditing && (

@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { LayoutDashboard, Truck, Wrench, Bell, LogOut, Moon, Sun, Menu, X, ShoppingBag, Fuel, Calendar, Settings } from 'lucide-react';
-import { useAuthStore } from './useAuthStore';
-import { useNotificationStore } from './useNotificationStore';
+import { useAuthStore } from './store/useAuthStore';
+import { useNotificationStore } from './store/useNotificationStore';
 
 export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
   const { user, logout, company } = useAuthStore();
@@ -67,4 +67,3 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
     </div>
   );
 };
-PeriodicWave

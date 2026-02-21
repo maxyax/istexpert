@@ -101,6 +101,7 @@ export interface BreakdownRecord {
   fixedDate?: string;
   hoursAtBreakdown?: number;
   reportedBy?: string;
+  photos?: string[];
 }
 
 export type ProcurementStatus = 'Новая' | 'Поиск' | 'Оплачено' | 'В пути' | 'На складе';

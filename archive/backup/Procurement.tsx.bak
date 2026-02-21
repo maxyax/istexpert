@@ -1,3 +1,4 @@
+```tsx
 
 import React from 'react';
 import { Package, Search, FileText, Wallet, Box, Truck, MapPin, Plus, ChevronRight } from 'lucide-react';
@@ -50,3 +51,5 @@ export const Procurement: React.FC = () => {
     </div>
   );
 };
+
+```

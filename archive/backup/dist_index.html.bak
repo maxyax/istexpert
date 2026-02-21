@@ -1,0 +1,85 @@
+```html
+
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ISTExpert Pro - Fleet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: { 
+              neo: { bg: 'var(--neo-bg)', shadow: 'var(--neo-shadow)' },
+              blue: {
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+              }
+            },
+            boxShadow: { neo: 'var(--shadow-neo)', 'neo-inset': 'var(--shadow-neo-inset)', 'neo-sm': 'var(--shadow-neo-sm)' }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --neo-bg: #e0e5ec;
+        --shadow-neo: 9px 9px 16px rgb(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+        --shadow-neo-inset: inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff;
+        --shadow-neo-sm: 4px 4px 8px rgb(163, 177, 198, 0.6), -4px -4px 8px rgba(255, 255, 255, 0.5);
+      }
+      .dark {
+        --neo-bg: #1e2228;
+        --shadow-neo: 9px 9px 16px rgba(0, 0, 0, 0.4), -9px -9px 16px rgba(60, 75, 95, 0.3);
+        --shadow-neo-inset: inset 6px 6px 12px rgba(0, 0, 0, 0.4), inset -6px -6px 12px rgba(60, 75, 95, 0.3);
+      }
+      /* Более светлые синие цвета для темного режима */
+      .dark .text-blue-600 { color: #60a5fa !important; }
+      .dark .text-blue-500 { color: #60a5fa !important; }
+      .dark .text-blue-400 { color: #93c5fd !important; }
+      .dark .border-blue-500 { border-color: #60a5fa !important; }
+      .dark .border-blue-600 { border-color: #60a5fa !important; }
+      .dark .bg-blue-600 { background-color: #60a5fa !important; }
+      .dark .bg-blue-500 { background-color: #60a5fa !important; }
+      /* Более светлые серые цвета для лучшей читаемости текста */
+      .dark .text-gray-800 { color: #e5e7eb !important; }
+      .dark .text-gray-700 { color: #d1d5db !important; }
+      .dark .text-gray-600 { color: #d1d5db !important; }
+      .dark .text-gray-500 { color: #9ca3af !important; }
+      .dark .text-gray-400 { color: #9ca3af !important; }
+      .dark .text-gray-300 { color: #d1d5db !important; }
+      .dark .text-gray-200 { color: #e5e7eb !important; }
+      body { background-color: var(--neo-bg); transition: 0.3s ease; }
+      .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "zustand": "https://esm.sh/zustand@^5.0.11",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "qrcode": "https://esm.sh/qrcode@^1.5.4",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-B3hE_Cgn.js"></script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
+```
