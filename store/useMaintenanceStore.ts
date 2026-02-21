@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { MaintenanceRecord, BreakdownRecord, BreakdownStatus, PlannedTO, PlannedTOStatus, BreakdownSeverity, FuelRecord, EquipStatus } from '../types';
 import { useNotificationStore } from './useNotificationStore';
 import { useFleetStore } from './useFleetStore';
+import { useAuthStore } from './useAuthStore';
 
 interface MaintenanceState {
   records: MaintenanceRecord[];
@@ -13,7 +14,7 @@ interface MaintenanceState {
   setSelectedMaintenanceEquipId: (id: string | null) => void;
   addMaintenance: (record: MaintenanceRecord) => void;
   addBreakdown: (record: Omit<BreakdownRecord, 'id'>) => void;
-  updateBreakdownStatus: (id: string, status: BreakdownStatus, fixedDate?: string) => void;
+  updateBreakdownStatus: (id: string, status: BreakdownStatus, fixedDate?: string, hoursAtFix?: number, mileageAtFix?: number) => void;
   addPlannedTO: (to: Omit<PlannedTO, 'id'>) => void;
   updatePlannedTO: (id: string, updates: Partial<PlannedTO>) => void;
   removePlannedTO: (id: string) => void;
@@ -76,18 +77,45 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
     const calc = useMaintenanceStore.getState()._recalculateEquipmentStatus;
     if (calc) calc(record.equipmentId);
   },
-  updateBreakdownStatus: (id, status, fixedDate) => {
+  updateBreakdownStatus: (id, status, fixedDate, hoursAtFix?: number, mileageAtFix?: number) => {
+    const breakdown = useMaintenanceStore.getState().breakdowns.find(b => b.id === id);
+    
     set((state) => ({
       breakdowns: state.breakdowns.map(b => {
         if (b.id !== id) return b;
-        return { 
-          ...b, 
-          status, 
+        return {
+          ...b,
+          status,
           // Fixed comparison to match BreakdownStatus type
-          fixedDate: status === 'Исправлено' ? (fixedDate || new Date().toISOString()) : b.fixedDate 
+          fixedDate: status === 'Исправлено' ? (fixedDate || new Date().toISOString()) : b.fixedDate,
+          // Сохраняем наработку и пробег на момент исправления
+          hoursAtFix: status === 'Исправлено' ? hoursAtFix : b.hoursAtFix,
+          mileageAtFix: status === 'Исправлено' ? mileageAtFix : b.mileageAtFix
         };
       })
     }));
+    
+    // Если статус "Исправлено", добавляем запись в архив обслуживания
+    if (status === 'Исправлено' && breakdown) {
+      const equip = useFleetStore.getState().equipment.find(e => e.id === breakdown.equipmentId);
+      const hoursAtFixValue = hoursAtFix || breakdown.hoursAtBreakdown || equip?.hours || 0;
+      
+      useMaintenanceStore.getState().addMaintenance({
+        id: `fix-${id}-${Date.now()}`,
+        equipmentId: breakdown.equipmentId,
+        date: fixedDate || new Date().toISOString().split('T')[0],
+        type: `Исправление поломки ${breakdown.actNumber || ''}`,
+        hoursAtMaintenance: hoursAtFixValue,
+        performedBy: useAuthStore.getState().user?.full_name || 'Механик',
+        checklistItems: [
+          { text: `Поломка: ${breakdown.partName} (${breakdown.node})`, done: true, note: breakdown.description },
+          { text: 'Неисправность устранена', done: true, note: `Статус: ${status}` },
+          ...(hoursAtFix ? [{ text: `Наработка при исправлении: ${hoursAtFix} м/ч`, done: true }] : []),
+          ...(mileageAtFix ? [{ text: `Пробег при исправлении: ${mileageAtFix} км`, done: true }] : [])
+        ]
+      });
+    }
+    
     // After updating, find equipment id and recalc status
     const b = useMaintenanceStore.getState().breakdowns.find(bb => bb.id === id);
     if (b) {

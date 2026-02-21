@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { Package, ChevronRight, Truck, LayoutGrid, List, Layers, X, CheckCircle2, ArrowRight, Wallet } from 'lucide-react';
+import { Package, ChevronRight, Truck, LayoutGrid, List, Layers, X, CheckCircle2, ArrowRight, Wallet, AlertTriangle } from 'lucide-react';
 import { useProcurementStore } from '../store/useProcurementStore';
 import { useFleetStore } from '../store/useFleetStore';
 import { ProcurementStatus } from '../types';
-import { formatNumber, formatMoney } from '../utils/format';
+import { formatNumber, formatMoney, formatDate, formatDateTime } from '../utils/format';
 
 const COLUMNS: {id: ProcurementStatus, title: string, color: string}[] = [
   { id: 'Новая', title: 'Новая', color: 'bg-gray-400' },
@@ -18,13 +18,39 @@ export const Procurement: React.FC = () => {
   const { requests, updateRequestStatus, updateRequest, selectedRequestId, setSelectedRequestId } = useProcurementStore();
   const { equipment } = useFleetStore();
   const [viewMode, setViewMode] = useState<'kanban' | 'list' | 'table'>('table');
+  const [readOnlyMode, setReadOnlyMode] = useState(false);
 
   const selectedReq = requests.find(r => r.id === selectedRequestId);
   const [editReq, setEditReq] = useState<any>(null);
 
   React.useEffect(() => {
-    setEditReq(selectedReq ? { ...selectedReq } : null);
+    if (selectedReq) {
+      setEditReq({ ...selectedReq });
+      setReadOnlyMode(false);
+    } else {
+      setEditReq(null);
+    }
   }, [selectedReq]);
+
+  // Прослушивание события для режима только для просмотра
+  React.useEffect(() => {
+    const handleReadOnly = (e: any) => {
+      if (e.detail === true) {
+        setReadOnlyMode(true);
+      }
+    };
+    window.addEventListener('procurement-readonly', handleReadOnly);
+    return () => {
+      window.removeEventListener('procurement-readonly', handleReadOnly);
+    };
+  }, []);
+
+  // Сброс режима при закрытии модального окна
+  React.useEffect(() => {
+    if (!selectedRequestId) {
+      setReadOnlyMode(false);
+    }
+  }, [selectedRequestId]);
 
   // sorted for list/table: non-completed first, completed ('На складе') moved down sorted by completedAt desc
   const sortedRequests = [...requests].sort((a, b) => {
@@ -173,26 +199,65 @@ export const Procurement: React.FC = () => {
               <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg">
                  <div className="flex items-center gap-4">
                     <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Package size={28}/></div>
-                    <h3 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Карточка ТМЦ</h3>
+                    <div>
+                      <h3 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">
+                        {readOnlyMode ? 'Просмотр заявки' : 'Карточка ТМЦ'}
+                      </h3>
+                      {readOnlyMode && (
+                        <p className="text-[8px] font-black text-orange-400 uppercase tracking-widest">
+                          Режим только для просмотра
+                        </p>
+                      )}
+                    </div>
                  </div>
-                 <button onClick={() => setSelectedRequestId(null)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={24}/></button>
+                 <button onClick={() => { setSelectedRequestId(null); setReadOnlyMode(false); }} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={24}/></button>
               </div>
               
                  <div className="space-y-6">
+                   {/* Информация о поломке */}
+                   {editReq.breakdownActNumber && (
+                     <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-red-500/20 space-y-3">
+                       <div className="flex items-center gap-2">
+                         <AlertTriangle size={18} className="text-red-500"/>
+                         <p className="text-[8px] font-black text-red-400 uppercase tracking-widest">Акт поломки</p>
+                       </div>
+                       <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="text-xs font-bold text-gray-400">Номер акта</label>
+                           <div className="text-lg font-black text-blue-600">{editReq.breakdownActNumber}</div>
+                         </div>
+                         <div>
+                           <label className="text-xs font-bold text-gray-400">Узел</label>
+                           <div className="text-sm font-bold text-gray-700 dark:text-gray-200">{editReq.breakdownNode || '—'}</div>
+                         </div>
+                       </div>
+                       <div>
+                         <label className="text-xs font-bold text-gray-400">Наименование поломки</label>
+                         <div className="text-base font-black text-gray-800 dark:text-gray-200">{editReq.breakdownName || editReq.title}</div>
+                       </div>
+                       {editReq.breakdownDescription && (
+                         <div>
+                           <label className="text-xs font-bold text-gray-400">Описание</label>
+                           <p className="text-sm text-gray-600 dark:text-gray-300">{editReq.breakdownDescription}</p>
+                         </div>
+                       )}
+                     </div>
+                   )}
+
                    <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-4">
                      <div className="space-y-2">
                        <label className="text-xs font-bold text-gray-400">Наименование</label>
-                       <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" value={editReq.title} onChange={e=>setEditReq({...editReq, title: e.target.value})} />
+                       <input disabled={readOnlyMode} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed" value={editReq.title} onChange={e=>setEditReq({...editReq, title: e.target.value})} />
                      </div>
 
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-400">Контрагент</label>
-                         <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input" value={editReq.contractorName || ''} onChange={e=>setEditReq({...editReq, contractorName: e.target.value})} />
+                         <input disabled={readOnlyMode} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed" value={editReq.contractorName || ''} onChange={e=>setEditReq({...editReq, contractorName: e.target.value})} />
                        </div>
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-400">Номер счета / спецификации</label>
-                         <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input" value={editReq.invoiceNumber || ''} onChange={e=>setEditReq({...editReq, invoiceNumber: e.target.value})} />
+                         <input disabled={readOnlyMode} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed" value={editReq.invoiceNumber || ''} onChange={e=>setEditReq({...editReq, invoiceNumber: e.target.value})} />
                        </div>
                      </div>
 
@@ -200,7 +265,15 @@ export const Procurement: React.FC = () => {
                        <label className="text-xs font-bold text-gray-400">Статус заявки</label>
                        <div className="flex flex-wrap gap-2">
                          {COLUMNS.map(col => (
-                           <button key={col.id} type="button" onClick={()=>setEditReq({...editReq, status: col.id})} className={`px-4 py-3 rounded-2xl font-bold text-xs uppercase transition-all ${editReq.status === col.id ? `${col.color} text-white shadow-neo` : 'bg-neo-bg border border-white/10 text-gray-400 shadow-neo hover:shadow-neo-inset'}`}>{col.title}</button>
+                           <button
+                             key={col.id}
+                             type="button"
+                             disabled={readOnlyMode}
+                             onClick={()=>setEditReq({...editReq, status: col.id})}
+                             className={`px-4 py-3 rounded-2xl font-bold text-xs uppercase transition-all disabled:opacity-50 disabled:cursor-not-allowed ${editReq.status === col.id ? `${col.color} text-white shadow-neo` : 'bg-neo-bg border border-white/10 text-gray-400 shadow-neo hover:shadow-neo-inset'}`}
+                           >
+                             {col.title}
+                           </button>
                          ))}
                        </div>
                      </div>
@@ -286,21 +359,51 @@ export const Procurement: React.FC = () => {
                      </div>
                    </div>
 
-                   <div className="flex gap-3">
-                     <button onClick={() => {
-                       // save updates
-                       const totalCost = (editReq.items||[]).reduce((s:any,it:any)=> s + (it.total||0), 0);
-                       const statusChanged = selectedReq.status !== editReq.status;
-                       // if status changed, use updateRequestStatus to trigger side effects
-                       if (statusChanged) {
-                         updateRequestStatus(editReq.id, editReq.status);
-                       }
-                       // update other fields
-                       updateRequest(editReq.id, { ...editReq, cost: totalCost });
-                       setSelectedRequestId(null);
-                     }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs">Сохранить</button>
-                     <button onClick={() => setSelectedRequestId(null)} className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs">Отмена</button>
-                   </div>
+                   {readOnlyMode ? (
+                     <div className="flex gap-3 pt-4">
+                       <button
+                         onClick={() => setReadOnlyMode(false)}
+                         className="flex-1 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs hover:bg-blue-700 transition-all"
+                       >
+                         Перейти к редактированию
+                       </button>
+                       <button
+                         onClick={() => { setSelectedRequestId(null); setReadOnlyMode(false); }}
+                         className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs"
+                       >
+                         Закрыть
+                       </button>
+                     </div>
+                   ) : (
+                     <div className="flex gap-3">
+                       <button onClick={() => {
+                         // save updates
+                         const totalCost = (editReq.items||[]).reduce((s:any,it:any)=> s + (it.total||0), 0);
+                         const statusChanged = selectedReq.status !== editReq.status;
+                         
+                         // Сначала обновляем остальные поля (кроме статуса)
+                         updateRequest(editReq.id, {
+                           title: editReq.title,
+                           contractorName: editReq.contractorName,
+                           invoiceNumber: editReq.invoiceNumber,
+                           carrierName: editReq.carrierName,
+                           trackingNumber: editReq.trackingNumber,
+                           responsible: editReq.responsible,
+                           items: editReq.items,
+                           invoiceFiles: editReq.invoiceFiles,
+                           cost: totalCost
+                         });
+                         
+                         // Затем, если статус изменился, вызываем updateRequestStatus для триггеров
+                         if (statusChanged) {
+                           updateRequestStatus(editReq.id, editReq.status);
+                         }
+                         
+                         setSelectedRequestId(null);
+                       }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs">Сохранить</button>
+                       <button onClick={() => setSelectedRequestId(null)} className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs">Отмена</button>
+                     </div>
+                   )}
                  </div>
            </div>
         </div>

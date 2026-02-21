@@ -103,6 +103,8 @@ export interface BreakdownRecord {
   hoursAtBreakdown?: number;
   reportedBy?: string;
   photos?: string[];
+  hoursAtFix?: number;
+  mileageAtFix?: number;
 }
 
 export type ProcurementStatus = 'Новая' | 'Поиск' | 'Оплачено' | 'В пути' | 'На складе';
@@ -126,8 +128,12 @@ export interface ProcurementRequest {
   equipmentId: string;
   breakdownId?: string;
   breakdownActNumber?: string;
+  breakdownName?: string;
+  breakdownDescription?: string;
+  breakdownNode?: string;
   priority?: number;
   createdBy?: string;
+  statusHistory?: { status: ProcurementStatus; date: string; user?: string }[];
 }
 
 export interface FuelRecord {

@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera } from 'lucide-react';
+import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera, Package, CheckCircle2, Wallet } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useProcurementStore } from '../store/useProcurementStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { EquipStatus } from '../types';
-import { formatNumber } from '../utils/format';
+import { formatNumber, formatMoney, formatDate, formatDateTime } from '../utils/format';
 
 const breakdownBorderClass = (status?: string) => {
   switch (status) {
@@ -24,36 +24,66 @@ const breakdownBorderClass = (status?: string) => {
   }
 };
 
-const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[]) => {
+const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[], equipment: any[]) => {
   const activeBreakdowns = breakdowns.filter(b => b.equipmentId === equipmentId && b.status !== 'Исправлено');
-  
-  if (activeBreakdowns.length === 0) {
-    const plannedTO = plannedTOs.filter(t => t.equipmentId === equipmentId && t.status === 'planned');
-    if (plannedTO.length > 0) return EquipStatus.MAINTENANCE;
-    return EquipStatus.ACTIVE;
-  }
-  
-  // Проверка критических поломок
+  const equip = equipment.find(e => e.id === equipmentId);
+
+  // 1. Проверка критических поломок - техника в ремонте
   const criticalBreakdowns = activeBreakdowns.filter(b => b.severity === 'Критическая');
   if (criticalBreakdowns.length > 0) return EquipStatus.REPAIR;
-  
-  // Проверка ожидания запчастей
+
+  // 2. Проверка поломок в работе
+  const inWorkBreakdowns = activeBreakdowns.filter(b => b.status === 'В работе');
+  if (inWorkBreakdowns.length > 0) return EquipStatus.REPAIR;
+
+  // 3. Проверка ожидания запчастей
   const waitingForParts = activeBreakdowns.filter(b => b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены');
   if (waitingForParts.length > 0) return EquipStatus.WAITING_PARTS;
-  
-  // Проверка поломок в работе
-  const inWork = activeBreakdowns.filter(b => b.status === 'В работе');
-  if (inWork.length > 0) return EquipStatus.REPAIR;
-  
-  // Проверка незначительных поломок (не критические и не в работе)
-  const minorBreakdowns = activeBreakdowns.filter(b => 
-    b.severity !== 'Критическая' && 
-    b.status !== 'В работе' && 
-    b.status !== 'Запчасти заказаны' && 
-    b.status !== 'Запчасти получены'
+
+  // 4. Проверка незначительных поломок (низкая/средняя серьезность)
+  const minorBreakdowns = activeBreakdowns.filter(b =>
+    (b.severity === 'Низкая' || b.severity === 'Средняя') &&
+    b.status === 'Новая'
   );
   if (minorBreakdowns.length > 0) return EquipStatus.ACTIVE_WITH_RESTRICTIONS;
+
+  // 5. Проверка просроченного ТО по пробегу/моточасам
+  if (equip && equip.regulations && equip.regulations.length > 0) {
+    const currHours = equip.hours || 0;
+    const currKm = equip.mileage_km || 0;
+    
+    for (const reg of equip.regulations) {
+      const intervalHours = reg.intervalHours || 0;
+      const intervalKm = reg.intervalKm || 0;
+      
+      let nextHours = intervalHours > 0 ? Math.ceil(currHours / intervalHours) * intervalHours : Infinity;
+      let nextKm = intervalKm > 0 ? Math.ceil(currKm / intervalKm) * intervalKm : Infinity;
+      
+      const hoursOverdue = intervalHours > 0 && currHours >= nextHours;
+      const kmOverdue = intervalKm > 0 && currKm >= nextKm;
+      
+      if (hoursOverdue || kmOverdue) return EquipStatus.MAINTENANCE;
+    }
+  }
+
+  // 6. Проверка просроченного ТО по календарю
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   
+  const overduePlannedTO = plannedTOs.filter(t => {
+    if (t.equipmentId !== equipmentId || t.status !== 'planned') return false;
+    const plannedDate = new Date(t.date);
+    plannedDate.setHours(0, 0, 0, 0);
+    return plannedDate < today;
+  });
+  
+  if (overduePlannedTO.length > 0) return EquipStatus.MAINTENANCE;
+
+  // 7. Проверка предстоящего планового ТО
+  const upcomingPlannedTO = plannedTOs.filter(t => t.equipmentId === equipmentId && t.status === 'planned');
+  if (upcomingPlannedTO.length > 0) return EquipStatus.MAINTENANCE;
+
+  // 8. Техника в работе
   return EquipStatus.ACTIVE;
 };
 
@@ -87,7 +117,7 @@ export const Maintenance: React.FC = () => {
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [selectedRecordDetail, setSelectedRecordDetail] = useState<any>(null);
   const [selectedBreakdownDetail, setSelectedBreakdownDetail] = useState<any>(null);
-  const [breakdownStatusForm, setBreakdownStatusForm] = useState({ status: 'Новая' as any, fixedDate: new Date().toISOString().slice(0, 10) });
+  const [breakdownStatusForm, setBreakdownStatusForm] = useState({ status: 'Новая' as any, fixedDate: new Date().toISOString().slice(0, 10), hoursAtFix: undefined as number | undefined, mileageAtFix: undefined as number | undefined });
 
   const selectedEquip = equipment.find(e => e.id === selectedMaintenanceEquipId);
 
@@ -300,6 +330,120 @@ export const Maintenance: React.FC = () => {
           </div>
 
           <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
+            <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-10 flex items-center gap-2"><AlertTriangle size={16} className="text-red-600"/> Список поломок</h3>
+            <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+              {(() => {
+                // Показываем только активные (не исправленные) поломки
+                const activeBreakdowns = breakdowns.filter(b => 
+                  b.equipmentId === selectedEquip.id && 
+                  b.status !== 'Исправлено'
+                );
+                
+                if (activeBreakdowns.length === 0) {
+                  return (
+                    <div className="text-center py-12 md:py-20">
+                      <div className="w-16 h-16 rounded-full shadow-neo mx-auto mb-6 flex items-center justify-center text-emerald-500 bg-emerald-500/10">
+                        <CheckCircle2 size={32}/>
+                      </div>
+                      <p className="text-[9px] md:text-[10px] font-black text-emerald-600 uppercase tracking-widest">Все поломки исправлены</p>
+                      <p className="text-[8px] text-gray-400 mt-2">История доступна во вкладке "Архив обслуживания"</p>
+                    </div>
+                  );
+                }
+                
+                return activeBreakdowns.map(b => {
+                  const relatedRequest = useProcurementStore.getState().requests.find(r => r.breakdownId === b.id);
+                  const isReadyToWork = relatedRequest?.status === 'На складе' && b.status !== 'В работе' && b.status !== 'Исправлено';
+                  
+                  return (
+                  <div key={b.id} className={`p-4 md:p-6 rounded-2xl shadow-neo-sm bg-neo-bg flex flex-col gap-3 border-l-4 ${breakdownBorderClass(b.status)} group hover:shadow-neo transition-all ${isReadyToWork ? 'ring-2 ring-emerald-500 ring-offset-2 animate-pulse' : ''}`}>
+                    {isReadyToWork && (
+                      <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-emerald-500 text-white animate-bounce">
+                          <CheckCircle2 size={16}/>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Готово к работе!</p>
+                          <p className="text-xs font-bold text-emerald-600">Запчасти на складе — можно брать в работу</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSelectedBreakdownDetail(b);
+                            setBreakdownStatusForm({ status: 'В работе', fixedDate: new Date().toISOString().slice(0, 10), hoursAtFix: undefined, mileageAtFix: undefined });
+                          }}
+                          className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-black uppercase text-[8px] hover:bg-emerald-700 transition-all"
+                        >
+                          В работу
+                        </button>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between items-start">
+                      <div className="overflow-hidden flex-1 cursor-pointer" onClick={() => setSelectedBreakdownDetail(b)}>
+                        <p className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate">{b.partName}</p>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{b.status} • {b.node}</p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4 shrink-0">
+                        {!relatedRequest && (
+                          <button
+                            onClick={() => {
+                              setSelectedBreakdownDetail(b);
+                              setIsCreateRequestOpen(true);
+                            }}
+                            className="px-3 py-2 rounded-xl bg-emerald-600 text-white font-black uppercase text-[8px] hover:bg-emerald-700 transition-all"
+                            title="Создать заявку в снабжение"
+                          >
+                            Заявка
+                          </button>
+                        )}
+                        <button onClick={() => setSelectedBreakdownDetail(b)} className="p-2 rounded-xl shadow-neo text-gray-400 hover:text-blue-500 transition-all"><Edit3 size={14}/></button>
+                      </div>
+                    </div>
+
+                    {/* Прогресс-бар статусов снабжения */}
+                    {relatedRequest && !isReadyToWork && (
+                      <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-1 mb-1">
+                          <div className={`flex-1 h-1.5 rounded-full ${
+                            ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                          <div className={`flex-1 h-1.5 rounded-full ${
+                            ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                          <div className={`flex-1 h-1.5 rounded-full ${
+                            ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                          <div className={`flex-1 h-1.5 rounded-full ${
+                            ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                          <div className={`flex-1 h-1.5 rounded-full ${
+                            ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className={`text-[7px] font-black uppercase ${
+                            relatedRequest.status === 'На складе' ? 'text-emerald-600' :
+                            relatedRequest.status === 'В пути' ? 'text-indigo-600' :
+                            relatedRequest.status === 'Оплачено' ? 'text-orange-600' :
+                            relatedRequest.status === 'Поиск' ? 'text-blue-600' :
+                            'text-gray-400'
+                          }`}>{relatedRequest.status}</span>
+                          {relatedRequest.status === 'На складе' && (
+                            <span className="text-[7px] font-black text-emerald-600 flex items-center gap-1">
+                              <CheckCircle2 size={10}/> Готово
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+
+          <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
             <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-10 flex items-center gap-2"><History size={16} className="text-blue-600"/> Архив обслуживания</h3>
             <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-2">
               {records.filter(r => r.equipmentId === selectedEquip.id).map(r => {
@@ -315,25 +459,6 @@ export const Maintenance: React.FC = () => {
                 );
               })}
               {records.filter(r => r.equipmentId === selectedEquip.id).length === 0 && <p className="text-center py-12 md:py-20 text-gray-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest">История пуста</p>}
-            </div>
-          </div>
-
-          <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
-            <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-10 flex items-center gap-2"><AlertTriangle size={16} className="text-red-600"/> Список поломок</h3>
-            <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-2">
-              {breakdowns.filter(b => b.equipmentId === selectedEquip.id).map(b => (
-                <div key={b.id} onClick={() => setSelectedBreakdownDetail(b)} className={`p-4 md:p-6 rounded-2xl shadow-neo-sm bg-neo-bg flex justify-between items-center border-l-4 ${breakdownBorderClass(b.status)} group hover:shadow-neo hover:cursor-pointer transition-all`}>
-                  <div className="overflow-hidden flex-1">
-                    <p className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate">{b.partName}</p>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{b.status} • {b.node}</p>
-                  </div>
-                  <div className="flex items-center gap-3 ml-4 shrink-0">
-                    <span className="text-[9px] md:text-[10px] font-black text-gray-400">{b.date.split('T')[0]}</span>
-                    <Edit3 size={14} className="text-gray-400"/>
-                  </div>
-                </div>
-              ))}
-              {breakdowns.filter(b => b.equipmentId === selectedEquip.id).length === 0 && <p className="text-center py-12 md:py-20 text-gray-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest">Поломок нет</p>}
             </div>
           </div>
         </div>
@@ -544,6 +669,9 @@ export const Maintenance: React.FC = () => {
                       equipmentId: selectedBreakdownDetail.equipmentId,
                       breakdownId: selectedBreakdownDetail.id,
                       breakdownActNumber: selectedBreakdownDetail.actNumber,
+                      breakdownName: selectedBreakdownDetail.partName,
+                      breakdownDescription: selectedBreakdownDetail.description,
+                      breakdownNode: selectedBreakdownDetail.node,
                       breakdownPhotos: requestPhotos.map((url, i) => ({ id: `p-${i}`, name: `Фото ${i + 1} (акт)`, url, type: 'image' }))
                     };
                     addRequest(req as any);
@@ -601,9 +729,240 @@ export const Maintenance: React.FC = () => {
         </div>
       )}
 
-      {selectedBreakdownDetail && (
+      {selectedBreakdownDetail && (() => {
+        // Найти связанную заявку снабжения
+        const relatedRequest = useProcurementStore.getState().requests.find(r => r.breakdownId === selectedBreakdownDetail.id);
+        const equipment = useFleetStore.getState().equipment.find(e => e.id === selectedBreakdownDetail.equipmentId);
+        
+        return (
         <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+          <div className="bg-neo-bg w-full max-w-2xl rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6 md:mb-8 sticky top-0 bg-neo-bg z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-red-500"><AlertTriangle size={24}/></div>
+                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Карточка поломки</h2>
+              </div>
+              <button onClick={() => setSelectedBreakdownDetail(null)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+            </div>
+            
+            <div className="space-y-5 md:space-y-6">
+              {/* Основная информация */}
+              <div className="p-5 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Номер акта</p>
+                    <p className="text-lg font-black text-blue-600">{selectedBreakdownDetail.actNumber || 'АКТ-001'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Дата</p>
+                    <p className="text-sm font-black text-gray-700">{formatDate(selectedBreakdownDetail.date)}</p>
+                  </div>
+                </div>
+                <div className="pt-3 border-t border-white/5">
+                  <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Наименование поломки</p>
+                  <p className="text-base font-black text-gray-800 dark:text-gray-200">{selectedBreakdownDetail.partName}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Узел</p>
+                    <p className="text-sm font-bold text-gray-700">{selectedBreakdownDetail.node}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Серьезность</p>
+                    <p className={`text-sm font-black px-2 py-1 rounded-lg inline-block ${
+                      selectedBreakdownDetail.severity === 'Критическая' ? 'bg-red-500/20 text-red-600' :
+                      selectedBreakdownDetail.severity === 'Средняя' ? 'bg-orange-500/20 text-orange-600' :
+                      'bg-green-500/20 text-green-600'
+                    }`}>{selectedBreakdownDetail.severity}</p>
+                  </div>
+                </div>
+                {selectedBreakdownDetail.description && (
+                  <div className="pt-3 border-t border-white/5">
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Описание</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{selectedBreakdownDetail.description}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Техника</p>
+                    <p className="text-sm font-bold text-gray-700 truncate">{equipment?.name || 'Неизвестно'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Наработка</p>
+                    <p className="text-sm font-bold text-gray-700">{selectedBreakdownDetail.hoursAtBreakdown || '—'} м/ч</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Статус поломки и заявка снабжения */}
+              <div className="p-5 rounded-2xl shadow-neo bg-neo-bg border border-white/5 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Статус поломки</h3>
+                  <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full ${
+                    selectedBreakdownDetail.status === 'Исправлено' ? 'bg-emerald-500 text-white' :
+                    selectedBreakdownDetail.status === 'В работе' ? 'bg-blue-500 text-white' :
+                    selectedBreakdownDetail.status === 'Запчасти получены' ? 'bg-emerald-400 text-white' :
+                    selectedBreakdownDetail.status === 'Запчасти заказаны' ? 'bg-yellow-500 text-white' :
+                    'bg-gray-400 text-white'
+                  }`}>{selectedBreakdownDetail.status}</span>
+                </div>
+
+                {relatedRequest ? (
+                  <div className="space-y-3">
+                    <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Package size={16} className="text-blue-500"/>
+                        <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Заявка снабжения</p>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">{relatedRequest.title}</p>
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
+                          relatedRequest.status === 'На складе' ? 'bg-indigo-500 text-white' :
+                          relatedRequest.status === 'В пути' ? 'bg-orange-500 text-white' :
+                          relatedRequest.status === 'Оплачено' ? 'bg-emerald-500 text-white' :
+                          relatedRequest.status === 'Поиск' ? 'bg-blue-500 text-white' :
+                          'bg-gray-400 text-white'
+                        }`}>{relatedRequest.status}</span>
+                      </div>
+                      {relatedRequest.cost && (
+                        <p className="text-xs font-black text-emerald-600">{formatMoney(relatedRequest.cost)}</p>
+                      )}
+                      
+                      {/* Прогресс-бар статусов снабжения */}
+                      <div className="pt-3 border-t border-blue-500/20">
+                        <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-3">Статус заявки</p>
+                        <div className="flex items-center gap-1">
+                          <div className={`flex-1 h-2 rounded-full ${
+                            ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                          <div className={`flex-1 h-2 rounded-full ${
+                            ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                          <div className={`flex-1 h-2 rounded-full ${
+                            ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                          <div className={`flex-1 h-2 rounded-full ${
+                            ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                          <div className={`flex-1 h-2 rounded-full ${
+                            ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}/>
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <span className={`text-[7px] font-black uppercase ${relatedRequest.status === 'Новая' ? 'text-emerald-600' : 'text-gray-400'}`}>Новая</span>
+                          <span className={`text-[7px] font-black uppercase ${relatedRequest.status === 'Поиск' ? 'text-blue-600' : 'text-gray-400'}`}>Поиск</span>
+                          <span className={`text-[7px] font-black uppercase ${relatedRequest.status === 'Оплачено' ? 'text-orange-600' : 'text-gray-400'}`}>Оплачено</span>
+                          <span className={`text-[7px] font-black uppercase ${relatedRequest.status === 'В пути' ? 'text-indigo-600' : 'text-gray-400'}`}>В пути</span>
+                          <span className={`text-[7px] font-black uppercase ${relatedRequest.status === 'На складе' ? 'text-emerald-600' : 'text-gray-400'}`}>Склад</span>
+                        </div>
+                      </div>
+                      
+                      {/* Подсказка для механика */}
+                      {relatedRequest.status === 'На складе' && selectedBreakdownDetail.status !== 'В работе' && selectedBreakdownDetail.status !== 'Исправлено' && (
+                        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                          <div className="flex items-start gap-2">
+                            <CheckCircle2 size={16} className="text-emerald-500 mt-0.5"/>
+                            <div>
+                              <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1">Готово к работе</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-300">Запчасти на складе. Механик может взять поломку в работу.</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {relatedRequest.status === 'Оплачено' && (
+                        <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                          <div className="flex items-start gap-2">
+                            <Wallet size={16} className="text-blue-500 mt-0.5"/>
+                            <div>
+                              <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-1">Счет оплачен</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-300">Запчасти оплачены, ожидаем доставку.</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {relatedRequest.status === 'В пути' && (
+                        <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                          <div className="flex items-start gap-2">
+                            <Truck size={16} className="text-orange-500 mt-0.5"/>
+                            <div>
+                              <p className="text-[8px] font-black text-orange-400 uppercase tracking-widest mb-1">В пути</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-300">Запчасти в пути на склад.</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-gray-500/10 border border-gray-500/20">
+                    <p className="text-sm text-gray-500">Заявка снабжения еще не создана</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Фотографии */}
+              {selectedBreakdownDetail.photos && selectedBreakdownDetail.photos.length > 0 && (
+                <div className="p-5 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                  <h3 className="text-xs font-black text-gray-400 uppercase mb-3 tracking-widest">Фотографии поломки</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {selectedBreakdownDetail.photos.map((p: string, i: number) => (
+                      <div key={i} className="rounded-lg overflow-hidden border border-white/10 cursor-pointer hover:border-blue-500 transition-colors" onClick={() => viewImage(p)}>
+                        <img src={p} className="w-full h-24 object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Действия */}
+              <div className="flex gap-3">
+                {!relatedRequest ? (
+                  <button type="button" onClick={() => setIsCreateRequestOpen(true)} className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs leading-tight shadow-neo hover:shadow-neo-inset transition-all">Создать заявку снабжения</button>
+                ) : (
+                  <button type="button" onClick={() => {
+                    setSelectedBreakdownDetail(null);
+                    useProcurementStore.getState().setSelectedRequestId(relatedRequest.id);
+                  }} className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs leading-tight shadow-neo hover:shadow-neo-inset transition-all">Открыть заявку снабжения</button>
+                )}
+                <button type="button" onClick={() => { navigator.clipboard?.writeText(selectedBreakdownDetail.partName || ''); alert('Название скопировано'); }} className="flex-1 py-4 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs leading-tight shadow-neo hover:shadow-neo-inset transition-all">Копировать название</button>
+              </div>
+              
+              {/* Кнопка редактирования статуса */}
+              <div className="space-y-3">
+                {/* Кнопка "Исправлено без запчастей" - доступна всегда */}
+                {selectedBreakdownDetail.status !== 'Исправлено' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateBreakdownStatus(selectedBreakdownDetail.id, 'Исправлено', new Date().toISOString().slice(0, 10));
+                      setSelectedBreakdownDetail(null);
+                    }}
+                    className="w-full py-4 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all hover:bg-emerald-700"
+                  >
+                    ✓ Исправлено без запчастей
+                  </button>
+                )}
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBreakdownStatusForm({ status: selectedBreakdownDetail.status, fixedDate: selectedBreakdownDetail.fixedDate || new Date().toISOString().slice(0, 10), hoursAtFix: undefined, mileageAtFix: undefined });
+                  }}
+                  className="w-full py-4 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all border border-blue-500/10 hover:shadow-neo-inset"
+                >
+                  Изменить статус
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
+
+      {/* Форма обновления статуса */}
+      {selectedBreakdownDetail && (
+        <div className="fixed inset-0 z-[215] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md pointer-events-none">
+          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 pointer-events-auto">
             <div className="flex justify-between items-center mb-6 md:mb-10 sticky top-0 bg-neo-bg">
               <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Обновить статус</h2>
               <button onClick={() => setSelectedBreakdownDetail(null)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
@@ -611,7 +970,13 @@ export const Maintenance: React.FC = () => {
             <form onSubmit={(e) => {
               e.preventDefault();
               if (selectedBreakdownDetail) {
-                updateBreakdownStatus(selectedBreakdownDetail.id, breakdownStatusForm.status, breakdownStatusForm.fixedDate);
+                updateBreakdownStatus(
+                  selectedBreakdownDetail.id,
+                  breakdownStatusForm.status,
+                  breakdownStatusForm.fixedDate,
+                  (breakdownStatusForm as any).hoursAtFix,
+                  (breakdownStatusForm as any).mileageAtFix
+                );
                 setSelectedBreakdownDetail(null);
               }
             }} className="space-y-5 md:space-y-6">
@@ -619,32 +984,109 @@ export const Maintenance: React.FC = () => {
                 <p className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Деталь</p>
                 <p className="text-sm font-black text-gray-700 dark:text-gray-200">{selectedBreakdownDetail.partName}</p>
               </div>
-              {selectedBreakdownDetail.photos && selectedBreakdownDetail.photos.length > 0 && (
-                <div className="p-4 rounded-xl bg-neo-bg border border-white/10">
-                  <h3 className="text-xs font-black text-gray-400 uppercase mb-3">Фотографии</h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {selectedBreakdownDetail.photos.map((p: string, i: number) => (
-                      <div key={i} className="rounded-lg overflow-hidden border">
-                        <img src={p} onClick={() => viewImage(p)} className="w-full h-24 object-cover cursor-pointer" />
+
+              {/* Проверка доступности статуса "В работе" */}
+              {(() => {
+                const relatedReq = useProcurementStore.getState().requests.find(r => r.breakdownId === selectedBreakdownDetail.id);
+                const canTakeToWork = relatedReq && relatedReq.status === 'На складе';
+                
+                return (
+                  <>
+                    {breakdownStatusForm.status === 'В работе' && !canTakeToWork && (
+                      <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle size={16} className="text-red-500 mt-0.5"/>
+                          <div>
+                            <p className="text-[8px] font-black text-red-400 uppercase tracking-widest mb-1">Недоступно</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">
+                              {relatedReq 
+                                ? `Запчасти еще не на складе. Текущий статус: ${relatedReq.status}`
+                                : 'Заявка в снабжение еще не создана'}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setIsCreateRequestOpen(true)} className="flex-1 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs leading-tight">Создать заявку снабжения</button>
-                <button type="button" onClick={() => { navigator.clipboard?.writeText(selectedBreakdownDetail.partName || ''); alert('Название скопировано'); }} className="flex-1 py-3 px-4 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs leading-tight">Копировать название</button>
-              </div>
+                    )}
+                    
+                    {canTakeToWork && (
+                      <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 size={16} className="text-emerald-500 mt-0.5"/>
+                          <div>
+                            <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1">Доступно</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">Запчасти на складе. Можно брать в работу.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+
               <div className="space-y-2">
                 <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Новый статус</label>
-                <select className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs uppercase text-gray-700 dark:text-gray-200 outline-none" value={breakdownStatusForm.status} onChange={e=>setBreakdownStatusForm({...breakdownStatusForm, status: e.target.value as any})}>
-                  <option>Новая</option><option>Запчасти заказаны</option><option>Запчасти получены</option><option>В работе</option><option>Исправлено</option>
+                <select
+                  className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs uppercase text-gray-700 dark:text-gray-200 outline-none"
+                  value={breakdownStatusForm.status}
+                  onChange={e => {
+                    const newStatus = e.target.value as any;
+                    const relatedReq = useProcurementStore.getState().requests.find(r => r.breakdownId === selectedBreakdownDetail.id);
+                    // Блокируем установку "В работе" если запчасти не на складе
+                    if (newStatus === 'В работе' && (!relatedReq || relatedReq.status !== 'На складе')) {
+                      return;
+                    }
+                    setBreakdownStatusForm({...breakdownStatusForm, status: newStatus});
+                  }}
+                >
+                  <option>Новая</option>
+                  {(() => {
+                    const relatedReq = useProcurementStore.getState().requests.find(r => r.breakdownId === selectedBreakdownDetail.id);
+                    const canTakeToWork = relatedReq && relatedReq.status === 'На складе';
+                    return <option disabled={!canTakeToWork}>В работе</option>;
+                  })()}
+                  <option>Исправлено</option>
                 </select>
+                {(() => {
+                  const relatedReq = useProcurementStore.getState().requests.find(r => r.breakdownId === selectedBreakdownDetail.id);
+                  const canTakeToWork = relatedReq && relatedReq.status === 'На складе';
+                  return breakdownStatusForm.status === 'В работе' && !canTakeToWork && (
+                    <p className="text-[8px] font-black text-orange-600">⚠ Статус "В работе" доступен только после получения запчастей со склада</p>
+                  );
+                })()}
               </div>
               {breakdownStatusForm.status === 'Исправлено' && (
-                <div className="space-y-2">
-                  <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Дата ввода в эксплуатацию</label>
-                  <input type="date" value={breakdownStatusForm.fixedDate} onChange={e=>setBreakdownStatusForm({...breakdownStatusForm, fixedDate: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none" />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Дата ввода в эксплуатацию</label>
+                    <input type="date" value={breakdownStatusForm.fixedDate} onChange={e=>setBreakdownStatusForm({...breakdownStatusForm, fixedDate: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Наработка (м/ч)</label>
+                      <input
+                        type="number"
+                        value={(breakdownStatusForm as any).hoursAtFix || ''}
+                        onChange={e => setBreakdownStatusForm({...breakdownStatusForm, hoursAtFix: e.target.value ? parseInt(e.target.value) : undefined} as any)}
+                        placeholder={selectedBreakdownDetail.hoursAtBreakdown?.toString() || '0'}
+                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none"
+                      />
+                      <p className="text-[7px] text-gray-400">На момент поломки: {selectedBreakdownDetail.hoursAtBreakdown || '—'} м/ч</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Пробег (км)</label>
+                      <input
+                        type="number"
+                        value={(breakdownStatusForm as any).mileageAtFix || ''}
+                        onChange={e => setBreakdownStatusForm({...breakdownStatusForm, mileageAtFix: e.target.value ? parseInt(e.target.value) : undefined} as any)}
+                        placeholder="0"
+                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                    <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Примечание</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Заполните наработку/пробег если поломка была не критической и техника продолжала работать</p>
+                  </div>
                 </div>
               )}
               <button type="submit" className="w-full py-5 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-4 border border-blue-500/10 hover:shadow-neo-inset">Обновить</button>

@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, Plus, Truck, X, QrCode, Zap, Gauge, Edit3, Save, Camera, FileText, User, ChevronRight, History, Upload, LayoutGrid, List, Clock, Trash2
+import {
+  Search, Plus, Truck, X, QrCode, Zap, Gauge, Edit3, Save, Camera, FileText, User, ChevronRight, History, Upload, LayoutGrid, List, Clock, Trash2, AlertTriangle, CheckCircle2, Package
 } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
+import { useProcurementStore } from '../store/useProcurementStore';
 import { EquipStatus, Equipment, MaintenanceRegulation } from '../types';
-import { formatNumber } from '../utils/format';
+import { formatNumber, formatDate, formatDateTime } from '../utils/format';
 import QRCode from 'qrcode';
 
 // Функция проверки срока страховки
@@ -55,40 +56,121 @@ const getInsuranceStatus = (insuranceEnd?: string): { status: 'expired' | 'warni
   return { status: 'ok', daysLeft, message: `Действительна` };
 };
 
-const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[]) => {
+const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[], equipment: any[]) => {
   const activeBreakdowns = breakdowns.filter(b => b.equipmentId === equipmentId && b.status !== 'Исправлено');
-  
-  if (activeBreakdowns.length === 0) {
-    const plannedTO = plannedTOs.filter(t => t.equipmentId === equipmentId && t.status === 'planned');
-    if (plannedTO.length > 0) return EquipStatus.MAINTENANCE;
-    return EquipStatus.ACTIVE;
-  }
-  
-  // Проверка критических поломок
+  const equip = equipment.find(e => e.id === equipmentId);
+
+  // 1. Проверка критических поломок - техника в ремонте
   const criticalBreakdowns = activeBreakdowns.filter(b => b.severity === 'Критическая');
-  if (criticalBreakdowns.length > 0) return EquipStatus.REPAIR;
-  
-  // Проверка ожидания запчастей
+  if (criticalBreakdowns.length > 0) {
+    return {
+      status: EquipStatus.REPAIR,
+      reason: `Критическая поломка: ${criticalBreakdowns[0].partName}`
+    };
+  }
+
+  // 2. Проверка поломок в работе
+  const inWorkBreakdowns = activeBreakdowns.filter(b => b.status === 'В работе');
+  if (inWorkBreakdowns.length > 0) {
+    return {
+      status: EquipStatus.REPAIR,
+      reason: `В ремонте: ${inWorkBreakdowns[0].partName}`
+    };
+  }
+
+  // 3. Проверка ожидания запчастей
   const waitingForParts = activeBreakdowns.filter(b => b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены');
-  if (waitingForParts.length > 0) return EquipStatus.WAITING_PARTS;
-  
-  // Проверка поломок в работе
-  const inWork = activeBreakdowns.filter(b => b.status === 'В работе');
-  if (inWork.length > 0) return EquipStatus.REPAIR;
-  
-  // Проверка незначительных поломок (не критические и не в работе)
-  const minorBreakdowns = activeBreakdowns.filter(b => 
-    b.severity !== 'Критическая' && 
-    b.status !== 'В работе' && 
-    b.status !== 'Запчасти заказаны' && 
-    b.status !== 'Запчасти получены'
+  if (waitingForParts.length > 0) {
+    return {
+      status: EquipStatus.WAITING_PARTS,
+      reason: `Ожидание запчастей: ${waitingForParts[0].partName}`
+    };
+  }
+
+  // 4. Проверка незначительных поломок (низкая/средняя серьезность)
+  const minorBreakdowns = activeBreakdowns.filter(b =>
+    (b.severity === 'Низкая' || b.severity === 'Средняя') &&
+    b.status === 'Новая'
   );
-  if (minorBreakdowns.length > 0) return EquipStatus.ACTIVE_WITH_RESTRICTIONS;
+  if (minorBreakdowns.length > 0) {
+    return {
+      status: EquipStatus.ACTIVE_WITH_RESTRICTIONS,
+      reason: `Неисправности: ${minorBreakdowns.map(b => b.partName).join(', ')}`
+    };
+  }
+
+  // 5. Проверка просроченного ТО по пробегу/моточасам
+  if (equip && equip.regulations && equip.regulations.length > 0) {
+    const currHours = equip.hours || 0;
+    const currKm = equip.mileage_km || 0;
+    
+    for (const reg of equip.regulations) {
+      const intervalHours = reg.intervalHours || 0;
+      const intervalKm = reg.intervalKm || 0;
+      
+      let nextHours = intervalHours > 0 ? Math.ceil(currHours / intervalHours) * intervalHours : Infinity;
+      let nextKm = intervalKm > 0 ? Math.ceil(currKm / intervalKm) * intervalKm : Infinity;
+      
+      const hoursOverdue = intervalHours > 0 && currHours >= nextHours;
+      const kmOverdue = intervalKm > 0 && currKm >= nextKm;
+      
+      if (hoursOverdue || kmOverdue) {
+        const overdueHours = hoursOverdue ? currHours - nextHours + intervalHours : 0;
+        const overdueKm = kmOverdue ? currKm - nextKm + intervalKm : 0;
+        
+        return {
+          status: EquipStatus.MAINTENANCE,
+          reason: hoursOverdue 
+            ? `ТО просрочено на ${overdueHours} м/ч (${reg.type})`
+            : `ТО просрочено на ${overdueKm} км (${reg.type})`
+        };
+      }
+    }
+  }
+
+  // 6. Проверка просроченного ТО по календарю
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   
-  return EquipStatus.ACTIVE;
+  const overduePlannedTO = plannedTOs.filter(t => {
+    if (t.equipmentId !== equipmentId || t.status !== 'planned') return false;
+    const plannedDate = new Date(t.date);
+    plannedDate.setHours(0, 0, 0, 0);
+    return plannedDate < today;
+  });
+  
+  if (overduePlannedTO.length > 0) {
+    const overdueTO = overduePlannedTO[0];
+    const plannedDate = new Date(overdueTO.date);
+    const daysOverdue = Math.floor((today.getTime() - plannedDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      status: EquipStatus.MAINTENANCE,
+      reason: `ТО просрочено на ${daysOverdue} дн. (${overdueTO.type})`
+    };
+  }
+
+  // 7. Проверка предстоящего планового ТО
+  const upcomingPlannedTO = plannedTOs.filter(t => t.equipmentId === equipmentId && t.status === 'planned');
+  if (upcomingPlannedTO.length > 0) {
+    return {
+      status: EquipStatus.MAINTENANCE,
+      reason: `Запланировано ${upcomingPlannedTO[0].type} на ${formatDate(upcomingPlannedTO[0].date)}`
+    };
+  }
+
+  // 8. Техника в работе
+  return {
+    status: EquipStatus.ACTIVE,
+    reason: 'В работе'
+  };
 };
 
-export const EquipmentList: React.FC = () => {
+interface EquipmentListProps {
+  onNavigate?: (page: string) => void;
+}
+
+export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
   const { equipment, selectEquipment, selectedEquipmentId, updateEquipment, deleteEquipment, addEquipment } = useFleetStore();
   const { records, breakdowns, plannedTOs } = useMaintenanceStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -240,16 +322,37 @@ export const EquipmentList: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filtered.map(e => {
             const insuranceStatus = getInsuranceStatus(e.insurance_end);
+            const computedStatus = computeEquipmentStatus(e.id, breakdowns, plannedTOs, equipment);
             return (
             <div key={e.id} onClick={() => selectEquipment(e.id)} className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg group hover:shadow-neo-inset transition-all cursor-pointer border border-white/10 relative overflow-hidden">
-              <div className={`absolute top-0 right-0 w-2 h-full ${e.status === EquipStatus.ACTIVE ? 'bg-green-500' : 'bg-red-500'}`} />
+              <div className={`absolute top-0 right-0 w-2 h-full ${
+                computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-500' :
+                computedStatus.status === EquipStatus.REPAIR ? 'bg-red-500' :
+                computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-500' :
+                computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-500' :
+                'bg-blue-500'
+              }`} />
               <div className="flex items-start justify-between mb-6">
                 <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform"><Truck size={32} /></div>
                 <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">{e.year} г.в.</span>
               </div>
               <h3 className="text-xl font-black uppercase tracking-tight text-gray-700 dark:text-gray-200 group-hover:text-blue-600 transition-colors">{e.name}</h3>
               <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase mt-1 tracking-widest">{e.make} {e.model}</p>
-              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 space-y-4">
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                <div className={`text-[8px] font-black uppercase px-2 py-1 rounded-lg inline-block ${
+                  computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' :
+                  computedStatus.status === EquipStatus.REPAIR ? 'bg-red-100 text-red-700' :
+                  computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-100 text-orange-700' :
+                  computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-blue-100 text-blue-700'
+                }`}>
+                  {computedStatus.status}
+                </div>
+                {computedStatus.reason && computedStatus.status !== EquipStatus.ACTIVE && (
+                  <p className="text-[8px] text-gray-500 mt-1 truncate">{computedStatus.reason}</p>
+                )}
+              </div>
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800 space-y-4">
                  <div className="flex justify-between items-center text-[10px] font-black uppercase text-gray-400">
                     <div className="flex items-center gap-2"><Gauge size={14} className="text-blue-600"/> Наработка</div>
                     <span className="text-gray-800 font-bold">{formatNumber(e.hours)} м/ч</span>
@@ -283,7 +386,9 @@ export const EquipmentList: React.FC = () => {
                  </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                 {filtered.map(e => (
+                 {filtered.map(e => {
+                   const computedStatus = computeEquipmentStatus(e.id, breakdowns, plannedTOs, equipment);
+                   return (
                    <tr key={e.id} onClick={() => selectEquipment(e.id)} className="hover:bg-white/5 transition-colors cursor-pointer group">
                       <td className="px-8 py-6 flex items-center gap-4">
                          <div className="p-3 rounded-xl shadow-neo-sm bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform"><Truck size={20}/></div>
@@ -292,12 +397,26 @@ export const EquipmentList: React.FC = () => {
                             <p className="text-[9px] text-gray-400 uppercase font-bold">{e.vin}</p>
                          </div>
                       </td>
-                      <td className="px-6 py-6"><span className={`text-[10px] md:text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-neo-sm whitespace-nowrap ${e.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{e.status}</span></td>
+                      <td className="px-6 py-6">
+                        <div className="space-y-1">
+                          <span className={`text-[8px] md:text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-neo-sm whitespace-nowrap ${
+                            computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' :
+                            computedStatus.status === EquipStatus.REPAIR ? 'bg-red-100 text-red-700' :
+                            computedStatus.status === EquipStatus.MAINTENANCE ? 'bg-orange-100 text-orange-700' :
+                            computedStatus.status === EquipStatus.WAITING_PARTS ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-blue-100 text-blue-700'
+                          }`}>{computedStatus.status}</span>
+                          {computedStatus.reason && computedStatus.status !== EquipStatus.ACTIVE && (
+                            <p className="text-[7px] text-gray-500 truncate">{computedStatus.reason}</p>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-6 text-sm font-black text-gray-700">{formatNumber(e.hours)} м/ч</td>
                       <td className="px-6 py-6 text-sm font-black text-gray-400 uppercase">{e.driver || '—'}</td>
                       <td className="px-6 py-6 text-right"><ChevronRight size={18} className="text-gray-300 group-hover:text-blue-600 transition-all"/></td>
                    </tr>
-                 ))}
+                   );
+                 })}
               </tbody>
            </table>
         </div>
@@ -691,28 +810,115 @@ export const EquipmentList: React.FC = () => {
 
               {activeTab === 'history' && (
                 <div className="space-y-6">
-                   {records.filter(r => r.equipmentId === selectedItem?.id).length === 0 ? (
-                     <div className="p-20 rounded-[3rem] shadow-neo-inset bg-neo-bg text-center">
-                        <div className="w-20 h-20 rounded-full shadow-neo mx-auto mb-8 flex items-center justify-center text-gray-300"><History size={40}/></div>
-                        <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">История обслуживания пока пуста</p>
-                        <button className="mt-8 px-10 py-4 rounded-2xl shadow-neo text-[10px] font-black uppercase text-blue-600 hover:shadow-neo-inset transition-all active:scale-95 border border-blue-500/10">Скачать отчет PDF</button>
-                     </div>
-                   ) : (
-                     <div className="space-y-4">
-                       {records.filter(r => r.equipmentId === selectedItem?.id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(r => {
-                         const isBreakdown = r.type.toLowerCase().includes('поломк') || r.type.toLowerCase().includes('неисправност') || r.type.toLowerCase().includes('акт');
-                         return (
-                           <div key={r.id} onClick={() => setSelectedHistoryRecord(r)} className={`p-4 md:p-6 rounded-2xl shadow-neo-sm bg-neo-bg flex justify-between items-center border-l-4 ${isBreakdown ? 'border-red-500' : 'border-emerald-500'} group hover:shadow-neo hover:cursor-pointer transition-all`}>
-                             <div className="overflow-hidden">
-                               <p className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate">{r.type}</p>
-                               <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{r.performedBy} • {r.hoursAtMaintenance} м/ч</p>
+                   {(() => {
+                     // Объединяем записи обслуживания и поломки для данной техники
+                     const equipRecords = records.filter(r => r.equipmentId === selectedItem?.id);
+                     const equipBreakdowns = breakdowns.filter(b => b.equipmentId === selectedItem?.id);
+                     
+                     // Создаем объединенный список
+                     const allHistory = [
+                       ...equipRecords.map(r => ({ ...r, _type: 'maintenance' })),
+                       ...equipBreakdowns.map(b => ({ ...b, _type: 'breakdown' }))
+                     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+                     if (allHistory.length === 0) {
+                       return (
+                         <div className="p-20 rounded-[3rem] shadow-neo-inset bg-neo-bg text-center">
+                            <div className="w-20 h-20 rounded-full shadow-neo mx-auto mb-8 flex items-center justify-center text-gray-300"><History size={40}/></div>
+                            <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">История обслуживания пока пуста</p>
+                            <button className="mt-8 px-10 py-4 rounded-2xl shadow-neo text-[10px] font-black uppercase text-blue-600 hover:shadow-neo-inset transition-all active:scale-95 border border-blue-500/10">Скачать отчет PDF</button>
+                         </div>
+                       );
+                     }
+
+                     return (
+                       <div className="space-y-4">
+                         {allHistory.map((item) => {
+                           const isBreakdown = item._type === 'breakdown';
+                           const status = (item as any).status;
+                           // Найти связанную заявку снабжения для поломки
+                           const relatedRequest = isBreakdown ? useProcurementStore.getState().requests.find(r => r.breakdownId === item.id) : null;
+
+                           return (
+                             <div
+                               key={item.id}
+                               onClick={() => setSelectedHistoryRecord(item)}
+                               className={`p-4 md:p-6 rounded-2xl shadow-neo-sm bg-neo-bg flex flex-col gap-3 border-l-4 ${
+                                 isBreakdown
+                                   ? status === 'Исправлено' ? 'border-emerald-500'
+                                   : status === 'В работе' ? 'border-blue-500'
+                                   : status === 'Запчасти заказаны' ? 'border-yellow-500'
+                                   : 'border-red-500'
+                                   : 'border-emerald-500'
+                               } group hover:shadow-neo hover:cursor-pointer transition-all`}
+                             >
+                               <div className="flex justify-between items-start">
+                                 <div className="overflow-hidden flex-1">
+                                   <div className="flex items-center gap-2">
+                                     <p className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate">
+                                       {isBreakdown ? (item as any).partName || 'Поломка' : (item as any).type}
+                                     </p>
+                                     {isBreakdown && (
+                                       <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
+                                         status === 'Исправлено' ? 'bg-emerald-500 text-white' :
+                                         status === 'В работе' ? 'bg-blue-500 text-white' :
+                                         status === 'Запчасти заказаны' ? 'bg-yellow-500 text-white' :
+                                         'bg-red-500 text-white'
+                                       }`}>{status}</span>
+                                     )}
+                                   </div>
+                                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">
+                                     {isBreakdown
+                                       ? `${(item as any).node || 'Узел'} • ${(item as any).severity || ''}`
+                                       : `${(item as any).performedBy} • ${(item as any).hoursAtMaintenance} м/ч`
+                                     }
+                                   </p>
+                                 </div>
+                                 <span className="text-[9px] md:text-[10px] font-black text-gray-400 shrink-0 ml-4">{formatDate(item.date)}</span>
+                               </div>
+                               
+                               {/* Прогресс-бар статусов снабжения для поломок */}
+                               {isBreakdown && relatedRequest && (
+                                 <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                                   <div className="flex items-center gap-1 mb-1">
+                                     <div className={`flex-1 h-1.5 rounded-full ${
+                                       ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
+                                     }`}/>
+                                     <div className={`flex-1 h-1.5 rounded-full ${
+                                       ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
+                                     }`}/>
+                                     <div className={`flex-1 h-1.5 rounded-full ${
+                                       ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
+                                     }`}/>
+                                     <div className={`flex-1 h-1.5 rounded-full ${
+                                       ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
+                                     }`}/>
+                                     <div className={`flex-1 h-1.5 rounded-full ${
+                                       ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'
+                                     }`}/>
+                                   </div>
+                                   <div className="flex justify-between items-center">
+                                     <span className={`text-[7px] font-black uppercase ${
+                                       relatedRequest.status === 'На складе' ? 'text-emerald-600' :
+                                       relatedRequest.status === 'В пути' ? 'text-indigo-600' :
+                                       relatedRequest.status === 'Оплачено' ? 'text-orange-600' :
+                                       relatedRequest.status === 'Поиск' ? 'text-blue-600' :
+                                       'text-gray-400'
+                                     }`}>{relatedRequest.status}</span>
+                                     {relatedRequest.status === 'На складе' && status !== 'В работе' && status !== 'Исправлено' && (
+                                       <span className="text-[7px] font-black text-emerald-600 flex items-center gap-1">
+                                         <CheckCircle2 size={10}/> Готово к работе
+                                       </span>
+                                     )}
+                                   </div>
+                                 </div>
+                               )}
                              </div>
-                             <span className="text-[9px] md:text-[10px] font-black text-gray-400 shrink-0 ml-4">{r.date}</span>
-                           </div>
-                         );
-                       })}
-                     </div>
-                   )}
+                           );
+                         })}
+                       </div>
+                     );
+                   })()}
                    {isEditing && (
                      <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
                        <button onClick={() => setShowDeleteConfirm(true)} className="px-10 py-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95">Удалить технику</button>
@@ -738,60 +944,232 @@ export const EquipmentList: React.FC = () => {
         </div>
       )}
 
-      {selectedHistoryRecord && (
+      {selectedHistoryRecord && (() => {
+        // Найти связанную заявку снабжения для поломки
+        const relatedRequest = selectedHistoryRecord._type === 'breakdown' 
+          ? useProcurementStore.getState().requests.find(r => r.breakdownId === selectedHistoryRecord.id) 
+          : null;
+        
+        return (
         <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-neo-bg rounded-[3rem] shadow-neo max-w-2xl w-full p-8 md:p-12 border border-white/20 max-h-[90vh] overflow-y-auto animate-in zoom-in duration-300">
+          <div className="bg-neo-bg rounded-[3rem] shadow-neo max-w-3xl w-full p-8 md:p-12 border border-white/20 max-h-[90vh] overflow-y-auto animate-in zoom-in duration-300">
             <div className="flex items-start justify-between mb-8">
-              <div>
-                <h3 className="text-2xl md:text-3xl font-black uppercase text-gray-800 dark:text-gray-200 mb-2">{selectedHistoryRecord.type}</h3>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{selectedHistoryRecord.date}</p>
+              <div className="flex items-center gap-3">
+                {selectedHistoryRecord._type === 'breakdown' ? (
+                  <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-red-500"><AlertTriangle size={24}/></div>
+                ) : (
+                  <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-emerald-500"><CheckCircle2 size={24}/></div>
+                )}
+                <div>
+                  <h3 className="text-xl md:text-2xl font-black uppercase text-gray-800 dark:text-gray-200 mb-1">
+                    {selectedHistoryRecord._type === 'breakdown'
+                      ? (selectedHistoryRecord.partName || 'Поломка')
+                      : (selectedHistoryRecord.type || 'Обслуживание')
+                    }
+                  </h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    {formatDate(selectedHistoryRecord.date)}
+                  </p>
+                </div>
               </div>
               <button onClick={() => setSelectedHistoryRecord(null)} className="p-2 rounded-xl shadow-neo-inset text-gray-400 hover:text-red-500 transition-all"><X size={24}/></button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
-                <p className="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Исполнитель</p>
-                <p className="text-sm font-black text-gray-800 dark:text-gray-200 uppercase">{selectedHistoryRecord.performedBy || '—'}</p>
-              </div>
-              <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
-                <p className="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Наработка (м/ч)</p>
-                <p className="text-sm font-black text-gray-800 dark:text-gray-200">{selectedHistoryRecord.hoursAtMaintenance || '—'}</p>
-              </div>
-            </div>
-
-            {selectedHistoryRecord.checklistItems && selectedHistoryRecord.checklistItems.length > 0 && (
-              <div className="mb-8">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Контрольный список</h4>
-                <div className="space-y-3">
-                  {selectedHistoryRecord.checklistItems.map((item: any, idx: number) => (
-                    <div key={idx} className="p-4 rounded-xl shadow-neo-sm bg-neo-bg border-l-4 border-emerald-500 flex items-start gap-3">
-                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${item.done ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                        {item.done && <span className="text-xs font-black">✓</span>}
+            {selectedHistoryRecord._type === 'breakdown' ? (
+              // Детали поломки
+              <div className="space-y-5">
+                {/* Кнопки перехода */}
+                {relatedRequest && (
+                  <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Package size={18} className="text-blue-500"/>
+                        <p className="text-sm font-black text-blue-400 uppercase">Заявка снабжения №{relatedRequest.id.slice(-6)}</p>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-black uppercase ${item.done ? 'text-emerald-600 line-through' : 'text-gray-800 dark:text-gray-200'}`}>{item.text}</p>
-                        {item.note && <p className="text-[9px] text-gray-500 mt-2 italic">Примечание: {item.note}</p>}
+                      <button
+                        onClick={() => {
+                          setSelectedHistoryRecord(null);
+                          // Переключаемся на вкладку снабжения
+                          if (onNavigate) {
+                            onNavigate('procurement');
+                          }
+                          // Устанавливаем заявку и режим только для просмотра
+                          useProcurementStore.getState().setSelectedRequestId(relatedRequest.id);
+                          // Сохраняем флаг readOnlyMode в store (нужно добавить)
+                          setTimeout(() => {
+                            const event = new CustomEvent('procurement-readonly', { detail: true });
+                            window.dispatchEvent(event);
+                          }, 100);
+                        }}
+                        className="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-black uppercase hover:bg-blue-700 transition-all"
+                      >
+                        Открыть заявку
+                      </button>
+                    </div>
+                    <div className="mt-3 flex items-center gap-4 text-[8px] font-black text-gray-400 uppercase">
+                      <span>Статус: <span className="text-blue-400">{relatedRequest.status}</span></span>
+                      <span>•</span>
+                      <span>Создана: <span className="text-blue-400">{formatDate(relatedRequest.createdAt)}</span></span>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="p-5 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Номер акта</p>
+                      <button
+                        onClick={() => {
+                          // Переключаемся на вкладку ТО и ремонт
+                          if (onNavigate) {
+                            onNavigate('maintenance');
+                          }
+                        }}
+                        className="text-lg font-black text-blue-600 hover:text-blue-700 hover:underline transition-all"
+                        title="Перейти к акту во вкладке ТО и ремонт"
+                      >
+                        {selectedHistoryRecord.actNumber || 'АКТ-001'}
+                      </button>
+                    </div>
+                    <div>
+                      <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Статус</p>
+                      <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full ${
+                        selectedHistoryRecord.status === 'Исправлено' ? 'bg-emerald-500 text-white' :
+                        selectedHistoryRecord.status === 'В работе' ? 'bg-blue-500 text-white' :
+                        selectedHistoryRecord.status === 'Запчасти получены' ? 'bg-emerald-400 text-white' :
+                        selectedHistoryRecord.status === 'Запчасти заказаны' ? 'bg-yellow-500 text-white' :
+                        'bg-gray-400 text-white'
+                      }`}>{selectedHistoryRecord.status}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Узел</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{selectedHistoryRecord.node || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Серьезность</p>
+                    <p className={`text-sm font-black px-2 py-1 rounded-lg inline-block ${
+                      selectedHistoryRecord.severity === 'Критическая' ? 'bg-red-500/20 text-red-600' :
+                      selectedHistoryRecord.severity === 'Средняя' ? 'bg-orange-500/20 text-orange-600' :
+                      'bg-green-500/20 text-green-600'
+                    }`}>{selectedHistoryRecord.severity}</p>
+                  </div>
+                  {selectedHistoryRecord.description && (
+                    <div>
+                      <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Описание</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{selectedHistoryRecord.description}</p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Наработка (м/ч)</p>
+                      <p className="text-sm font-black text-gray-700">{selectedHistoryRecord.hoursAtBreakdown || '—'}</p>
+                    </div>
+                    {selectedHistoryRecord.reportedBy && (
+                      <div>
+                        <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Кто сообщил</p>
+                        <p className="text-sm font-black text-gray-700">{selectedHistoryRecord.reportedBy}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Лог изменений */}
+                <div className="p-5 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">История изменений</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0"/>
+                      <div className="flex-1">
+                        <p className="text-xs font-black text-gray-700 dark:text-gray-200">Акт поломки создан</p>
+                        <p className="text-[8px] text-gray-400">{formatDateTime(selectedHistoryRecord.date)}</p>
                       </div>
                     </div>
-                  ))}
+                    {relatedRequest && (
+                      <>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"/>
+                          <div className="flex-1">
+                            <p className="text-xs font-black text-gray-700 dark:text-gray-200">Заявка в снабжение создана</p>
+                            <p className="text-[8px] text-gray-400">{formatDateTime(relatedRequest.createdAt)}</p>
+                          </div>
+                        </div>
+                        {(relatedRequest.statusHistory || []).map((entry, idx) => (
+                          <div key={idx} className="flex items-start gap-3">
+                            <div className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 shrink-0"/>
+                            <div className="flex-1">
+                              <p className="text-xs font-black text-gray-700 dark:text-gray-200">Статус изменен на "{entry.status}"</p>
+                              <p className="text-[8px] text-gray-400">{formatDateTime(entry.date)}{entry.user ? ` • ${entry.user}` : ''}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
 
-            {selectedHistoryRecord.notes && (
-              <div className="mb-8">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Примечания</h4>
-                <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selectedHistoryRecord.notes}</p>
-                </div>
+                {selectedHistoryRecord.photos && selectedHistoryRecord.photos.length > 0 && (
+                  <div className="p-5 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Фотографии поломки</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      {selectedHistoryRecord.photos.map((p: string, i: number) => (
+                        <div key={i} className="rounded-lg overflow-hidden border border-white/10 cursor-pointer hover:border-blue-500 transition-colors" onClick={() => window.open(p, '_blank')}>
+                          <img src={p} className="w-full h-24 object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+            ) : (
+              // Детали обслуживания
+              <>
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                    <p className="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Исполнитель</p>
+                    <p className="text-sm font-black text-gray-800 dark:text-gray-200 uppercase">{selectedHistoryRecord.performedBy || '—'}</p>
+                  </div>
+                  <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                    <p className="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Наработка (м/ч)</p>
+                    <p className="text-sm font-black text-gray-800 dark:text-gray-200">{selectedHistoryRecord.hoursAtMaintenance || '—'}</p>
+                  </div>
+                </div>
+
+                {selectedHistoryRecord.checklistItems && selectedHistoryRecord.checklistItems.length > 0 && (
+                  <div className="mb-8">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Контрольный список</h4>
+                    <div className="space-y-3">
+                      {selectedHistoryRecord.checklistItems.map((item: any, idx: number) => (
+                        <div key={idx} className="p-4 rounded-xl shadow-neo-sm bg-neo-bg border-l-4 border-emerald-500 flex items-start gap-3">
+                          <div className={`w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 ${item.done ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                            {item.done && <span className="text-xs font-black">✓</span>}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-black uppercase ${item.done ? 'text-emerald-600 line-through' : 'text-gray-800 dark:text-gray-200'}`}>{item.text}</p>
+                            {item.note && <p className="text-[9px] text-gray-500 mt-2 italic">Примечание: {item.note}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedHistoryRecord.notes && (
+                  <div className="mb-8">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Примечания</h4>
+                    <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selectedHistoryRecord.notes}</p>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             <button onClick={() => setSelectedHistoryRecord(null)} className="w-full px-8 py-4 rounded-2xl shadow-neo bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] transition-all">Закрыть</button>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
