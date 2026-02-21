@@ -279,53 +279,56 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           <h2 className="text-2xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">ТО и Ремонт</h2>
           
           {/* Быстрые действия */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 md:gap-6">
             <button
-              onClick={() => setIsBreakdownModalOpen(true)}
-              className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+              onClick={() => setIsBreakdownEquipSelectOpen(true)}
+              className="p-4 md:p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
             >
-              <div className="flex items-center gap-4">
-                <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <AlertTriangle size={24}/>
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="p-2 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
+                  <AlertTriangle size={18} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm font-black uppercase tracking-widest">Акт поломки</h4>
-                  <p className="text-[8px] font-bold text-white/80 uppercase">Зафиксировать неисправность</p>
+                  <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">Акт</h4>
+                  <p className="text-[8px] md:text-[9px] font-bold text-white/80 uppercase">Поломки</p>
                 </div>
               </div>
             </button>
-            
+
             <button
-              onClick={() => setSelectedMaintenanceEquipId(equipment[0]?.id || null)}
-              className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+              onClick={() => setIsTOEquipSelectOpen(true)}
+              className="p-4 md:p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
             >
-              <div className="flex items-center gap-4">
-                <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <Wrench size={24}/>
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="p-2 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
+                  <Wrench size={18} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm font-black uppercase tracking-widest">Провести ТО</h4>
-                  <p className="text-[8px] font-bold text-white/80 uppercase">Выбрать технику</p>
+                  <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">ТО</h4>
+                  <p className="text-[8px] md:text-[9px] font-bold text-white/80 uppercase">Обслуживание</p>
                 </div>
               </div>
             </button>
-            
+
             <button
-              onClick={() => {
-                if (onNavigate) onNavigate('procurement');
-              }}
-              className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+              onClick={() => setIsBreakdownSelectOpen(true)}
+              className="p-4 md:p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
             >
-              <div className="flex items-center gap-4">
-                <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <Package size={24}/>
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="p-2 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
+                  <Package size={18} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm font-black uppercase tracking-widest">Снабжение</h4>
-                  <p className="text-[8px] font-bold text-white/80 uppercase">Заявки и запчасти</p>
+                  <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">Заявка</h4>
+                  <p className="text-[8px] md:text-[9px] font-bold text-white/80 uppercase">Снабжение</p>
                 </div>
               </div>
             </button>
+
+            <div className="p-4 md:p-6 rounded-[2rem] shadow-neo bg-neo-bg/50 border border-white/10 flex flex-col items-center justify-center gap-1">
+              <p className="text-[8px] md:text-[9px] font-black text-gray-400 uppercase">Техники</p>
+              <p className="text-lg md:text-xl font-black text-gray-700">{equipment.length}</p>
+            </div>
           </div>
           
           <div className="flex items-center justify-between">
@@ -836,8 +839,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               </div>
 
               <div className="space-y-6">
-                {/* Выбор техники если нет акта */}
-                {!selectedBreakdownDetail && (
+                {/* Выбор техники если заявка создается без привязки к технике */}
+                {!selectedBreakdownDetail && !selectedMaintenanceEquipId && (
                   <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-blue-500/20 space-y-3">
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-400">Техника</label>
