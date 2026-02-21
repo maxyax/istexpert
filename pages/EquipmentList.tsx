@@ -835,14 +835,19 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
               {activeTab === 'history' && (
                 <div className="space-y-6">
                    {(() => {
-                     // Объединяем записи обслуживания и поломки для данной техники
-                     const equipRecords = records.filter(r => r.equipmentId === selectedItem?.id);
+                     // Показываем ТОЛЬКО поломки + ТО, без дублирования актов поломок
                      const equipBreakdowns = breakdowns.filter(b => b.equipmentId === selectedItem?.id);
-                     
-                     // Создаем объединенный список
+                     const equipTORecords = records.filter(r => 
+                       r.equipmentId === selectedItem?.id && 
+                       !r.type.toLowerCase().includes('поломк') && 
+                       !r.type.toLowerCase().includes('неисправност') && 
+                       !r.type.toLowerCase().includes('акт')
+                     );
+
+                     // Создаем объединенный список (только ТО + поломки, без дублей)
                      const allHistory = [
-                       ...equipRecords.map(r => ({ ...r, _type: 'maintenance' })),
-                       ...equipBreakdowns.map(b => ({ ...b, _type: 'breakdown' }))
+                       ...equipTORecords.map(r => ({ ...r, _type: 'maintenance' as const })),
+                       ...equipBreakdowns.map(b => ({ ...b, _type: 'breakdown' as const }))
                      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
                      if (allHistory.length === 0) {
@@ -931,7 +936,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                                      }`}>{relatedRequest.status}</span>
                                      {relatedRequest.status === 'На складе' && status !== 'В работе' && status !== 'Исправлено' && (
                                        <span className="text-[7px] font-black text-emerald-600 flex items-center gap-1">
-                                         <CheckCircle2 size={10}/> Готово к работе
+                                         <CheckCircle2 size={10}/> Готово
                                        </span>
                                      )}
                                    </div>
