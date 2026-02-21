@@ -370,14 +370,14 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedMaintenanceEquipId(e.id)}>
                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-neo-bg flex items-center justify-center text-blue-600 shrink-0"><Wrench size={20} className="md:w-5 md:h-5"/></div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-black uppercase text-xs md:text-sm text-gray-700 truncate">{e.name}</div>
-                      <div className="text-[9px] md:text-[11px] text-gray-400 truncate">{e.make} {e.model} • {e.hours} м/ч</div>
+                      <div className="font-semibold text-xs md:text-sm text-gray-800 dark:text-gray-100 truncate">{e.name}</div>
+                      <div className="text-[9px] md:text-[11px] text-gray-500 dark:text-gray-400 truncate">{e.make} {e.model} • {e.hours} м/ч</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <button onClick={() => setIsTOEquipSelectOpen(true)} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-[8px] md:text-[9px] text-center">Провести ТО</button>
-                    <button onClick={() => setIsBreakdownEquipSelectOpen(true)} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-red-600 font-black uppercase text-[8px] md:text-[9px] text-center">Акт</button>
-                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-neo-bg shadow-neo text-emerald-600 font-black uppercase text-[8px] md:text-[9px] text-center">Заявка</button>
+                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); openTOForEquip(e); }} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold text-[8px] md:text-[9px] text-center">Провести ТО</button>
+                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '' }); setIsBreakdownModalOpen(true); }} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-semibold text-[8px] md:text-[9px] text-center">Акт</button>
+                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-semibold text-[8px] md:text-[9px] text-center">Заявка</button>
                   </div>
                 </div>
               ))}

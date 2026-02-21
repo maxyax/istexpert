@@ -142,9 +142,9 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             <div className={`p-4 rounded-2xl w-fit mb-4 md:mb-6 ${s.bgColor} group-hover:scale-110 transition-transform`}>
               <div className={s.color}>{s.icon}</div>
             </div>
-            <h4 className="text-gray-700 dark:text-gray-300 text-[11px] font-semibold uppercase tracking-wide mb-1">{s.title}</h4>
+            <h4 className="text-gray-700 dark:text-gray-200 text-[11px] font-semibold uppercase tracking-wide mb-1">{s.title}</h4>
             <div className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">{s.value}</div>
-            <p className={`text-[9px] md:text-[10px] font-medium mt-2 ${s.highlight ? 'text-red-700 font-semibold' : 'text-gray-600'}`}>{s.sub}</p>
+            <p className={`text-[9px] md:text-[10px] font-medium mt-2 ${s.highlight ? 'text-red-700 dark:text-red-400 font-semibold' : 'text-gray-600 dark:text-gray-300'}`}>{s.sub}</p>
           </div>
         ))}
       </div>
@@ -154,23 +154,23 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Топливо */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-emerald-100 text-emerald-700">
+            <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
               <Fuel size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800">Топливо за месяц</h3>
-              <p className="text-[9px] text-gray-500 uppercase">{new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
+              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Топливо за месяц</h3>
+              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">{new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
             </div>
           </div>
-          <div className="text-3xl font-bold text-emerald-700 mb-4">{formatMoney(fuelCostThisMonth)}</div>
+          <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 mb-4">{formatMoney(fuelCostThisMonth)}</div>
           <div className="space-y-2">
             <div className="flex justify-between text-[9px] uppercase">
-              <span className="text-gray-600">Заправок</span>
-              <span className="font-semibold text-gray-800">{fuelThisMonth.length}</span>
+              <span className="text-gray-600 dark:text-gray-300">Заправок</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{fuelThisMonth.length}</span>
             </div>
             <div className="flex justify-between text-[9px] uppercase">
-              <span className="text-gray-600">Объем</span>
-              <span className="font-semibold text-gray-800">{fuelThisMonth.reduce((s, f) => s + f.quantity, 0)} л</span>
+              <span className="text-gray-600 dark:text-gray-300">Объем</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{fuelThisMonth.reduce((s, f) => s + f.quantity, 0)} л</span>
             </div>
           </div>
         </div>
@@ -178,19 +178,19 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Оплачено */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-blue-100 text-blue-700">
+            <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
               <DollarSign size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800">Оплачено заявок</h3>
-              <p className="text-[9px] text-gray-500 uppercase">Ожидание доставки</p>
+              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Оплачено заявок</h3>
+              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Ожидание доставки</p>
             </div>
           </div>
-          <div className="text-3xl font-bold text-blue-700 mb-4">{formatMoney(requestsPaidAmount)}</div>
+          <div className="text-3xl font-bold text-blue-700 dark:text-blue-400 mb-4">{formatMoney(requestsPaidAmount)}</div>
           <div className="space-y-2">
             <div className="flex justify-between text-[9px] uppercase">
-              <span className="text-gray-600">Заявок</span>
-              <span className="font-semibold text-gray-800">{requestsPaid.length}</span>
+              <span className="text-gray-600 dark:text-gray-300">Заявок</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{requestsPaid.length}</span>
             </div>
           </div>
         </div>
@@ -198,19 +198,19 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* На складе */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-indigo-100 text-indigo-700">
+            <div className="p-3 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400">
               <Package size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800">Поступило на склад</h3>
-              <p className="text-[9px] text-gray-500 uppercase">Готово к выдаче</p>
+              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Поступило на склад</h3>
+              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Готово к выдаче</p>
             </div>
           </div>
-          <div className="text-3xl font-bold text-indigo-700 mb-4">{formatMoney(requestsInWarehouseAmount)}</div>
+          <div className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-4">{formatMoney(requestsInWarehouseAmount)}</div>
           <div className="space-y-2">
             <div className="flex justify-between text-[9px] uppercase">
-              <span className="text-gray-600">Заявок</span>
-              <span className="font-semibold text-gray-800">{requestsInWarehouse.length}</span>
+              <span className="text-gray-600 dark:text-gray-300">Заявок</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{requestsInWarehouse.length}</span>
             </div>
           </div>
         </div>
@@ -221,28 +221,28 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-red-100 text-red-700">
+              <div className="p-3 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
                 <AlertTriangle size={24}/>
               </div>
               <div>
-                <h3 className="text-sm font-semibold uppercase text-gray-800">Акты поломок</h3>
-                <p className="text-[9px] text-gray-500 uppercase">За этот месяц</p>
+                <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Акты поломок</h3>
+                <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">За этот месяц</p>
               </div>
             </div>
-            <div className="text-2xl font-bold text-red-700">{breakdownsThisMonth.length}</div>
+            <div className="text-2xl font-bold text-red-700 dark:text-red-400">{breakdownsThisMonth.length}</div>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[9px] uppercase text-gray-600">Критические</span>
-              <span className="font-semibold text-red-700">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
+              <span className="text-[9px] uppercase text-gray-600 dark:text-gray-300">Критические</span>
+              <span className="font-semibold text-red-700 dark:text-red-400">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[9px] uppercase text-gray-600">Средние</span>
-              <span className="font-semibold text-orange-600">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
+              <span className="text-[9px] uppercase text-gray-600 dark:text-gray-300">Средние</span>
+              <span className="font-semibold text-orange-600 dark:text-orange-400">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[9px] uppercase text-gray-600">Низкие</span>
-              <span className="font-semibold text-yellow-600">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
+              <span className="text-[9px] uppercase text-gray-600 dark:text-gray-300">Низкие</span>
+              <span className="font-semibold text-yellow-600 dark:text-yellow-400">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
             </div>
           </div>
         </div>
@@ -250,12 +250,12 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Самая ломающаяся техника */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-orange-100 text-orange-700">
+            <div className="p-3 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
               <TrendingUp size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800">Частые поломки</h3>
-              <p className="text-[9px] text-gray-500 uppercase">Топ-5 за месяц</p>
+              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Частые поломки</h3>
+              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Топ-5 за месяц</p>
             </div>
           </div>
           <div className="space-y-3">
@@ -266,23 +266,23 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                     idx === 0 ? 'bg-red-500 text-white' :
                     idx === 1 ? 'bg-orange-500 text-white' :
                     idx === 2 ? 'bg-yellow-500 text-white' :
-                    'bg-gray-200 text-gray-600'
+                    'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                   }`}>
                     {idx + 1}
                   </div>
                   <div>
-                    <p className="text-[9px] font-semibold text-gray-800">{item.equipment.name}</p>
-                    <p className="text-[7px] text-gray-500">{item.equipment.vin}</p>
+                    <p className="text-[9px] font-semibold text-gray-800 dark:text-gray-200">{item.equipment.name}</p>
+                    <p className="text-[7px] text-gray-500 dark:text-gray-400">{item.equipment.vin}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-red-700">{item.breakdowns}</p>
-                  <p className="text-[7px] text-gray-500 uppercase">поломок</p>
+                  <p className="text-sm font-bold text-red-700 dark:text-red-400">{item.breakdowns}</p>
+                  <p className="text-[7px] text-gray-500 dark:text-gray-400 uppercase">поломок</p>
                 </div>
               </div>
             ))}
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).length === 0 && (
-              <p className="text-center py-10 text-[9px] font-medium text-gray-500 uppercase">Поломок за месяц не было</p>
+              <p className="text-center py-10 text-[9px] font-medium text-gray-500 dark:text-gray-400 uppercase">Поломок за месяц не было</p>
             )}
           </div>
         </div>
@@ -292,15 +292,15 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-orange-100 text-orange-700">
+            <div className="p-3 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
               <History size={24}/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800">Живая лента</h3>
-              <p className="text-[9px] text-gray-500 uppercase">Последние события</p>
+              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Живая лента</h3>
+              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Последние события</p>
             </div>
           </div>
-          <button onClick={() => onNavigate('maintenance')} className="text-[9px] font-semibold text-blue-700 hover:text-blue-800 uppercase flex items-center gap-1">
+          <button onClick={() => onNavigate('maintenance')} className="text-[9px] font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 uppercase flex items-center gap-1">
             Весь журнал <ChevronRight size={14}/>
           </button>
         </div>
