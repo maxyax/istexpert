@@ -91,6 +91,7 @@ export type BreakdownSeverity = 'Критическая' | 'Средняя' | '�
 
 export interface BreakdownRecord {
   id: string;
+  actNumber?: string;
   equipmentId: string;
   date: string;
   partName: string;
@@ -117,11 +118,14 @@ export interface ProcurementRequest {
   carrierName?: string;
   trackingNumber?: string;
   responsible?: string;
+  breakdownPhotos?: { id: string; name: string; url: string; type?: string }[];
+  invoiceFiles?: { id: string; name: string; url: string; type?: string }[];
   attachments?: { id: string; name: string; url: string; type?: string }[];
   createdAt: string;
   completedAt?: string;
   equipmentId: string;
   breakdownId?: string;
+  breakdownActNumber?: string;
   priority?: number;
   createdBy?: string;
 }

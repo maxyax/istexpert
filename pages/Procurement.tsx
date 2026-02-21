@@ -244,9 +244,25 @@ export const Procurement: React.FC = () => {
                      </div>
                    </div>
 
-                   <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
-                     <label className="text-xs font-bold text-gray-400">Прикрепить счет / спецификацию</label>
-                     <div className="flex items-center gap-3 mt-2">
+                   <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5">
+                     <label className="text-xs font-bold text-gray-400">Фотографии запчастей (из акта поломки №{editReq.breakdownActNumber})</label>
+                     <div className="flex gap-3 items-center mt-3">
+                       <div className="flex-1 grid grid-cols-3 gap-2">
+                         {(editReq.breakdownPhotos||[]).map((p:any, i:number) => (
+                           <div key={p.id || i} className="w-full h-20 rounded-lg overflow-hidden relative border border-white/10 cursor-pointer hover:border-blue-500 transition-colors group" onClick={() => window.open(p.url, '_blank')}>
+                             <img src={p.url} className="w-full h-full object-cover" />
+                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                               <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-bold">Открыть</span>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   </div>
+
+                   <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5">
+                     <label className="text-xs font-bold text-gray-400">Счета / Спецификации / Документы</label>
+                     <div className="flex items-center gap-3 mt-3">
                        <input type="file" id="req-file-input" className="hidden" onChange={(ev:any)=>{
                          const file = ev.target.files && ev.target.files[0];
                          if (!file) return;
@@ -254,14 +270,17 @@ export const Procurement: React.FC = () => {
                          reader.onload = (e) => {
                            const url = e.target?.result as string;
                            const att = { id: `a-${Date.now()}`, name: file.name, url, type: file.type };
-                           setEditReq((prev:any)=> ({ ...prev, attachments: [...(prev.attachments||[]), att] }));
+                           setEditReq((prev:any)=> ({ ...prev, invoiceFiles: [...(prev.invoiceFiles||[]), att] }));
                          };
                          reader.readAsDataURL(file);
                        }} />
-                       <button onClick={() => { const el = document.getElementById('req-file-input'); if (el) (el as HTMLInputElement).click(); }} className="px-3 py-2 rounded-xl bg-neo-bg border border-white/5 font-bold text-xs">Загрузить файл</button>
-                       <div className="flex gap-2">
-                         {(editReq.attachments||[]).map((a:any)=> (
-                           <a key={a.id} href={a.url} target="_blank" className="text-sm font-black text-blue-600">{a.name}</a>
+                       <button onClick={() => { const el = document.getElementById('req-file-input'); if (el) (el as HTMLInputElement).click(); }} className="px-4 py-3 rounded-2xl bg-neo-bg border border-white/5 font-bold text-xs shadow-neo hover:shadow-neo-inset transition-all">+ Добавить документ</button>
+                       <div className="flex-1 flex flex-col gap-2">
+                         {(editReq.invoiceFiles||[]).map((a:any)=> (
+                           <div key={a.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                             <a href={a.url} target="_blank" className="text-sm font-black text-blue-600 hover:text-blue-500 truncate">{a.name}</a>
+                             <button onClick={() => { const arr = [...(editReq.invoiceFiles||[])]; arr.splice(arr.indexOf(a), 1); setEditReq({...editReq, invoiceFiles: arr}); }} className="text-red-500 hover:text-red-600 font-bold">×</button>
+                           </div>
                          ))}
                        </div>
                      </div>

@@ -487,6 +487,10 @@ export const Maintenance: React.FC = () => {
               <div className="space-y-6">
                 <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
                   <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400">Номер акта</label>
+                    <div className="text-xl font-black text-blue-600">{selectedBreakdownDetail.actNumber || 'АКТ-001'}</div>
+                  </div>
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-gray-400">Наименование заявки</label>
                     <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder={`Запрос по акту: ${selectedBreakdownDetail.partName || 'Запчасть'}`} />
                   </div>
@@ -530,7 +534,7 @@ export const Maintenance: React.FC = () => {
                 <div className="flex gap-3">
                   <button onClick={() => {
                     // submit request
-                    const title = requestItems.map(i => `${i.name} x${i.quantity}`).slice(0,3).join(', ') || `Запрос по акту ${selectedBreakdownDetail.id}`;
+                    const title = requestItems.map(i => `${i.name} x${i.quantity}`).slice(0,3).join(', ') || `Запрос по акту ${selectedBreakdownDetail.actNumber || selectedBreakdownDetail.id}`;
                     const req = {
                       id: `pr-${Math.random().toString(36).substr(2,9)}`,
                       title,
@@ -539,7 +543,8 @@ export const Maintenance: React.FC = () => {
                       createdAt: new Date().toISOString(),
                       equipmentId: selectedBreakdownDetail.equipmentId,
                       breakdownId: selectedBreakdownDetail.id,
-                      attachments: requestPhotos.map((url, i) => ({ id: `p-${i}`, name: `Фото ${i + 1}`, url, type: 'image' }))
+                      breakdownActNumber: selectedBreakdownDetail.actNumber,
+                      breakdownPhotos: requestPhotos.map((url, i) => ({ id: `p-${i}`, name: `Фото ${i + 1} (акт)`, url, type: 'image' }))
                     };
                     addRequest(req as any);
                     // set breakdown status to 'Запчасти заказаны'

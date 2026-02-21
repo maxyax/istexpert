@@ -57,18 +57,21 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
   })),
   addBreakdown: (record) => {
     const id = `b-${Math.random().toString(36).substr(2, 9)}`;
-    const equipment = useFleetStore.getState().equipment.find(e => e.id === record.equipmentId);
-    
-    // Fixed comparison to match BreakdownSeverity type
-    useNotificationStore.getState().addNotification(
-      'Зарегистрирована поломка',
-      `${equipment?.name || 'Техника'}: неисправность узла "${record.node}" (${record.partName}). Степень: ${record.severity}.`,
-      record.severity === 'Критическая' ? 'error' : 'warning'
-    );
+    set((state) => {
+      const actNumber = `АКТ-${String(state.breakdowns.length + 1).padStart(3, '0')}`; // Generate act number like АКТ-001, АКТ-002
+      const equipment = useFleetStore.getState().equipment.find(e => e.id === record.equipmentId);
+      
+      // Fixed comparison to match BreakdownSeverity type
+      useNotificationStore.getState().addNotification(
+        'Зарегистрирована поломка',
+        `${equipment?.name || 'Техника'}: неисправность узла "${record.node}" (${record.partName}). Степень: ${record.severity}. АКТ ${actNumber}`,
+        record.severity === 'Критическая' ? 'error' : 'warning'
+      );
 
-    set((state) => ({
-      breakdowns: [{ ...record, id }, ...state.breakdowns]
-    }));
+      return {
+        breakdowns: [{ ...record, id, actNumber }, ...state.breakdowns]
+      };
+    });
     // After adding breakdown, recalculate equipment status
     const calc = useMaintenanceStore.getState()._recalculateEquipmentStatus;
     if (calc) calc(record.equipmentId);
