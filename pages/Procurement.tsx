@@ -166,34 +166,34 @@ export const Procurement: React.FC = () => {
       {/* МОДАЛКА УПРАВЛЕНИЯ ЗАЯВКОЙ (Смена статусов здесь) */}
       {selectedReq && editReq && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-           <div className="bg-neo-bg w-full max-w-xl rounded-[3rem] shadow-neo p-8 md:p-12 animate-in zoom-in border border-white/20">
-              <div className="flex justify-between items-center mb-10">
+           <div className="bg-neo-bg w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[85vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg">
                  <div className="flex items-center gap-4">
                     <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Package size={28}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Карточка ТМЦ</h3>
+                    <h3 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Карточка ТМЦ</h3>
                  </div>
                  <button onClick={() => setSelectedRequestId(null)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={24}/></button>
               </div>
               
                  <div className="space-y-6">
                    <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
-                     <label className="text-[9px] font-black text-gray-400 uppercase">Наименование</label>
+                     <label className="text-xs font-bold text-gray-400">Наименование</label>
                      <input className="w-full p-3 rounded-lg bg-neo-bg outline-none app-input" value={editReq.title} onChange={e=>setEditReq({...editReq, title: e.target.value})} />
 
                      <div className="grid grid-cols-2 gap-3">
                        <div>
-                         <label className="text-[9px] font-black text-gray-400 uppercase">Контрагент</label>
+                         <label className="text-xs font-bold text-gray-400">Контрагент</label>
                          <input className="w-full p-3 rounded-lg bg-neo-bg outline-none app-input" value={editReq.contractorName || ''} onChange={e=>setEditReq({...editReq, contractorName: e.target.value})} />
                        </div>
                        <div>
-                         <label className="text-[9px] font-black text-gray-400 uppercase">Номер счета / спецификации</label>
+                         <label className="text-xs font-bold text-gray-400">Номер счета / спецификации</label>
                          <input className="w-full p-3 rounded-lg bg-neo-bg outline-none app-input" value={editReq.invoiceNumber || ''} onChange={e=>setEditReq({...editReq, invoiceNumber: e.target.value})} />
                        </div>
                      </div>
                    </div>
 
                    <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
-                     <p className="text-[9px] font-black text-gray-400 uppercase mb-2">Позиции</p>
+                     <p className="text-xs font-bold text-gray-400 mb-2">Позиции</p>
                      <div className="space-y-3">
                        {(editReq.items || []).map((it: any, idx: number) => (
                          <div key={it.id || idx} className="grid grid-cols-12 gap-2 items-center">
@@ -204,27 +204,27 @@ export const Procurement: React.FC = () => {
                            <button className="col-span-1 text-red-500" onClick={() => { const arr = [...editReq.items]; arr.splice(idx,1); setEditReq({...editReq, items: arr}); }}>×</button>
                          </div>
                        ))}
-                       <button onClick={()=> setEditReq({...editReq, items: [...(editReq.items||[]), { id: `i-${Date.now()}`, name: '', quantity: '1', unitPriceWithVAT: 0, total: 0 }]})} className="mt-2 px-3 py-2 rounded-xl bg-neo-bg border border-white/5 font-black">Добавить позицию</button>
+                       <button onClick={()=> setEditReq({...editReq, items: [...(editReq.items||[]), { id: `i-${Date.now()}`, name: '', quantity: '1', unitPriceWithVAT: 0, total: 0 }]})} className="mt-2 px-3 py-2 rounded-xl bg-neo-bg border border-white/5 font-bold text-xs">Добавить позицию</button>
                      </div>
                    </div>
 
                    <div className="grid grid-cols-2 gap-3">
                      <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
-                       <label className="text-[9px] font-black text-gray-400 uppercase">Перевозчик</label>
+                       <label className="text-xs font-bold text-gray-400">Перевозчик</label>
                        <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.carrierName || ''} onChange={e=>setEditReq({...editReq, carrierName: e.target.value})} />
-                       <label className="text-[9px] font-black text-gray-400 uppercase mt-2">Трек/накладная</label>
+                       <label className="text-xs font-bold text-gray-400 mt-2">Трек/накладная</label>
                        <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
                      </div>
                      <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
-                       <label className="text-[9px] font-black text-gray-400 uppercase">Ответственный</label>
+                       <label className="text-xs font-bold text-gray-400">Ответственный</label>
                        <input className="w-full p-2 rounded-lg bg-neo-bg outline-none app-input" value={editReq.responsible || ''} onChange={e=>setEditReq({...editReq, responsible: e.target.value})} />
-                       <label className="text-[9px] font-black text-gray-400 uppercase mt-2">Сумма всех позиций</label>
+                       <label className="text-xs font-bold text-gray-400 mt-2">Сумма всех позиций</label>
                        <div className="text-2xl font-black text-emerald-600">{((editReq.items||[]).reduce((s:any,it:any)=>s + (it.total||0),0) || 0).toFixed(2)} ₽</div>
                      </div>
                    </div>
 
                    <div className="p-4 rounded-2xl bg-neo-bg border border-white/5">
-                     <label className="text-[9px] font-black text-gray-400 uppercase">Прикрепить счет / спецификацию</label>
+                     <label className="text-xs font-bold text-gray-400">Прикрепить счет / спецификацию</label>
                      <div className="flex items-center gap-3 mt-2">
                        <input type="file" id="req-file-input" className="hidden" onChange={(ev:any)=>{
                          const file = ev.target.files && ev.target.files[0];
@@ -237,7 +237,7 @@ export const Procurement: React.FC = () => {
                          };
                          reader.readAsDataURL(file);
                        }} />
-                       <button onClick={() => { const el = document.getElementById('req-file-input'); if (el) (el as HTMLInputElement).click(); }} className="px-3 py-2 rounded-xl bg-neo-bg border border-white/5 font-black">Загрузить файл</button>
+                       <button onClick={() => { const el = document.getElementById('req-file-input'); if (el) (el as HTMLInputElement).click(); }} className="px-3 py-2 rounded-xl bg-neo-bg border border-white/5 font-bold text-xs">Загрузить файл</button>
                        <div className="flex gap-2">
                          {(editReq.attachments||[]).map((a:any)=> (
                            <a key={a.id} href={a.url} target="_blank" className="text-sm font-black text-blue-600">{a.name}</a>

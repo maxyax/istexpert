@@ -36,11 +36,11 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
           <nav className="flex-1 space-y-4">
             {navItems.map(item => (
               <button key={item.id} onClick={() => { onNavigate(item.id); setIsMobileMenuOpen(false); }} className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all ${activePage === item.id ? 'shadow-neo-inset text-blue-500 font-bold' : 'shadow-neo hover:shadow-neo-inset text-gray-500'}`}>
-                <item.icon size={20} /> <span className="text-sm">{item.label}</span>
+                <item.icon size={20} /> <span className="text-xs font-bold">{item.label}</span>
               </button>
             ))}
           </nav>
-          <button onClick={logout} className="mt-10 flex items-center space-x-3 p-4 rounded-2xl shadow-neo text-red-500 font-bold text-sm uppercase tracking-widest hover:shadow-neo-inset transition-all">
+          <button onClick={logout} className="mt-10 flex items-center space-x-3 p-4 rounded-2xl shadow-neo text-red-500 font-bold text-xs hover:shadow-neo-inset transition-all">
             <LogOut size={18} /> <span>Выйти</span>
           </button>
         </div>

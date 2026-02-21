@@ -347,22 +347,22 @@ export const Maintenance: React.FC = () => {
               </div>
               <form onSubmit={handleSaveBreakdown} className="space-y-5 md:space-y-6">
                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Узел техники</label>
+                    <label className="text-xs font-bold text-gray-400 ml-2">Узел техники</label>
                     <select className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" value={breakdownForm.node} onChange={e=>setBreakdownForm({...breakdownForm, node: e.target.value})}>
                        <option>Двигатель</option><option>Гидравлика</option><option>Ходовая часть</option><option>Электроника</option><option>Кузов</option>
                     </select>
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Деталь / Запчасть</label>
+                    <label className="text-xs font-bold text-gray-400 ml-2">Деталь / Запчасть</label>
                     <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" placeholder="Введите название..." value={breakdownForm.partName} onChange={e=>setBreakdownForm({...breakdownForm, partName: e.target.value})} required />
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <div className="space-y-2">
-                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Дата поломки</label>
+                     <label className="text-xs font-bold text-gray-400 ml-2">Дата поломки</label>
                      <input type="date" value={breakdownForm.date} onChange={e=>setBreakdownForm({...breakdownForm, date: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" />
                    </div>
                    <div className="space-y-2">
-                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Пробег / Наработка</label>
+                     <label className="text-xs font-bold text-gray-400 ml-2">Пробег / Наработка</label>
                      <input type="number" value={breakdownForm.hoursAtBreakdown as any || ''} onChange={e=>setBreakdownForm({...breakdownForm, hoursAtBreakdown: e.target.value ? parseInt(e.target.value) : undefined})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" />
                    </div>
                  </div>
@@ -371,19 +371,19 @@ export const Maintenance: React.FC = () => {
                    <input placeholder="Кто обнаружил (водитель)" value={breakdownForm.driver} onChange={e=>setBreakdownForm({...breakdownForm, driver: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 dark:text-gray-200 outline-none app-input" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Серьезность</label>
+                    <label className="text-xs font-bold text-gray-400 ml-2">Серьезность</label>
                     <div className="flex gap-3">
                        {['Низкая', 'Средняя', 'Критическая'].map(s => (
-                         <button key={s} type="button" onClick={()=>setBreakdownForm({...breakdownForm, severity: s as any})} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase transition-all ${breakdownForm.severity === s ? 'bg-neo-bg shadow-neo-inset text-red-600 border border-red-500/20' : 'shadow-neo text-gray-400 hover:text-gray-600'}`}>{s}</button>
+                         <button key={s} type="button" onClick={()=>setBreakdownForm({...breakdownForm, severity: s as any})} className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${breakdownForm.severity === s ? 'bg-neo-bg shadow-neo-inset text-red-600 border border-red-500/20' : 'shadow-neo text-gray-400 hover:text-gray-600'}`}>{s}</button>
                        ))}
                     </div>
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Примечания</label>
+                    <label className="text-xs font-bold text-gray-400 ml-2">Примечания</label>
                     <textarea value={breakdownForm.description} onChange={e=>setBreakdownForm({...breakdownForm, description: e.target.value})} placeholder="Описание и примечания" className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none h-24 text-gray-700 dark:text-gray-200 outline-none app-input" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Фотографии (узел/шильдик/маркировка)</label>
+                    <label className="text-xs font-bold text-gray-400 ml-2">Фотографии (узел/шильдик/маркировка)</label>
                     <div className="flex gap-3 items-center">
                       <div className="flex-1 grid grid-cols-3 gap-2">
                         {(breakdownForm.photos || []).map((p, i) => (
