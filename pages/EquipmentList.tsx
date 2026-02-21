@@ -936,7 +936,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
                                          status === 'Исправлено' ? 'bg-emerald-500 text-white' :
                                          status === 'В работе' ? 'bg-blue-500 text-white' :
-                                         status === 'Запчасти заказаны' ? 'bg-yellow-500 text-white' :
+                                         status === 'Запчасти заказаны' ? 'bg-yellow-400 text-yellow-900' :
                                          'bg-red-500 text-white'
                                        }`}>{status}</span>
                                      )}
@@ -1111,7 +1111,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                         selectedHistoryRecord.status === 'Исправлено' ? 'bg-emerald-500 text-white' :
                         selectedHistoryRecord.status === 'В работе' ? 'bg-blue-500 text-white' :
                         selectedHistoryRecord.status === 'Запчасти получены' ? 'bg-emerald-400 text-white' :
-                        selectedHistoryRecord.status === 'Запчасти заказаны' ? 'bg-yellow-500 text-white' :
+                        selectedHistoryRecord.status === 'Запчасти заказаны' ? 'bg-yellow-400 text-yellow-900' :
                         'bg-gray-400 text-white'
                       }`}>{selectedHistoryRecord.status}</span>
                     </div>
