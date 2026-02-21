@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { 
   Fuel, Coins, TrendingUp, Search, Clock, Droplet, Plus, X, Save
 } from 'lucide-react';
+import { formatNumber, formatMoney } from '../utils/format';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useFleetStore } from '../store/useFleetStore';
 import { FuelRecord } from '../types';
@@ -52,8 +53,8 @@ export const FuelManagement: React.FC = () => {
        </div>
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <StatCard label="Объем за месяц" value={`${stats.total.toLocaleString()} л`} icon={<Droplet size={24} className="text-blue-500"/>} />
-          <StatCard label="Финансовые затраты" value={`${stats.cost.toLocaleString()} ₽`} icon={<Coins size={24} className="text-emerald-500"/>} />
+          <StatCard label="Объем за месяц" value={`${formatNumber(stats.total)} л`} icon={<Droplet size={24} className="text-blue-500"/>} />
+          <StatCard label="Финансовые затраты" value={formatMoney(stats.cost)} icon={<Coins size={24} className="text-emerald-500"/>} />
           <StatCard label="Средняя цена ДТ" value="65.40 ₽" icon={<TrendingUp size={24} className="text-indigo-500"/>} />
        </div>
 
@@ -81,7 +82,7 @@ export const FuelManagement: React.FC = () => {
                 </div>
                 <div className="text-left md:text-right flex-shrink-0">
                    <p className="text-xl md:text-2xl font-black text-blue-500 whitespace-nowrap">+{r.quantity} л</p>
-                   <p className="text-[10px] md:text-[11px] font-black text-emerald-500 tracking-widest whitespace-nowrap">{r.totalCost.toLocaleString()} ₽</p>
+                   <p className="text-[10px] md:text-[11px] font-black text-emerald-500 tracking-widest whitespace-nowrap">{formatMoney(r.totalCost)}</p>
                 </div>
               </div>
             ))}

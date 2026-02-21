@@ -78,6 +78,7 @@ export const Maintenance: React.FC = () => {
 
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
   const [requestItems, setRequestItems] = useState<{ sku?: string; name: string; quantity: string }[]>([]);
+  const [requestPhotos, setRequestPhotos] = useState<string[]>([]);
 
   const [toChecklist, setToChecklist] = useState<{ text: string; done: boolean; note?: string }[]>([]);
   const [toTypeLabel, setToTypeLabel] = useState<string>('');
@@ -494,20 +495,34 @@ export const Maintenance: React.FC = () => {
                   <p className="text-xs font-bold text-gray-400 mb-3">Позиции</p>
                   <div className="space-y-3">
                     <div className="grid grid-cols-12 gap-2 items-center text-[10px] font-bold text-gray-500 mb-2">
-                      <div className="col-span-2">Артикул</div>
-                      <div className="col-span-6">Наименование</div>
+                      <div className="col-span-4">Артикул</div>
+                      <div className="col-span-4">Наименование</div>
                       <div className="col-span-3">Кол-во</div>
                       <div className="col-span-1"></div>
                     </div>
                     {requestItems.map((it, idx) => (
                       <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-white/5 p-3 rounded-2xl">
-                        <input className="col-span-2 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Артикул" value={it.sku || ''} onChange={e => { const arr = [...requestItems]; arr[idx].sku = e.target.value; setRequestItems(arr); }} />
-                        <input className="col-span-6 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Наименование" value={it.name} onChange={e => { const arr=[...requestItems]; arr[idx].name = e.target.value; setRequestItems(arr); }} />
+                        <input className="col-span-4 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Артикул" value={it.sku || ''} onChange={e => { const arr = [...requestItems]; arr[idx].sku = e.target.value; setRequestItems(arr); }} />
+                        <input className="col-span-4 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Наименование" value={it.name} onChange={e => { const arr=[...requestItems]; arr[idx].name = e.target.value; setRequestItems(arr); }} />
                         <input type="number" className="col-span-3 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Кол-во" value={it.quantity} onChange={e => { const arr=[...requestItems]; arr[idx].quantity = e.target.value; setRequestItems(arr); }} />
                         <button className="col-span-1 text-red-500 font-bold text-lg hover:text-red-600 transition-colors" onClick={() => { const arr = [...requestItems]; arr.splice(idx, 1); setRequestItems(arr); }}>×</button>
                       </div>
                     ))}
                     <button onClick={() => setRequestItems([...requestItems, { name: '', quantity: '1' }])} className="mt-3 px-4 py-3 rounded-2xl bg-neo-bg border border-white/5 font-bold text-xs shadow-neo hover:shadow-neo-inset transition-all">+ Добавить позицию</button>
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5">
+                  <label className="text-xs font-bold text-gray-400">Фотографии запчасти / шильдика / маркировки</label>
+                  <div className="flex gap-3 items-center mt-3">
+                    <div className="flex-1 grid grid-cols-3 gap-2">
+                      {requestPhotos.map((p, i) => (
+                        <div key={i} className="w-full h-20 rounded-lg overflow-hidden relative border border-white/10 cursor-pointer hover:border-blue-500 transition-colors" onClick={() => viewImage(p)}>
+                          <img src={p} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                    <button type="button" onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = (e: any) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = (evt) => { const url = evt.target?.result as string; setRequestPhotos([...requestPhotos, url]); }; reader.readAsDataURL(file); }; input.click(); }} className="p-3 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Camera size={20}/></button>
                   </div>
                 </div>
 
@@ -522,7 +537,8 @@ export const Maintenance: React.FC = () => {
                       items: requestItems.map((it, idx) => ({ id: `i-${idx}-${Date.now()}`, name: it.name, quantity: it.quantity, unitPriceWithVAT: 0, total: 0 })),
                       createdAt: new Date().toISOString(),
                       equipmentId: selectedBreakdownDetail.equipmentId,
-                      breakdownId: selectedBreakdownDetail.id
+                      breakdownId: selectedBreakdownDetail.id,
+                      attachments: requestPhotos.map((url, i) => ({ id: `p-${i}`, name: `Фото ${i + 1}`, url, type: 'image' }))
                     };
                     addRequest(req as any);
                     // set breakdown status to 'Запчасти заказаны'
@@ -530,6 +546,7 @@ export const Maintenance: React.FC = () => {
                     setIsCreateRequestOpen(false);
                     setSelectedBreakdownDetail(null);
                     setRequestItems([]);
+                    setRequestPhotos([]);
                   }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs shadow-neo hover:shadow-neo-inset transition-all">Отправить в снабжение</button>
                   <button onClick={() => { setIsCreateRequestOpen(false); setRequestItems([]); }} className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs shadow-neo hover:shadow-neo-inset transition-all">Отмена</button>
                 </div>

@@ -4,6 +4,7 @@ import { Package, ChevronRight, Truck, LayoutGrid, List, Layers, X, CheckCircle2
 import { useProcurementStore } from '../store/useProcurementStore';
 import { useFleetStore } from '../store/useFleetStore';
 import { ProcurementStatus } from '../types';
+import { formatNumber, formatMoney } from '../utils/format';
 
 const COLUMNS: {id: ProcurementStatus, title: string, color: string}[] = [
   { id: 'Новая', title: 'Новая', color: 'bg-gray-400' },
@@ -83,7 +84,7 @@ export const Procurement: React.FC = () => {
                       <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase truncate">{equipment.find(e=>e.id===req.equipmentId)?.name || 'Общий'}</span>
                     </div>
                     <div className="flex justify-between items-center pt-4 border-t border-gray-200/50 dark:border-gray-800">
-                      <span className="text-[11px] font-black text-emerald-600">{req.cost ? `${req.cost.toLocaleString()} ₽` : 'Оценка...'}</span>
+                      <span className="text-[11px] font-black text-emerald-600">{req.cost ? formatMoney(req.cost) : 'Оценка...'}</span>
                       <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>
@@ -112,7 +113,7 @@ export const Procurement: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-4 md:gap-10 shrink-0">
-                <p className="text-base md:text-xl font-black text-emerald-600 whitespace-nowrap">{req.cost?.toLocaleString() || '—'} ₽</p>
+                <p className="text-base md:text-xl font-black text-emerald-600 whitespace-nowrap">{req.cost ? formatMoney(req.cost) : '—'}</p>
                 <div className="p-2 rounded-xl shadow-neo text-gray-300 group-hover:text-blue-600"><ChevronRight size={20}/></div>
               </div>
             </div>
@@ -156,7 +157,7 @@ export const Procurement: React.FC = () => {
                     </div>
                     <span className={`text-[9px] font-black uppercase px-2 py-1 rounded ${statusColor} text-white tracking-widest`}>{req.status}</span>
                   </td>
-                  <td className="px-8 py-6 text-right font-black text-emerald-600 text-base">{req.cost?.toLocaleString() || '—'}</td>
+                  <td className="px-8 py-6 text-right font-black text-emerald-600 text-base">{req.cost ? formatMoney(req.cost) : '—'}</td>
                 </tr>
                 );
               })}
@@ -220,7 +221,7 @@ export const Procurement: React.FC = () => {
                            <input className="col-span-5 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none app-input" placeholder="Наименование" value={it.name} onChange={e=>{ const arr = [...editReq.items]; arr[idx].name = e.target.value; setEditReq({...editReq, items: arr}); }} />
                            <input type="number" className="col-span-2 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none app-input" placeholder="Кол-во" value={it.quantity} onChange={e=>{ const arr=[...editReq.items]; arr[idx].quantity = e.target.value; arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (parseFloat(arr[idx].unitPriceWithVAT || '0') || 0); setEditReq({...editReq, items: arr}); }} />
                            <input type="number" step="0.01" className="col-span-3 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none app-input" placeholder="Цена с НДС" value={it.unitPriceWithVAT || ''} onChange={e=>{ const arr=[...editReq.items]; arr[idx].unitPriceWithVAT = parseFloat(e.target.value || '0') || 0; arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (arr[idx].unitPriceWithVAT || 0); setEditReq({...editReq, items: arr}); }} />
-                           <div className="col-span-1 text-right text-xs font-black text-emerald-600">{(it.total || 0).toFixed(2)}</div>
+                           <div className="col-span-1 text-right text-xs font-black text-emerald-600">{formatNumber(it.total || 0)}</div>
                            <button className="col-span-1 text-red-500 font-bold text-lg hover:text-red-600" onClick={() => { const arr = [...editReq.items]; arr.splice(idx,1); setEditReq({...editReq, items: arr}); }}>×</button>
                          </div>
                        ))}
@@ -239,7 +240,7 @@ export const Procurement: React.FC = () => {
                        <label className="text-xs font-bold text-gray-400">Ответственный</label>
                        <input className="w-full p-2 rounded-lg shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.responsible || ''} onChange={e=>setEditReq({...editReq, responsible: e.target.value})} />
                        <label className="text-xs font-bold text-gray-400 mt-2">Сумма всех позиций</label>
-                       <div className="text-2xl font-black text-emerald-600">{((editReq.items||[]).reduce((s:any,it:any)=>s + (it.total||0),0) || 0).toFixed(2)} ₽</div>
+                       <div className="text-2xl font-black text-emerald-600">{formatMoney((editReq.items||[]).reduce((s:any,it:any)=>s + (it.total||0),0) || 0)}</div>
                      </div>
                    </div>
 
