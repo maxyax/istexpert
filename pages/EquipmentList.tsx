@@ -419,8 +419,8 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                         {e.insurance_end ? (() => {
                           const insuranceStatus = getInsuranceStatus(e.insurance_end);
                           return (
-                            <div className="flex flex-col gap-1">
-                              <span className={`text-[9px] md:text-[10px] font-semibold uppercase px-2 py-0.5 rounded inline-block w-fit ${
+                            <div className="flex flex-col gap-1 items-start">
+                              <span className={`text-[9px] md:text-[10px] font-semibold uppercase px-2.5 py-1 rounded-full inline-block w-fit ${
                                 insuranceStatus.status === 'expired' ? 'bg-red-500 text-white' :
                                 insuranceStatus.status === 'critical' ? 'bg-orange-500 text-white' :
                                 insuranceStatus.status === 'warning' ? 'bg-yellow-500 text-white' :

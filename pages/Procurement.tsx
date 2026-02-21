@@ -9,11 +9,11 @@ import { ProcurementStatus } from '../types';
 import { formatNumber, formatMoney, formatDate, formatDateTime } from '../utils/format';
 
 const COLUMNS: {id: ProcurementStatus, title: string, color: string}[] = [
-  { id: 'Новая', title: 'Новая', color: 'bg-gray-400' },
-  { id: 'Поиск', title: 'Поиск', color: 'bg-blue-400' },
-  { id: 'Оплачено', title: 'Оплачено', color: 'bg-emerald-400' },
-  { id: 'В пути', title: 'В пути', color: 'bg-orange-500' },
-  { id: 'На складе', title: 'Склад', color: 'bg-indigo-500' },
+  { id: 'Новая', title: 'Новая', color: 'bg-emerald-500' },
+  { id: 'Поиск', title: 'Поиск', color: 'bg-blue-500' },
+  { id: 'Оплачено', title: 'Оплачено', color: 'bg-orange-500' },
+  { id: 'В пути', title: 'В пути', color: 'bg-indigo-500' },
+  { id: 'На складе', title: 'Склад', color: 'bg-emerald-600' },
 ];
 
 export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => {
