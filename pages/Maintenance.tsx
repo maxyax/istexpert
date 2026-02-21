@@ -348,8 +348,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 <div key={e.id} onClick={() => setSelectedMaintenanceEquipId(e.id)} className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all flex items-center gap-6 border border-white/5 group">
                   <div className="w-14 h-14 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform"><Wrench size={28}/></div>
                   <div className="overflow-hidden">
-                     <h3 className="font-black uppercase text-sm text-gray-700 dark:text-gray-200 truncate">{e.name}</h3>
-                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{e.hours} м/ч</p>
+                     <h3 className="font-black uppercase text-sm text-gray-800 dark:text-gray-200 truncate">{e.name}</h3>
+                     <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400">{e.hours} м/ч</p>
                   </div>
                 </div>
               ))}
