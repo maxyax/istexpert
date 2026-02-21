@@ -1,6 +1,7 @@
 
 import { create } from 'zustand';
 import { ProcurementRequest, ProcurementStatus } from '../types';
+import { useMaintenanceStore } from './useMaintenanceStore';
 
 interface ProcurementState {
   requests: ProcurementRequest[];
@@ -34,7 +35,18 @@ export const useProcurementStore = create<ProcurementState>((set) => ({
   selectedRequestId: null,
   setSelectedRequestId: (id) => set({ selectedRequestId: id }),
   addRequest: (req) => set((state) => ({ requests: [req, ...state.requests] })),
-  updateRequestStatus: (id, status) => set((state) => ({
-    requests: state.requests.map(r => r.id === id ? { ...r, status } : r)
-  })),
+  updateRequestStatus: (id, status) => set((state) => {
+    const updated = state.requests.map(r => r.id === id ? { ...r, status } : r);
+    // propagate to linked breakdown if present
+    const req = state.requests.find(r => r.id === id);
+    if (req && req.breakdownId) {
+      // map procurement statuses to breakdown statuses
+      if (status === 'На складе') {
+        useMaintenanceStore.getState().updateBreakdownStatus(req.breakdownId, 'Запчасти получены');
+      } else if (status === 'Новая') {
+        useMaintenanceStore.getState().updateBreakdownStatus(req.breakdownId, 'Запчасти заказаны');
+      }
+    }
+    return { requests: updated };
+  }),
 }));

@@ -83,7 +83,7 @@ export const Procurement: React.FC = () => {
                 <div className="overflow-hidden">
                   <h4 className="text-sm md:text-base font-black uppercase text-gray-700 dark:text-gray-200 truncate">{req.title}</h4>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{req.status}</span>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded ${COLUMNS.find(c=>c.id===req.status)?.color || 'bg-gray-300'} text-white`}>{req.status}</span>
                     <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate">{equipment.find(e=>e.id===req.equipmentId)?.name}</span>
                   </div>

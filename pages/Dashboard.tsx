@@ -122,7 +122,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                   const partName = b.partName || '';
                   const status = b.status || '';
                   return (
-                    <div key={`b-${b.id}`} className="p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 border-red-500 flex justify-between items-center group cursor-pointer hover:shadow-neo transition-all">
+                    <div key={`b-${b.id}`} className={`p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 ${status === 'Исправлено' ? 'border-emerald-500' : status === 'Запчасти получены' ? 'border-emerald-500' : status === 'Запчасти заказаны' ? 'border-yellow-400' : status === 'В работе' ? 'border-blue-500' : 'border-red-500'} flex justify-between items-center group cursor-pointer hover:shadow-neo transition-all`}>
                        <div className="overflow-hidden">
                           <p className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 truncate">{partName}</p>
                           <p className="text-[8px] font-bold text-gray-400 uppercase truncate">{status} • {equipment.find(e=>e.id===b.equipmentId)?.name}</p>
