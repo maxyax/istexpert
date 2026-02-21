@@ -473,23 +473,44 @@ export const Maintenance: React.FC = () => {
 
         {isCreateRequestOpen && selectedBreakdownDetail && (
           <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <div className="bg-neo-bg w-full max-w-xl rounded-[2.5rem] shadow-neo p-6 animate-in zoom-in border border-white/20">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-black uppercase">Создать заявку снабжения</h3>
-                <button onClick={() => setIsCreateRequestOpen(false)} className="p-2 rounded-xl text-gray-400"><X size={18}/></button>
-              </div>
-              <div className="space-y-3">
-                {requestItems.map((it, idx) => (
-                  <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                    <input className="col-span-3 p-2 rounded-xl bg-neo-bg border border-white/5" placeholder="Артикул" value={it.sku || ''} onChange={e => { const arr = [...requestItems]; arr[idx].sku = e.target.value; setRequestItems(arr); }} />
-                    <input className="col-span-7 p-2 rounded-xl bg-neo-bg border border-white/5" placeholder="Наименование" value={it.name} onChange={e => { const arr=[...requestItems]; arr[idx].name = e.target.value; setRequestItems(arr); }} />
-                    <input className="col-span-2 p-2 rounded-xl bg-neo-bg border border-white/5" placeholder="Кол-во" value={it.quantity} onChange={e => { const arr=[...requestItems]; arr[idx].quantity = e.target.value; setRequestItems(arr); }} />
-                  </div>
-                ))}
-                <div className="flex gap-2">
-                  <button onClick={() => setRequestItems([...requestItems, { name: '', quantity: '1' }])} className="py-2 px-3 rounded-xl bg-neo-bg border border-white/5 font-black">Добавить позицию</button>
-                  <button onClick={() => setRequestItems(requestItems.slice(0, -1))} className="py-2 px-3 rounded-xl bg-neo-bg border border-white/5 font-black">Удалить позицию</button>
+            <div className="bg-neo-bg w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[85vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6 md:mb-8 sticky top-0 bg-neo-bg">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Truck size={28}/></div>
+                  <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Заявка снабжения</h3>
                 </div>
+                <button onClick={() => setIsCreateRequestOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400">Наименование заявки</label>
+                    <input className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder={`Запрос по акту: ${selectedBreakdownDetail.partName || 'Запчасть'}`} />
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
+                  <p className="text-xs font-bold text-gray-400 mb-3">Позиции</p>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-12 gap-2 items-center text-[10px] font-bold text-gray-500 mb-2">
+                      <div className="col-span-2">Артикул</div>
+                      <div className="col-span-6">Наименование</div>
+                      <div className="col-span-3">Кол-во</div>
+                      <div className="col-span-1"></div>
+                    </div>
+                    {requestItems.map((it, idx) => (
+                      <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-white/5 p-3 rounded-2xl">
+                        <input className="col-span-2 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Артикул" value={it.sku || ''} onChange={e => { const arr = [...requestItems]; arr[idx].sku = e.target.value; setRequestItems(arr); }} />
+                        <input className="col-span-6 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Наименование" value={it.name} onChange={e => { const arr=[...requestItems]; arr[idx].name = e.target.value; setRequestItems(arr); }} />
+                        <input type="number" className="col-span-3 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" placeholder="Кол-во" value={it.quantity} onChange={e => { const arr=[...requestItems]; arr[idx].quantity = e.target.value; setRequestItems(arr); }} />
+                        <button className="col-span-1 text-red-500 font-bold text-lg hover:text-red-600 transition-colors" onClick={() => { const arr = [...requestItems]; arr.splice(idx, 1); setRequestItems(arr); }}>×</button>
+                      </div>
+                    ))}
+                    <button onClick={() => setRequestItems([...requestItems, { name: '', quantity: '1' }])} className="mt-3 px-4 py-3 rounded-2xl bg-neo-bg border border-white/5 font-bold text-xs shadow-neo hover:shadow-neo-inset transition-all">+ Добавить позицию</button>
+                  </div>
+                </div>
+
                 <div className="flex gap-3">
                   <button onClick={() => {
                     // submit request
@@ -498,7 +519,7 @@ export const Maintenance: React.FC = () => {
                       id: `pr-${Math.random().toString(36).substr(2,9)}`,
                       title,
                       status: 'Новая' as any,
-                      items: requestItems.map((it, idx) => ({ id: `i-${idx}-${Date.now()}`, name: it.name, quantity: it.quantity })),
+                      items: requestItems.map((it, idx) => ({ id: `i-${idx}-${Date.now()}`, name: it.name, quantity: it.quantity, unitPriceWithVAT: 0, total: 0 })),
                       createdAt: new Date().toISOString(),
                       equipmentId: selectedBreakdownDetail.equipmentId,
                       breakdownId: selectedBreakdownDetail.id
@@ -508,8 +529,9 @@ export const Maintenance: React.FC = () => {
                     updateBreakdownStatus(selectedBreakdownDetail.id, 'Запчасти заказаны');
                     setIsCreateRequestOpen(false);
                     setSelectedBreakdownDetail(null);
-                  }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs">Отправить в снабжение</button>
-                  <button onClick={() => setIsCreateRequestOpen(false)} className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs">Отмена</button>
+                    setRequestItems([]);
+                  }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs shadow-neo hover:shadow-neo-inset transition-all">Отправить в снабжение</button>
+                  <button onClick={() => { setIsCreateRequestOpen(false); setRequestItems([]); }} className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs shadow-neo hover:shadow-neo-inset transition-all">Отмена</button>
                 </div>
               </div>
             </div>

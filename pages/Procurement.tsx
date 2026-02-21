@@ -195,11 +195,13 @@ export const Procurement: React.FC = () => {
                        </div>
                      </div>
 
-                     <div className="space-y-2">
+                     <div className="space-y-3">
                        <label className="text-xs font-bold text-gray-400">Статус заявки</label>
-                       <select className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input" value={editReq.status} onChange={e=>setEditReq({...editReq, status: e.target.value as any})}>
-                         {COLUMNS.map(col => <option key={col.id} value={col.id}>{col.title}</option>)}
-                       </select>
+                       <div className="flex flex-wrap gap-2">
+                         {COLUMNS.map(col => (
+                           <button key={col.id} type="button" onClick={()=>setEditReq({...editReq, status: col.id})} className={`px-4 py-3 rounded-2xl font-bold text-xs uppercase transition-all ${editReq.status === col.id ? `${col.color} text-white shadow-neo` : 'bg-neo-bg border border-white/10 text-gray-400 shadow-neo hover:shadow-neo-inset'}`}>{col.title}</button>
+                         ))}
+                       </div>
                      </div>
                    </div>
 
