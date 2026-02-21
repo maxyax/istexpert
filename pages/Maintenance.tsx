@@ -93,6 +93,7 @@ const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedT
 export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => {
   const { equipment } = useFleetStore();
   const { selectedMaintenanceEquipId, setSelectedMaintenanceEquipId, addMaintenance, addBreakdown, records, breakdowns, plannedTOs, updateBreakdownStatus } = useMaintenanceStore();
+  const { requests } = useProcurementStore();
   const { user } = useAuthStore();
   
   const [viewMode, setViewMode] = useState<'list' | 'tiles'>('list');
@@ -355,7 +356,15 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
             </div>
           ) : (
             <div className="space-y-3 overflow-x-auto scrollbar-hide pb-2">
-              {equipment.map(e => (
+              {equipment.map(e => {
+                // Находим все активные поломки и заявки по этой технике
+                const equipBreakdowns = breakdowns.filter(b => b.equipmentId === e.id && b.status !== 'Исправлено');
+                const relatedRequests = requests.filter(r => {
+                  const breakdown = breakdowns.find(b => b.id === r.breakdownId);
+                  return breakdown?.equipmentId === e.id;
+                });
+
+                return (
                 <div key={e.id} className="p-4 rounded-xl shadow-neo bg-neo-bg flex flex-col gap-3 border border-white/5 min-w-[280px]">
                   <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedMaintenanceEquipId(e.id)}>
                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-neo-bg flex items-center justify-center text-blue-600 shrink-0"><Wrench size={20} className="md:w-5 md:h-5"/></div>
@@ -378,8 +387,54 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       <span>Заявка</span>
                     </button>
                   </div>
+                  {/* Прогресс-бары по заявкам */}
+                  {relatedRequests.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      {relatedRequests.map(req => {
+                        const breakdown = breakdowns.find(b => b.id === req.breakdownId);
+                        if (!breakdown) return null;
+                        const statusOrder = ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'];
+                        const currentIndex = statusOrder.indexOf(req.status);
+                        return (
+                          <button
+                            key={req.id}
+                            onClick={() => {
+                              setSelectedMaintenanceEquipId(e.id);
+                              setSelectedBreakdownDetail(breakdown);
+                            }}
+                            className="w-full text-left group"
+                          >
+                            <div className="relative h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div className={`absolute top-0 left-0 h-full transition-all duration-500 ${
+                                req.status === 'На складе' ? 'w-full bg-emerald-500' :
+                                req.status === 'В пути' ? 'w-[80%] bg-indigo-500' :
+                                req.status === 'Оплачено' ? 'w-[60%] bg-orange-500' :
+                                req.status === 'Поиск' ? 'w-[40%] bg-blue-500' :
+                                'w-[20%] bg-purple-500'
+                              }`}/>
+                            </div>
+                            <div className="flex items-center justify-between mt-1">
+                              <p className="text-[8px] md:text-[9px] font-semibold text-gray-500 dark:text-gray-400 truncate flex-1">
+                                {breakdown.partName}
+                              </p>
+                              <span className={`text-[8px] md:text-[9px] font-semibold ml-2 whitespace-nowrap ${
+                                req.status === 'На складе' ? 'text-emerald-500' :
+                                req.status === 'В пути' ? 'text-indigo-500' :
+                                req.status === 'Оплачено' ? 'text-orange-500' :
+                                req.status === 'Поиск' ? 'text-blue-500' :
+                                'text-purple-500'
+                              }`}>
+                                {req.status}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
