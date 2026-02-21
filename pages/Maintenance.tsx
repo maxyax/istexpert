@@ -284,7 +284,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           {/* Быстрые действия */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
             <button
-              onClick={() => setIsBreakdownEquipSelectOpen(true)}
+              onClick={() => {
+                setSelectedMaintenanceEquipId(null);
+                setIsBreakdownEquipSelectOpen(true);
+              }}
               className="p-3 md:p-4 rounded-[2rem] shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
             >
               <div className="flex items-center gap-2">
@@ -539,6 +542,53 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 );
               })}
               {records.filter(r => r.equipmentId === selectedEquip.id).length === 0 && <p className="text-center py-12 md:py-20 text-gray-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest">История пуста</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно выбора техники для акта поломки */}
+      {isBreakdownEquipSelectOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-red-500">
+                  <AlertTriangle size={24}/>
+                </div>
+                <h2 className="text-xl font-black uppercase text-gray-800 dark:text-gray-100">Выберите технику для акта</h2>
+              </div>
+              <button onClick={() => setIsBreakdownEquipSelectOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+                <X size={20}/>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 text-center py-4">Выберите технику для фиксации поломки:</p>
+              <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                {equipment.map(e => (
+                  <button
+                    key={e.id}
+                    onClick={() => {
+                      setSelectedMaintenanceEquipId(e.id);
+                      setIsBreakdownEquipSelectOpen(false);
+                      setIsBreakdownModalOpen(true);
+                    }}
+                    className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-red-500/50 transition-all flex justify-between items-center group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform">
+                        <Truck size={20}/>
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{e.name}</p>
+                        <p className="text-[8px] text-gray-400">{e.vin} • {e.hours} м/ч</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={18} className="text-gray-300 group-hover:text-red-500"/>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -802,6 +852,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           {/* Кнопка создания заявки без акта (для ТО на склад) */}
                           <button
                             onClick={() => {
+                              // Если техника уже выбрана, используем ее
+                              if (requestEquipmentId) {
+                                setSelectedMaintenanceEquipId(requestEquipmentId);
+                              }
                               setIsBreakdownSelectOpen(false);
                               setIsCreateRequestOpen(true);
                               setSelectedBreakdownDetail(null);
@@ -813,7 +867,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           
                           {/* Кнопка назад к выбору техники */}
                           <button
-                            onClick={() => setRequestEquipmentId(null)}
+                            onClick={() => {
+                              setRequestEquipmentId(null);
+                              setSelectedMaintenanceEquipId(null);
+                            }}
                             className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/10 font-black uppercase text-xs hover:shadow-neo-inset transition-all"
                           >
                             ← Назад к выбору техники
@@ -892,8 +949,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               </div>
 
               <div className="space-y-6">
-                {/* Выбор техники если заявка создается без привязки к технике */}
-                {!selectedBreakdownDetail && !selectedMaintenanceEquipId && (
+                {/* Выбор техники ТОЛЬКО если заявка создается из вкладки Снабжение (без привязки) */}
+                {!selectedBreakdownDetail && !requestEquipmentId && (
                   <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-blue-500/20 space-y-3">
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-400">Техника</label>

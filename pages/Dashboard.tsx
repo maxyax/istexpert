@@ -193,45 +193,45 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
         <button
           onClick={() => setIsQuickBreakdownOpen(true)}
-          className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+          className="p-3 md:p-4 rounded-[2rem] shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
         >
-          <div className="flex items-center gap-4">
-            <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
-              <AlertTriangle size={24}/>
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
+              <AlertTriangle size={16} className="md:w-5 md:h-5"/>
             </div>
             <div className="text-left">
-              <h4 className="text-sm font-black uppercase tracking-widest">Акт поломки</h4>
-              <p className="text-[8px] font-bold text-white/80 uppercase">Зафиксировать неисправность</p>
+              <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">Акт</h4>
+              <p className="text-[7px] md:text-[8px] font-bold text-white/80 uppercase">Поломки</p>
             </div>
           </div>
         </button>
-        
+
         <button
           onClick={() => setIsQuickTOOpen(true)}
-          className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+          className="p-3 md:p-4 rounded-[2rem] shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
         >
-          <div className="flex items-center gap-4">
-            <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
-              <Wrench size={24}/>
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
+              <Wrench size={16} className="md:w-5 md:h-5"/>
             </div>
             <div className="text-left">
-              <h4 className="text-sm font-black uppercase tracking-widest">Провести ТО</h4>
-              <p className="text-[8px] font-bold text-white/80 uppercase">Плановое обслуживание</p>
+              <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">ТО</h4>
+              <p className="text-[7px] md:text-[8px] font-bold text-white/80 uppercase">Обслуживание</p>
             </div>
           </div>
         </button>
-        
+
         <button
           onClick={() => setIsQuickProcurementOpen(true)}
-          className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+          className="p-3 md:p-4 rounded-[2rem] shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
         >
-          <div className="flex items-center gap-4">
-            <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
-              <Package size={24}/>
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
+              <Package size={16} className="md:w-5 md:h-5"/>
             </div>
             <div className="text-left">
-              <h4 className="text-sm font-black uppercase tracking-widest">Заявка снабжения</h4>
-              <p className="text-[8px] font-bold text-white/80 uppercase">Заказать запчасти</p>
+              <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">Заявка</h4>
+              <p className="text-[7px] md:text-[8px] font-bold text-white/80 uppercase">Снабжение</p>
             </div>
           </div>
         </button>
@@ -254,55 +254,16 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-        {/* График наработки */}
-        <div className="lg:col-span-8 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5 overflow-hidden">
+        {/* Живая лента событий */}
+        <div className="lg:col-span-12 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
            <div className="flex justify-between items-center mb-6 md:mb-10">
               <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <Activity size={16} className="text-blue-500"/> Наработка парка (м/ч)
+                <History size={16} className="text-orange-500"/> Живая лента
               </h3>
-              <button onClick={() => onNavigate('equipment')} className="text-[8px] font-black text-blue-600 uppercase hover:underline flex items-center gap-1">
-                Автопарк <ChevronRight size={12}/>
+              <button onClick={() => onNavigate('maintenance')} className="text-[8px] font-black text-blue-600 uppercase hover:underline flex items-center gap-1">
+                Весь журнал <ChevronRight size={12}/>
               </button>
            </div>
-           <div className="h-48 md:h-64 flex items-end space-x-2 md:space-x-5 px-2">
-              {equipment.slice(0, 12).map((e, i) => {
-                const maxHours = Math.max(...equipment.map(eq => eq.hours));
-                const height = maxHours > 0 ? (e.hours / maxHours) * 100 : 0;
-                const status = computeEquipmentStatus(e.id, breakdowns, plannedTOs, equipment);
-                return (
-                  <div key={e.id} className="flex-1 bg-gray-100 dark:bg-gray-800/50 rounded-t-xl md:rounded-t-2xl relative group">
-                     <div
-                      style={{ height: `${height}%` }}
-                      className={`absolute bottom-0 w-full rounded-t-xl md:rounded-t-2xl group-hover:opacity-80 transition-all shadow-[0_0_15px_rgba(59,130,246,0.1)] ${
-                        status === EquipStatus.REPAIR ? 'bg-red-500' :
-                        status === EquipStatus.MAINTENANCE ? 'bg-orange-500' :
-                        status === EquipStatus.WAITING_PARTS ? 'bg-yellow-500' :
-                        'bg-blue-500'
-                      }`}
-                     />
-                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-neo-bg shadow-neo px-2 py-1 rounded-lg border border-white/10 pointer-events-none whitespace-nowrap z-10">
-                       <p className="text-[8px] font-black text-gray-400 uppercase">{e.name}</p>
-                       <p className="text-[9px] font-black text-gray-700">{e.hours} м/ч</p>
-                     </div>
-                  </div>
-                );
-              })}
-           </div>
-           <div className="flex justify-between mt-4 text-[7px] font-black text-gray-400 uppercase tracking-widest">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-blue-500"/> В работе
-                <span className="w-2 h-2 rounded-full bg-red-500"/> Ремонт
-                <span className="w-2 h-2 rounded-full bg-orange-500"/> ТО
-                <span className="w-2 h-2 rounded-full bg-yellow-500"/> Ожидание
-              </div>
-           </div>
-        </div>
-
-        {/* Живая лента событий */}
-        <div className="lg:col-span-4 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
-           <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-10 flex items-center gap-2">
-             <History size={16} className="text-orange-500"/> Живая лента
-           </h3>
            <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
               {(() => {
                 // Объединяем поломки и ТО, сортируем по дате
