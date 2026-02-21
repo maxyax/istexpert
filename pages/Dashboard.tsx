@@ -143,8 +143,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <div className={s.color}>{s.icon}</div>
             </div>
             <h4 className="text-gray-700 dark:text-gray-200 text-[11px] font-semibold uppercase tracking-wide mb-1">{s.title}</h4>
-            <div className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">{s.value}</div>
-            <p className={`text-[9px] md:text-[10px] font-medium mt-2 ${s.highlight ? 'text-red-700 dark:text-red-400 font-semibold' : 'text-gray-600 dark:text-gray-300'}`}>{s.sub}</p>
+            <div className="text-4xl md:text-5xl font-black text-gray-900 dark:text-gray-100 mb-2">{s.value}</div>
+            <p className={`text-sm font-medium mt-1 ${s.highlight ? 'text-red-700 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>{s.sub}</p>
           </div>
         ))}
       </div>
@@ -162,7 +162,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">{new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
             </div>
           </div>
-          <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 mb-4">{formatMoney(fuelCostThisMonth)}</div>
+          <div className="text-4xl md:text-5xl font-bold text-emerald-700 dark:text-emerald-400 mb-4">{formatMoney(fuelCostThisMonth)}</div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заправок</span>
@@ -186,7 +186,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">Ожидание доставки</p>
             </div>
           </div>
-          <div className="text-3xl font-bold text-blue-700 dark:text-blue-400 mb-4">{formatMoney(requestsPaidAmount)}</div>
+          <div className="text-4xl md:text-5xl font-bold text-blue-700 dark:text-blue-400 mb-4">{formatMoney(requestsPaidAmount)}</div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заявок</span>
@@ -206,7 +206,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">Готово к выдаче</p>
             </div>
           </div>
-          <div className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-4">{formatMoney(requestsInWarehouseAmount)}</div>
+          <div className="text-4xl md:text-5xl font-bold text-indigo-700 dark:text-indigo-400 mb-4">{formatMoney(requestsInWarehouseAmount)}</div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заявок</span>
