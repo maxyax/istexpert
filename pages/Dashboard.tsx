@@ -2,7 +2,7 @@
 import React from 'react';
 import {
   Truck, AlertTriangle, Clock, Activity, History,
-  ChevronRight, Fuel, TrendingUp, CheckCircle2, Wrench, Package, Calendar
+  ChevronRight, Fuel, TrendingUp, CheckCircle2, Wrench, Package, Calendar, X
 } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
@@ -54,7 +54,21 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
   const { equipment } = useFleetStore();
   const { breakdowns, records, fuelRecords, plannedTOs } = useMaintenanceStore();
   const { requests } = useProcurementStore();
-
+  
+  // Состояния для быстрых форм
+  const [isQuickBreakdownOpen, setIsQuickBreakdownOpen] = React.useState(false);
+  const [isQuickTOOpen, setIsQuickTOOpen] = React.useState(false);
+  const [isQuickProcurementOpen, setIsQuickProcurementOpen] = React.useState(false);
+  
+  // Форма быстрой поломки
+  const [quickBreakdownForm, setQuickBreakdownForm] = React.useState({
+    equipmentId: '',
+    partName: '',
+    node: 'Двигатель',
+    severity: 'Средняя' as any,
+    description: ''
+  });
+  
   // Подсчет статистики
   const activeBreakdowns = breakdowns.filter(b => b.status !== 'Исправлено');
   const criticalBreakdowns = activeBreakdowns.filter(b => b.severity === 'Критическая');
@@ -67,6 +81,27 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
     return t.status === 'planned' && plannedDate < new Date();
   });
   const activeProcurement = requests.filter(r => r.status !== 'На складе');
+
+  // Обработка быстрой поломки
+  const handleQuickBreakdown = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickBreakdownForm.equipmentId || !quickBreakdownForm.partName) return;
+    
+    const equip = equipment.find(eq => eq.id === quickBreakdownForm.equipmentId);
+    useMaintenanceStore.getState().addBreakdown({
+      equipmentId: quickBreakdownForm.equipmentId,
+      date: new Date().toISOString(),
+      partName: quickBreakdownForm.partName,
+      node: quickBreakdownForm.node,
+      description: quickBreakdownForm.description,
+      status: 'Новая',
+      severity: quickBreakdownForm.severity,
+      hoursAtBreakdown: equip?.hours || 0
+    });
+    
+    setQuickBreakdownForm({ equipmentId: '', partName: '', node: 'Двигатель', severity: 'Средняя', description: '' });
+    setIsQuickBreakdownOpen(false);
+  };
 
   const stats = [
     {
@@ -111,6 +146,54 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700">
+      {/* Быстрые действия */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+        <button
+          onClick={() => setIsQuickBreakdownOpen(true)}
+          className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
+              <AlertTriangle size={24}/>
+            </div>
+            <div className="text-left">
+              <h4 className="text-sm font-black uppercase tracking-widest">Акт поломки</h4>
+              <p className="text-[8px] font-bold text-white/80 uppercase">Зафиксировать неисправность</p>
+            </div>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => setIsQuickTOOpen(true)}
+          className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
+              <Wrench size={24}/>
+            </div>
+            <div className="text-left">
+              <h4 className="text-sm font-black uppercase tracking-widest">Провести ТО</h4>
+              <p className="text-[8px] font-bold text-white/80 uppercase">Плановое обслуживание</p>
+            </div>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => setIsQuickProcurementOpen(true)}
+          className="p-6 rounded-[2rem] shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-4 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform">
+              <Package size={24}/>
+            </div>
+            <div className="text-left">
+              <h4 className="text-sm font-black uppercase tracking-widest">Заявка снабжения</h4>
+              <p className="text-[8px] font-bold text-white/80 uppercase">Заказать запчасти</p>
+            </div>
+          </div>
+        </button>
+      </div>
+      
       {/* Карточки статистики */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map(s => (
@@ -330,4 +413,165 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       </div>
     </div>
   );
+  
+  {/* Модальное окно быстрой поломки */}
+  {isQuickBreakdownOpen && (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div className="bg-neo-bg w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-red-500">
+              <AlertTriangle size={24}/>
+            </div>
+            <h2 className="text-xl font-black uppercase text-gray-800 dark:text-gray-100">Акт поломки</h2>
+          </div>
+          <button onClick={() => setIsQuickBreakdownOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+            <X size={20}/>
+          </button>
+        </div>
+        
+        <form onSubmit={handleQuickBreakdown} className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-400 ml-2">Техника</label>
+            <select
+              className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 outline-none"
+              value={quickBreakdownForm.equipmentId}
+              onChange={e => setQuickBreakdownForm({...quickBreakdownForm, equipmentId: e.target.value})}
+              required
+            >
+              <option value="">Выберите технику...</option>
+              {equipment.map(e => (
+                <option key={e.id} value={e.id}>{e.name} ({e.vin})</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-400 ml-2">Узел</label>
+            <select
+              className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 outline-none"
+              value={quickBreakdownForm.node}
+              onChange={e => setQuickBreakdownForm({...quickBreakdownForm, node: e.target.value})}
+            >
+              <option>Двигатель</option>
+              <option>Гидравлика</option>
+              <option>Ходовая часть</option>
+              <option>Электроника</option>
+              <option>Кузов</option>
+              <option>Трансмиссия</option>
+            </select>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-400 ml-2">Деталь / Запчасть</label>
+            <input
+              className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 outline-none"
+              placeholder="Введите название..."
+              value={quickBreakdownForm.partName}
+              onChange={e => setQuickBreakdownForm({...quickBreakdownForm, partName: e.target.value})}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-400 ml-2">Серьезность</label>
+            <div className="flex gap-3">
+              {['Низкая', 'Средняя', 'Критическая'].map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setQuickBreakdownForm({...quickBreakdownForm, severity: s})}
+                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${
+                    quickBreakdownForm.severity === s
+                      ? 'bg-red-500 text-white shadow-neo'
+                      : 'bg-neo-bg shadow-neo text-gray-400'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-400 ml-2">Описание</label>
+            <textarea
+              className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none text-gray-700 outline-none h-24"
+              placeholder="Опишите неисправность..."
+              value={quickBreakdownForm.description}
+              onChange={e => setQuickBreakdownForm({...quickBreakdownForm, description: e.target.value})}
+            />
+          </div>
+          
+          <button type="submit" className="w-full py-5 rounded-2xl bg-red-500 text-white font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all">
+            Создать акт
+          </button>
+        </form>
+      </div>
+    </div>
+  )}
+  
+  {/* Модальное окно быстрого ТО */}
+  {isQuickTOOpen && (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div className="bg-neo-bg w-full max-w-lg rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-blue-500">
+              <Wrench size={24}/>
+            </div>
+            <h2 className="text-xl font-black uppercase text-gray-800 dark:text-gray-100">Провести ТО</h2>
+          </div>
+          <button onClick={() => setIsQuickTOOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+            <X size={20}/>
+          </button>
+        </div>
+        
+        <div className="text-center py-10">
+          <p className="text-sm text-gray-500 mb-6">Перейдите во вкладку "ТО и ремонт" для проведения ТО</p>
+          <button
+            onClick={() => {
+              setIsQuickTOOpen(false);
+              onNavigate('maintenance');
+            }}
+            className="px-8 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs"
+          >
+            Перейти к ТО
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+  
+  {/* Модальное окно быстрой заявки снабжения */}
+  {isQuickProcurementOpen && (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div className="bg-neo-bg w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-emerald-500">
+              <Package size={24}/>
+            </div>
+            <h2 className="text-xl font-black uppercase text-gray-800 dark:text-gray-100">Заявка снабжения</h2>
+          </div>
+          <button onClick={() => setIsQuickProcurementOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+            <X size={20}/>
+          </button>
+        </div>
+        
+        <div className="text-center py-10">
+          <p className="text-sm text-gray-500 mb-6">Перейдите во вкладку "Снабжение" для создания заявки</p>
+          <button
+            onClick={() => {
+              setIsQuickProcurementOpen(false);
+              onNavigate('procurement');
+            }}
+            className="px-8 py-4 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs"
+          >
+            Перейти к снабжению
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 };
