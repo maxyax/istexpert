@@ -6,6 +6,6 @@
     }
   ],
   "functions": {
-    "region": "fra1"
+    "region": ["fra1"]
   }
 }
