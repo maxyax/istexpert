@@ -24,6 +24,19 @@ const breakdownBorderClass = (status?: string) => {
   }
 };
 
+const severityColorClass = (severity?: string) => {
+  switch (severity) {
+    case 'Критическая':
+      return 'bg-red-500 text-white';
+    case 'Средняя':
+      return 'bg-orange-500 text-white';
+    case 'Низкая':
+      return 'bg-yellow-500 text-white';
+    default:
+      return 'bg-gray-400 text-white';
+  }
+};
+
 const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedTOs: any[], equipment: any[]) => {
   const activeBreakdowns = breakdowns.filter(b => b.equipmentId === equipmentId && b.status !== 'Исправлено');
   const equip = equipment.find(e => e.id === equipmentId);
@@ -438,34 +451,37 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           <CheckCircle2 size={16}/>
                         </div>
                         <div className="flex-1">
-                          <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Готово к работе!</p>
-                          <p className="text-xs font-bold text-emerald-600">Запчасти на складе — можно брать в работу</p>
+                          <p className="text-[9px] font-medium text-emerald-600 dark:text-emerald-400">Готово к работе!</p>
+                          <p className="text-xs font-medium text-emerald-600 dark:text-emerald-500">Запчасти на складе — можно брать в работу</p>
                         </div>
                         <button
                           onClick={() => {
                             setSelectedBreakdownDetail(b);
                             setBreakdownStatusForm({ status: 'В работе', fixedDate: new Date().toISOString().slice(0, 10), hoursAtFix: undefined, mileageAtFix: undefined, fixNotes: '' });
                           }}
-                          className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-black uppercase text-[8px] hover:bg-emerald-700 transition-all"
+                          className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold uppercase text-[8px] hover:bg-emerald-700 transition-all"
                         >
                           В работу
                         </button>
                       </div>
                     )}
-                    
-                    <div className="flex justify-between items-start">
+
+                    <div className="flex justify-between items-start gap-3">
                       <div className="overflow-hidden flex-1 cursor-pointer" onClick={() => setSelectedBreakdownDetail(b)}>
-                        <p className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate">{b.partName}</p>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{b.status} • {b.node}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-sm md:text-base font-semibold text-gray-800 dark:text-gray-100 truncate">{b.partName}</p>
+                          <span className={`text-[7px] md:text-[8px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${severityColorClass(b.severity)}`}>{b.severity}</span>
+                        </div>
+                        <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400">{b.status} • {b.node}</p>
                       </div>
-                      <div className="flex items-center gap-2 ml-4 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         {!relatedRequest && (
                           <button
                             onClick={() => {
                               setSelectedBreakdownDetail(b);
                               setIsCreateRequestOpen(true);
                             }}
-                            className="px-3 py-2 rounded-xl bg-emerald-600 text-white font-black uppercase text-[8px] hover:bg-emerald-700 transition-all"
+                            className="px-3 py-2 rounded-xl bg-emerald-600 text-white font-semibold uppercase text-[8px] hover:bg-emerald-700 transition-all"
                             title="Создать заявку в снабжение"
                           >
                             Заявка

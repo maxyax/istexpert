@@ -12,14 +12,46 @@
         darkMode: 'class',
         theme: {
           extend: {
-            fontFamily: { sans: ['Inter', 'sans-serif'] },
-            colors: { 
+            fontFamily: { 
+              sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif']
+            },
+            fontSize: {
+              'xs': ['0.75rem', { lineHeight: '1rem' }],
+              'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+              'base': ['1rem', { lineHeight: '1.5rem' }],
+              'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+              'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+              '2xl': ['1.5rem', { lineHeight: '2rem' }],
+            },
+            fontWeight: {
+              normal: '400',
+              medium: '500',
+              semibold: '600',
+              bold: '700',
+            },
+            colors: {
               neo: { bg: 'var(--neo-bg)', shadow: 'var(--neo-shadow)' },
               blue: {
                 400: '#60a5fa',
                 500: '#3b82f6',
                 600: '#2563eb',
-              }
+              },
+              red: {
+                500: '#ef4444',
+                600: '#dc2626',
+              },
+              orange: {
+                500: '#f97316',
+                600: '#ea580c',
+              },
+              yellow: {
+                500: '#eab308',
+                600: '#ca8a04',
+              },
+              emerald: {
+                500: '#10b981',
+                600: '#059669',
+              },
             },
             boxShadow: { neo: 'var(--shadow-neo)', 'neo-inset': 'var(--shadow-neo-inset)', 'neo-sm': 'var(--shadow-neo-sm)' }
           }
@@ -55,19 +87,43 @@
       .dark .text-gray-400 { color: #9ca3af !important; }
       .dark .text-gray-300 { color: #d1d5db !important; }
       .dark .text-gray-200 { color: #e5e7eb !important; }
-      body { background-color: var(--neo-bg); transition: 0.3s ease; }
+      /* Улучшенная читаемость в светлом режиме - более темные цвета */
+      .text-gray-800 { color: #1f2937 !important; }
+      .text-gray-700 { color: #374151 !important; }
+      .text-gray-600 { color: #4b5563 !important; }
+      .text-gray-500 { color: #6b7280 !important; }
+      .text-red-600 { color: #dc2626 !important; }
+      .text-red-500 { color: #ef4444 !important; }
+      .text-orange-600 { color: #ea580c !important; }
+      .text-orange-500 { color: #f97316 !important; }
+      body { 
+        background-color: var(--neo-bg); 
+        transition: 0.3s ease; 
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
       .custom-scrollbar::-webkit-scrollbar { width: 5px; }
       .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-      /* Unified readable form inputs across the app — match Company Settings address style (bold, text-xs) */
+      /* Apple-style readable form inputs */
       input, textarea, select {
-        font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
-        font-weight: 700;
-        font-size: 12px;
-        text-transform: none;
-        letter-spacing: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        letter-spacing: -0.01em;
       }
-      /* helper class for Tailwind-heavy markup to enforce this style */
-      .app-input { font-weight: 700 !important; font-size: 12px !important; text-transform: none !important; }
+      .app-input { 
+        font-weight: 500 !important; 
+        font-size: 14px !important;
+        letter-spacing: -0.01em !important;
+      }
+      /* Уменьшаем жирность заголовков для лучшей читаемости */
+      h1, h2, h3, h4, h5, h6 {
+        font-weight: 600 !important;
+        letter-spacing: -0.02em !important;
+      }
+      .font-black { font-weight: 700 !important; }
+      .font-bold { font-weight: 600 !important; }
     </style>
   <script type="importmap">
 {
