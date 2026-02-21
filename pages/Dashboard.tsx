@@ -458,11 +458,9 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
           </div>
         )}
       </div>
-    </div>
-  );
-  
-  {/* Модальное окно быстрой поломки */}
-  {isQuickBreakdownOpen && (
+      
+      {/* Модальное окно быстрой поломки */}
+      {isQuickBreakdownOpen && (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
       <div className="bg-neo-bg w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
@@ -806,4 +804,6 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       </div>
     </div>
   )}
+    </div>
+  );
 };

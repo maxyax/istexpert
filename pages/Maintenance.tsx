@@ -110,6 +110,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
   const [requestItems, setRequestItems] = useState<{ sku?: string; name: string; quantity: string }[]>([]);
   const [requestPhotos, setRequestPhotos] = useState<string[]>([]);
+  
+  // Для выбора техники перед созданием поломки
+  const [isBreakdownEquipSelectOpen, setIsBreakdownEquipSelectOpen] = useState(false);
 
   const [toChecklist, setToChecklist] = useState<{ text: string; done: boolean; note?: string }[]>([]);
   const [toTypeLabel, setToTypeLabel] = useState<string>('');
@@ -349,7 +352,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   </div>
                   <div className="flex items-center gap-3">
                     <button onClick={() => openTOForEquip(e)} className="px-4 py-2 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-[10px]">Провести ТО</button>
-                    <button onClick={() => openBreakdownForEquip(e)} className="px-4 py-2 rounded-2xl bg-neo-bg shadow-neo text-red-600 font-black uppercase text-[10px]">Акт поломки</button>
+                    <button onClick={() => setIsBreakdownEquipSelectOpen(true)} className="px-4 py-2 rounded-2xl bg-neo-bg shadow-neo text-red-600 font-black uppercase text-[10px]">Акт поломки</button>
                   </div>
                 </div>
               ))}
@@ -367,7 +370,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
             <button onClick={() => openTOForEquip(selectedEquip)} className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg text-blue-600 flex flex-col items-center gap-3 md:gap-4 hover:shadow-neo-inset transition-all border border-blue-500/10 active:scale-95 group">
               <Wrench size={32} className="group-hover:rotate-12 transition-transform"/><span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300">Провести ТО</span>
             </button>
-            <button onClick={() => openBreakdownForEquip(selectedEquip)} className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg text-red-600 flex flex-col items-center gap-3 md:gap-4 hover:shadow-neo-inset transition-all border border-red-500/10 active:scale-95 group">
+            <button onClick={() => setIsBreakdownEquipSelectOpen(true)} className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg text-red-600 flex flex-col items-center gap-3 md:gap-4 hover:shadow-neo-inset transition-all border border-red-500/10 active:scale-95 group">
               <AlertTriangle size={32} className="group-hover:scale-110 transition-transform"/><span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300">Акт поломки</span>
             </button>
             <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center justify-center gap-1 md:gap-2 border border-white/5">
