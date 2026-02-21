@@ -401,13 +401,22 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           if (!breakdown) return null;
                           const statusOrder = ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'];
                           const currentIndex = statusOrder.indexOf(req.status);
+                          
+                          const handleProgressClick = () => {
+                            if (req.status === 'На складе') {
+                              // Если запчасти на складе - открываем модальное окно смены статуса
+                              setSelectedMaintenanceEquipId(e.id);
+                              setSelectedBreakdownDetail(breakdown);
+                            } else {
+                              // Если запчасти еще не на складе - открываем карточку техники
+                              setSelectedMaintenanceEquipId(e.id);
+                            }
+                          };
+                          
                           return (
                             <button
                               key={req.id}
-                              onClick={() => {
-                                setSelectedMaintenanceEquipId(e.id);
-                                setSelectedBreakdownDetail(breakdown);
-                              }}
+                              onClick={handleProgressClick}
                               className="w-full text-left group"
                             >
                               <div className="relative h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -433,6 +442,11 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                                   {req.status}
                                 </span>
                               </div>
+                              {req.status === 'На складе' && (
+                                <p className="text-[7px] md:text-[8px] text-emerald-500 mt-0.5 flex items-center gap-1">
+                                  <CheckCircle2 size={10}/> Нажмите чтобы изменить статус
+                                </p>
+                              )}
                             </button>
                           );
                         })}
