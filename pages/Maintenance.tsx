@@ -282,51 +282,51 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           <h2 className="text-2xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">ТО и Ремонт</h2>
           
           {/* Быстрые действия */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
             <button
               onClick={() => {
                 setSelectedMaintenanceEquipId(null);
                 setIsBreakdownEquipSelectOpen(true);
               }}
-              className="p-3 md:p-4 rounded-xl shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+              className="p-2.5 md:p-3 rounded-xl shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
             >
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <AlertTriangle size={16} className="md:w-5 md:h-5"/>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="p-1.5 md:p-2 rounded-lg bg-white/20 group-hover:scale-110 transition-transform">
+                  <AlertTriangle size={14} className="md:w-5 md:h-5"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">Акт</h4>
-                  <p className="text-[7px] md:text-[8px] font-bold text-white/80 uppercase">Поломки</p>
+                  <h4 className="text-xs md:text-sm font-bold uppercase">Акт</h4>
+                  <p className="text-[7px] md:text-[8px] font-medium text-white/80 uppercase">Поломки</p>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => setIsTOEquipSelectOpen(true)}
-              className="p-3 md:p-4 rounded-xl shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+              className="p-2.5 md:p-3 rounded-xl shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
             >
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <Wrench size={16} className="md:w-5 md:h-5"/>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="p-1.5 md:p-2 rounded-lg bg-white/20 group-hover:scale-110 transition-transform">
+                  <Wrench size={14} className="md:w-5 md:h-5"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">ТО</h4>
-                  <p className="text-[7px] md:text-[8px] font-bold text-white/80 uppercase">Обслуживание</p>
+                  <h4 className="text-xs md:text-sm font-bold uppercase">ТО</h4>
+                  <p className="text-[7px] md:text-[8px] font-medium text-white/80 uppercase">Обслуживание</p>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => setIsBreakdownSelectOpen(true)}
-              className="p-3 md:p-4 rounded-xl shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
+              className="p-2.5 md:p-3 rounded-xl shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-neo-inset transition-all group active:scale-95"
             >
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <Package size={16} className="md:w-5 md:h-5"/>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="p-1.5 md:p-2 rounded-lg bg-white/20 group-hover:scale-110 transition-transform">
+                  <Package size={14} className="md:w-5 md:h-5"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-xs md:text-sm font-black uppercase tracking-widest">Заявка</h4>
-                  <p className="text-[7px] md:text-[8px] font-bold text-white/80 uppercase">Снабжение</p>
+                  <h4 className="text-xs md:text-sm font-bold uppercase">Заявка</h4>
+                  <p className="text-[7px] md:text-[8px] font-medium text-white/80 uppercase">Снабжение</p>
                 </div>
               </div>
             </button>
@@ -358,20 +358,20 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-neo-bg flex items-center justify-center text-blue-600 shrink-0"><Wrench size={20} className="md:w-5 md:h-5"/></div>
                     <div className="min-w-0 flex-1">
                       <div className="font-semibold text-xs md:text-sm text-gray-800 dark:text-gray-100 truncate">{e.name}</div>
-                      <div className="text-[9px] md:text-[11px] text-gray-500 dark:text-gray-400 truncate">{e.make} {e.model} • {e.hours} м/ч</div>
+                      <div className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 truncate">{e.vin}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); openTOForEquip(e); }} className="flex items-center justify-center gap-1.5 px-3 md:px-4 py-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <Wrench size={12} className="md:w-3 md:h-3"/>
+                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); openTOForEquip(e); }} className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <Wrench size={10} className="md:w-3 md:h-3"/>
                       <span>ТО</span>
                     </button>
-                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '' }); setIsBreakdownModalOpen(true); }} className="flex items-center justify-center gap-1.5 px-3 md:px-4 py-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <AlertTriangle size={12} className="md:w-3 md:h-3"/>
+                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '' }); setIsBreakdownModalOpen(true); }} className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <AlertTriangle size={10} className="md:w-3 md:h-3"/>
                       <span>Акт</span>
                     </button>
-                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex items-center justify-center gap-1.5 px-3 md:px-4 py-2 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <Package size={12} className="md:w-3 md:h-3"/>
+                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold text-[8px] md:text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <Package size={10} className="md:w-3 md:h-3"/>
                       <span>Заявка</span>
                     </button>
                   </div>
@@ -494,41 +494,33 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     {/* Прогресс-бар статусов снабжения */}
                     {relatedRequest && !isReadyToWork && (
                       <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div className="relative mb-2">
-                          {/* Линия прогресса */}
-                          <div className="flex items-center gap-1.5">
-                            <div className={`flex-1 h-2 rounded-full ${
-                              ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
-                            }`}/>
-                            <div className={`flex-1 h-2 rounded-full ${
-                              ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
-                            }`}/>
-                            <div className={`flex-1 h-2 rounded-full ${
-                              ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
-                            }`}/>
-                            <div className={`flex-1 h-2 rounded-full ${
-                              ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
-                            }`}/>
-                            <div className={`flex-1 h-2 rounded-full ${
-                              ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'
+                        <div className="mb-3">
+                          {/* Единая линия прогресса */}
+                          <div className="relative h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div className={`absolute top-0 left-0 h-full transition-all duration-500 ${
+                              relatedRequest.status === 'На складе' ? 'w-full bg-emerald-500' :
+                              relatedRequest.status === 'В пути' ? 'w-[80%] bg-indigo-500' :
+                              relatedRequest.status === 'Оплачено' ? 'w-[60%] bg-orange-500' :
+                              relatedRequest.status === 'Поиск' ? 'w-[40%] bg-blue-500' :
+                              'w-[20%] bg-emerald-500'
                             }`}/>
                           </div>
-                          {/* Подписи статусов */}
-                          <div className="flex justify-between mt-2 text-[9px] font-semibold uppercase">
-                            <span className={`text-center w-[18%] ${
+                          {/* Подписи стадий */}
+                          <div className="flex justify-between mt-2 text-[10px] font-semibold uppercase">
+                            <span className={`${
                               ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'text-emerald-500' : 'text-gray-500 dark:text-gray-400'
                             }`}>Новая</span>
-                            <span className={`text-center w-[18%] ${
-                              ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500 text-white px-1 rounded' : 'text-gray-500 dark:text-gray-400'
+                            <span className={`${
+                              ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'text-blue-500' : 'text-gray-500 dark:text-gray-400'
                             }`}>Поиск</span>
-                            <span className={`text-center w-[18%] ${
-                              ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500 text-white px-1 rounded' : 'text-gray-500 dark:text-gray-400'
+                            <span className={`${
+                              ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400'
                             }`}>Оплачено</span>
-                            <span className={`text-center w-[18%] ${
-                              ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500 text-white px-1 rounded' : 'text-gray-500 dark:text-gray-400'
+                            <span className={`${
+                              ['В пути', 'На складе'].includes(relatedRequest.status) ? 'text-indigo-500' : 'text-gray-500 dark:text-gray-400'
                             }`}>В пути</span>
-                            <span className={`text-center w-[18%] ${
-                              ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600 text-white px-1 rounded' : 'text-gray-500 dark:text-gray-400'
+                            <span className={`${
+                              ['На складе'].includes(relatedRequest.status) ? 'text-emerald-500' : 'text-gray-500 dark:text-gray-400'
                             }`}>Склад</span>
                           </div>
                         </div>
