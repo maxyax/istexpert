@@ -32,12 +32,15 @@ const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedT
   const criticalBreakdowns = activeBreakdowns.filter(b => b.severity === 'Критическая');
   if (criticalBreakdowns.length > 0) return EquipStatus.REPAIR;
 
-  // 2. Проверка поломок в работе
+  // 2. Проверка поломок в работе - техника в ремонте
   const inWorkBreakdowns = activeBreakdowns.filter(b => b.status === 'В работе');
   if (inWorkBreakdowns.length > 0) return EquipStatus.REPAIR;
 
-  // 3. Проверка ожидания запчастей
-  const waitingForParts = activeBreakdowns.filter(b => b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены');
+  // 3. Проверка ожидания запчастей - запчасти заказаны/в пути
+  const waitingForParts = activeBreakdowns.filter(b => 
+    (b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены') &&
+    b.severity !== 'Критическая'
+  );
   if (waitingForParts.length > 0) return EquipStatus.WAITING_PARTS;
 
   // 4. Проверка незначительных поломок (низкая/средняя серьезность)
@@ -502,13 +505,13 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                               relatedRequest.status === 'В пути' ? 'w-[80%] bg-indigo-500' :
                               relatedRequest.status === 'Оплачено' ? 'w-[60%] bg-orange-500' :
                               relatedRequest.status === 'Поиск' ? 'w-[40%] bg-blue-500' :
-                              'w-[20%] bg-emerald-500'
+                              'w-[20%] bg-purple-500'
                             }`}/>
                           </div>
                           {/* Подписи стадий */}
                           <div className="flex justify-between mt-2 text-[10px] font-semibold uppercase">
                             <span className={`${
-                              ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'text-emerald-500' : 'text-gray-500 dark:text-gray-400'
+                              ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'text-purple-500' : 'text-gray-500 dark:text-gray-400'
                             }`}>Новая</span>
                             <span className={`${
                               ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'text-blue-500' : 'text-gray-500 dark:text-gray-400'
@@ -1364,9 +1367,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       {/* Форма обновления статуса */}
       {selectedBreakdownDetail && (
         <div className="fixed inset-0 z-[215] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md pointer-events-none">
-          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 pointer-events-auto">
-            <div className="flex justify-between items-center mb-6 md:mb-10 sticky top-0 bg-neo-bg">
-              <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Обновить статус</h2>
+          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20 pointer-events-auto max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg z-10">
+              <h2 className="text-lg md:text-xl font-bold uppercase text-gray-800 dark:text-gray-100">Обновить статус</h2>
               <button onClick={() => setSelectedBreakdownDetail(null)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
             </div>
             <form onSubmit={(e) => {
@@ -1382,7 +1385,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 );
                 setSelectedBreakdownDetail(null);
               }
-            }} className="space-y-5 md:space-y-6">
+            }} className="space-y-4">
               <div className="space-y-2">
                 <p className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Деталь</p>
                 <p className="text-sm font-black text-gray-700 dark:text-gray-200">{selectedBreakdownDetail.partName}</p>
@@ -1427,9 +1430,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               })()}
 
               <div className="space-y-2">
-                <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Новый статус</label>
+                <label className="text-[9px] font-bold text-gray-400 ml-2">Новый статус</label>
                 <select
-                  className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs uppercase text-gray-700 dark:text-gray-200 outline-none"
+                  className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm uppercase text-gray-700 dark:text-gray-200 outline-none"
                   value={breakdownStatusForm.status}
                   onChange={e => {
                     const newStatus = e.target.value as any;
@@ -1460,48 +1463,48 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               {breakdownStatusForm.status === 'Исправлено' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Дата ввода в эксплуатацию</label>
-                    <input type="date" value={breakdownStatusForm.fixedDate} onChange={e=>setBreakdownStatusForm({...breakdownStatusForm, fixedDate: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none" />
+                    <label className="text-[9px] font-bold text-gray-400 ml-2">Дата ввода в эксплуатацию</label>
+                    <input type="date" value={breakdownStatusForm.fixedDate} onChange={e=>setBreakdownStatusForm({...breakdownStatusForm, fixedDate: e.target.value})} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Наработка (м/ч)</label>
+                      <label className="text-[9px] font-bold text-gray-400 ml-2">Наработка (м/ч)</label>
                       <input
                         type="number"
                         value={(breakdownStatusForm as any).hoursAtFix || ''}
                         onChange={e => setBreakdownStatusForm({...breakdownStatusForm, hoursAtFix: e.target.value ? parseInt(e.target.value) : undefined} as any)}
                         placeholder={selectedBreakdownDetail.hoursAtBreakdown?.toString() || '0'}
-                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none"
+                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none"
                       />
-                      <p className="text-[7px] text-gray-400">На момент поломки: {selectedBreakdownDetail.hoursAtBreakdown || '—'} м/ч</p>
+                      <p className="text-[8px] text-gray-400">На момент поломки: {selectedBreakdownDetail.hoursAtBreakdown || '—'} м/ч</p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Пробег (км)</label>
+                      <label className="text-[9px] font-bold text-gray-400 ml-2">Пробег (км)</label>
                       <input
                         type="number"
                         value={(breakdownStatusForm as any).mileageAtFix || ''}
                         onChange={e => setBreakdownStatusForm({...breakdownStatusForm, mileageAtFix: e.target.value ? parseInt(e.target.value) : undefined} as any)}
                         placeholder="0"
-                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none"
+                        className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2 tracking-widest">Примечания к исправлению</label>
+                    <label className="text-[9px] font-bold text-gray-400 ml-2">Примечания к исправлению</label>
                     <textarea
                       value={(breakdownStatusForm as any).fixNotes || ''}
                       onChange={e => setBreakdownStatusForm({...breakdownStatusForm, fixNotes: e.target.value} as any)}
                       placeholder="Опишите выполненные работы, замененные детали, рекомендации..."
-                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-black text-xs text-gray-700 dark:text-gray-200 outline-none h-24 resize-none"
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none font-bold text-sm text-gray-700 dark:text-gray-200 outline-none h-24 resize-none"
                     />
                   </div>
                   <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                    <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Примечание</p>
+                    <p className="text-[9px] font-bold text-blue-400 uppercase">Примечание</p>
                     <p className="text-xs text-gray-600 dark:text-gray-300">Заполните наработку/пробег если поломка была не критической и техника продолжала работать</p>
                   </div>
                 </div>
               )}
-              <button type="submit" className="w-full py-5 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-4 border border-blue-500/10 hover:shadow-neo-inset">Обновить</button>
+              <button type="submit" className="w-full py-4 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold uppercase text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all">Сохранить</button>
             </form>
           </div>
         </div>

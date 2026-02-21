@@ -76,6 +76,60 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
 
   return (
     <div className="space-y-4 md:space-y-6 h-full flex flex-col overflow-hidden px-1 md:px-0">
+      {/* Плитка предстоящих ТО */}
+      {(() => {
+        const today = new Date();
+        const upcomingTOs = plannedTOs
+          .filter(t => {
+            const tDate = new Date(t.date + 'T00:00:00');
+            return tDate >= today && t.status === 'planned';
+          })
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .slice(0, 5);
+
+        if (upcomingTOs.length > 0) {
+          return (
+            <div className="bg-neo-bg rounded-2xl shadow-neo p-4 md:p-6 border border-white/5">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarIcon size={20} className="text-blue-500"/>
+                <h3 className="text-sm md:text-base font-bold uppercase text-gray-800 dark:text-gray-100">Предстоящие ТО</h3>
+              </div>
+              <div className="space-y-2">
+                {upcomingTOs.map(to => {
+                  const eq = equipment.find(e => e.id === to.equipmentId);
+                  const toDate = new Date(to.date + 'T00:00:00');
+                  const daysUntil = Math.ceil((toDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  return (
+                    <button
+                      key={to.id}
+                      onClick={() => {
+                        setCurrentDate(new Date(to.date));
+                        handleEventClick(to.equipmentId);
+                      }}
+                      className="w-full flex items-center justify-between p-3 rounded-xl bg-neo-bg hover:bg-white/5 transition-all text-left group"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs md:text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{eq?.name || 'ТО'}</p>
+                        <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400">{to.type}</p>
+                      </div>
+                      <div className="text-right shrink-0 ml-4">
+                        <p className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-200">{to.date.split('-').reverse().join('.')}</p>
+                        <p className={`text-[9px] md:text-[10px] font-semibold ${
+                          daysUntil <= 3 ? 'text-red-500' : daysUntil <= 7 ? 'text-orange-500' : 'text-gray-500'
+                        }`}>
+                          {daysUntil === 0 ? 'Сегодня' : daysUntil === 1 ? 'Завтра' : `через ${daysUntil} дн.`}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-2 md:gap-4 justify-between sm:justify-start w-full sm:w-auto">
           <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="p-2.5 md:p-3 rounded-xl shadow-neo bg-neo-bg hover:shadow-neo-inset transition-all dark:text-gray-400 active:scale-95">

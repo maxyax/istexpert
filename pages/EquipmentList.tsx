@@ -411,6 +411,41 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                           {computedStatus.reason && computedStatus.status !== EquipStatus.ACTIVE && (
                             <p className="text-[9px] md:text-[10px] text-gray-600 dark:text-gray-300 truncate max-w-[150px]">{computedStatus.reason}</p>
                           )}
+                          {/* Прогресс-бар по заявке */}
+                          {(() => {
+                            const relatedRequest = useProcurementStore.getState().requests.find(r => {
+                              const reqBreakdown = useMaintenanceStore.getState().breakdowns.find(b => b.id === r.breakdownId);
+                              return reqBreakdown?.equipmentId === e.id;
+                            });
+                            if (relatedRequest) {
+                              const statusOrder = ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'];
+                              const currentIndex = statusOrder.indexOf(relatedRequest.status);
+                              const progressPercent = (currentIndex + 1) * 20;
+                              return (
+                                <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                  <div className="relative h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div className={`absolute top-0 left-0 h-full transition-all duration-500 ${
+                                      relatedRequest.status === 'На складе' ? 'w-full bg-emerald-500' :
+                                      relatedRequest.status === 'В пути' ? 'w-[80%] bg-indigo-500' :
+                                      relatedRequest.status === 'Оплачено' ? 'w-[60%] bg-orange-500' :
+                                      relatedRequest.status === 'Поиск' ? 'w-[40%] bg-blue-500' :
+                                      'w-[20%] bg-purple-500'
+                                    }`}/>
+                                  </div>
+                                  <p className="text-[8px] md:text-[9px] font-semibold uppercase mt-1 text-gray-500 dark:text-gray-400">
+                                    Заявка: <span className={
+                                      relatedRequest.status === 'На складе' ? 'text-emerald-500' :
+                                      relatedRequest.status === 'В пути' ? 'text-indigo-500' :
+                                      relatedRequest.status === 'Оплачено' ? 'text-orange-500' :
+                                      relatedRequest.status === 'Поиск' ? 'text-blue-500' :
+                                      'text-purple-500'
+                                    }>{relatedRequest.status}</span>
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                       </td>
                       <td className="px-3 md:px-4 py-4 md:py-6 text-xs md:text-sm font-black text-gray-700 whitespace-nowrap hidden md:table-cell">{formatNumber(e.hours)} м/ч</td>
