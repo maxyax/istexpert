@@ -478,10 +478,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     <div className="flex justify-between items-start gap-3">
                       <div className="overflow-hidden flex-1 cursor-pointer" onClick={() => setSelectedBreakdownDetail(b)}>
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm md:text-base font-semibold text-gray-800 dark:text-gray-100 truncate">{b.partName}</p>
-                          <span className={`text-[7px] md:text-[8px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${severityColorClass(b.severity)}`}>{b.severity}</span>
+                          <p className="text-base md:text-lg font-semibold text-gray-800 dark:text-gray-100 truncate">{b.partName}</p>
+                          <span className={`text-[9px] md:text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${severityColorClass(b.severity)}`}>{b.severity}</span>
                         </div>
-                        <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400">{b.status} • {b.node}</p>
+                        <p className="text-sm md:text-base font-medium text-gray-600 dark:text-gray-300">{b.status} • {b.node}</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {!relatedRequest && (
@@ -490,7 +490,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                               setSelectedBreakdownDetail(b);
                               setIsCreateRequestOpen(true);
                             }}
-                            className="px-3 py-2 rounded-xl bg-emerald-600 text-white font-semibold uppercase text-[8px] hover:bg-emerald-700 transition-all"
+                            className="px-3 py-2 rounded-xl bg-emerald-600 text-white font-semibold uppercase text-[9px] hover:bg-emerald-700 transition-all"
                             title="Создать заявку в снабжение"
                           >
                             Заявка
@@ -502,35 +502,35 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
                     {/* Прогресс-бар статусов снабжения */}
                     {relatedRequest && !isReadyToWork && (
-                      <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-1 mb-1">
-                          <div className={`flex-1 h-1.5 rounded-full ${
+                      <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <div className={`flex-1 h-2 rounded-full ${
                             ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
                           }`}/>
-                          <div className={`flex-1 h-1.5 rounded-full ${
+                          <div className={`flex-1 h-2 rounded-full ${
                             ['Поиск', 'Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
                           }`}/>
-                          <div className={`flex-1 h-1.5 rounded-full ${
+                          <div className={`flex-1 h-2 rounded-full ${
                             ['Оплачено', 'В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
                           }`}/>
-                          <div className={`flex-1 h-1.5 rounded-full ${
+                          <div className={`flex-1 h-2 rounded-full ${
                             ['В пути', 'На складе'].includes(relatedRequest.status) ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
                           }`}/>
-                          <div className={`flex-1 h-1.5 rounded-full ${
+                          <div className={`flex-1 h-2 rounded-full ${
                             ['На складе'].includes(relatedRequest.status) ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'
                           }`}/>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className={`text-[7px] font-black uppercase ${
-                            relatedRequest.status === 'На складе' ? 'text-emerald-600' :
-                            relatedRequest.status === 'В пути' ? 'text-indigo-600' :
-                            relatedRequest.status === 'Оплачено' ? 'text-orange-600' :
-                            relatedRequest.status === 'Поиск' ? 'text-blue-600' :
-                            'text-gray-400'
+                          <span className={`text-sm font-semibold uppercase ${
+                            relatedRequest.status === 'На складе' ? 'text-emerald-600 dark:text-emerald-400' :
+                            relatedRequest.status === 'В пути' ? 'text-indigo-600 dark:text-indigo-400' :
+                            relatedRequest.status === 'Оплачено' ? 'text-orange-600 dark:text-orange-400' :
+                            relatedRequest.status === 'Поиск' ? 'text-blue-600 dark:text-blue-400' :
+                            'text-gray-500 dark:text-gray-400'
                           }`}>{relatedRequest.status}</span>
                           {relatedRequest.status === 'На складе' && (
-                            <span className="text-[7px] font-black text-emerald-600 flex items-center gap-1">
-                              <CheckCircle2 size={10}/> Готово
+                            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                              <CheckCircle2 size={14}/> Готово к работе
                             </span>
                           )}
                         </div>
