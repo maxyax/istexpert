@@ -304,7 +304,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             Весь журнал <ChevronRight size={14}/>
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
+        <div className="space-y-2 max-h-80 overflow-y-auto custom-scrollbar pr-2">
           {(() => {
             const allEvents = [
               ...breakdowns.map(b => ({ type: 'breakdown' as const, data: b, date: new Date(b.date).getTime() })),
@@ -323,21 +323,24 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                 return (
                   <div
                     key={`b-${b.id}`}
-                    className="p-3 rounded-xl shadow-neo-sm bg-neo-bg border-l-4 border-red-500 flex flex-col gap-1.5"
+                    className="p-3 rounded-xl shadow-[inset_3px_3px_6px_rgba(0,0,0,0.05),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] bg-neo-bg border-l-4 border-red-500 flex justify-between items-center group hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,1)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(60,75,95,0.25)] hover:cursor-pointer transition-all"
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="overflow-hidden flex-1">
-                        <p className="text-[9px] font-black uppercase text-gray-700 truncate">{b.partName || 'Поломка'}</p>
-                        <p className="text-[7px] font-bold text-gray-400 truncate">{equip?.name || 'Техника'}</p>
-                      </div>
-                      <span className="text-[6px] text-gray-400">{formatDate(b.date)}</span>
+                    <div className="overflow-hidden flex-1">
+                      <p className="text-[11px] md:text-[12px] font-black uppercase text-gray-800 dark:text-gray-100 truncate">{b.partName || 'Поломка'}</p>
+                      <p className="text-[9px] md:text-[10px] font-bold text-gray-600 dark:text-gray-300 truncate">{equip?.name || 'Техника'}</p>
                     </div>
-                    {req && (
-                      <div className="flex items-center gap-1.5">
-                        <Package size={8} className="text-blue-500"/>
-                        <span className="text-[6px] font-black text-blue-400 uppercase">{req.status}</span>
-                      </div>
-                    )}
+                    <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
+                      <span className="text-[8px] md:text-[9px] font-bold text-gray-500 dark:text-gray-400">{formatDate(b.date)}</span>
+                      {req && (
+                        <span className={`text-[8px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                          req.status === 'На складе' ? 'bg-emerald-500 text-white' :
+                          req.status === 'В пути' ? 'bg-indigo-500 text-white' :
+                          req.status === 'Оплачено' ? 'bg-orange-500 text-white' :
+                          req.status === 'Поиск' ? 'bg-blue-500 text-white' :
+                          'bg-purple-500 text-white'
+                        }`}>{req.status}</span>
+                      )}
+                    </div>
                   </div>
                 );
               } else {
@@ -348,14 +351,14 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                 return (
                   <div
                     key={`r-${r.id}`}
-                    className="p-3 rounded-xl shadow-neo-sm bg-neo-bg border-l-4 border-emerald-500 flex flex-col gap-1.5"
+                    className="p-3 rounded-xl shadow-[inset_3px_3px_6px_rgba(0,0,0,0.05),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] bg-neo-bg border-l-4 border-emerald-500 flex justify-between items-center group hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,1)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(60,75,95,0.25)] hover:cursor-pointer transition-all"
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="overflow-hidden flex-1">
-                        <p className="text-[9px] font-black uppercase text-gray-700 truncate">{recordType}</p>
-                        <p className="text-[7px] font-bold text-gray-400 truncate">{equip?.name || 'Техника'}</p>
-                      </div>
-                      <span className="text-[6px] text-gray-400">{formatDate(r.date)}</span>
+                    <div className="overflow-hidden flex-1">
+                      <p className="text-[11px] md:text-[12px] font-black uppercase text-gray-800 dark:text-gray-100 truncate">{recordType}</p>
+                      <p className="text-[9px] md:text-[10px] font-bold text-gray-600 dark:text-gray-300 truncate">{equip?.name || 'Техника'}</p>
+                    </div>
+                    <div className="shrink-0 ml-4">
+                      <span className="text-[8px] md:text-[9px] font-bold text-gray-500 dark:text-gray-400">{formatDate(r.date)}</span>
                     </div>
                   </div>
                 );
