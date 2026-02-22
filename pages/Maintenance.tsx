@@ -623,12 +623,12 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           </div>
 
           <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
-            <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-10 flex items-center gap-2"><History size={16} className="text-blue-600"/> Архив обслуживания</h3>
-            <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+            <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-10 flex items-center gap-2"><History size={16} className="text-blue-600"/> История обслуживания</h3>
+            <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
               {records.filter(r => r.equipmentId === selectedEquip.id).map(r => {
                 const isBreakdown = r.type.toLowerCase().includes('поломк') || r.type.toLowerCase().includes('неисправност') || r.type.toLowerCase().includes('акт');
                 return (
-                  <div key={r.id} onClick={() => setSelectedRecordDetail(r)} className={`p-4 md:p-6 rounded-2xl shadow-neo-sm bg-neo-bg flex justify-between items-center border-l-4 ${isBreakdown ? 'border-red-500' : 'border-emerald-500'} group hover:shadow-neo hover:cursor-pointer transition-all`}>
+                  <div key={r.id} onClick={() => setSelectedRecordDetail(r)} className={`p-4 md:p-5 rounded-xl shadow-[inset_3px_3px_6px_rgba(0,0,0,0.05),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] bg-neo-bg flex justify-between items-center border-l-4 ${isBreakdown ? 'border-red-500' : 'border-emerald-500'} group hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,1)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(60,75,95,0.25)] hover:cursor-pointer transition-all`}>
                     <div className="overflow-hidden">
                       <p className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate">{r.type}</p>
                       <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{r.performedBy} • {formatNumber(r.hoursAtMaintenance)} м/ч</p>
