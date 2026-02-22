@@ -160,7 +160,7 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
       <div className="flex-1 bg-neo-bg rounded-[1.5rem] md:rounded-[2.5rem] shadow-neo-inset p-1.5 md:p-6 overflow-y-auto custom-scrollbar">
         <div className="grid grid-cols-7 gap-1 md:gap-3 min-w-[280px]">
           {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(d => (
-            <div key={d} className="text-center text-[8px] md:text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest pb-1 md:pb-3">{d}</div>
+            <div key={d} className="text-center text-[12px] md:text-[14px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest pb-1 md:pb-3">{d}</div>
           ))}
           {Array(daysInMonth[0].getDay() === 0 ? 6 : daysInMonth[0].getDay() - 1).fill(0).map((_, i) => (
             <div key={`empty-${i}`} className="h-16 md:h-32 opacity-10"></div>
@@ -170,7 +170,7 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
             const isToday = new Date().toDateString() === day.toDateString();
             return (
               <div key={day.toISOString()} className={`h-20 md:h-36 p-1 md:p-2 rounded-lg md:rounded-2xl shadow-neo bg-neo-bg relative overflow-hidden group hover:shadow-neo-inset transition-all border border-white/5 dark:border-gray-800/50 ${isToday ? 'ring-2 ring-blue-500/30 ring-inset' : ''}`}>
-                <span className={`text-[8px] md:text-[11px] font-black mb-1 block ${isToday ? 'text-blue-500' : 'text-gray-400 dark:text-gray-600'}`}>{day.getDate()}</span>
+                <span className={`text-[12px] md:text-[15px] font-black mb-1 block ${isToday ? 'text-blue-500' : 'text-gray-700 dark:text-gray-300'}`}>{day.getDate()}</span>
                 <div className="space-y-0.5 overflow-y-auto max-h-[calc(100%-1rem)] custom-scrollbar pr-0.5">
                   {planned.map(e => (
                     <div 
