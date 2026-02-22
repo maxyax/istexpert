@@ -137,10 +137,10 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
           <div
             key={s.title}
             onClick={() => onNavigate(s.id)}
-            className={`p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all group border border-white/5 ${s.highlight ? 'ring-2 ring-offset-2 ' + (s.color.replace('text-', 'ring-')) + ' animate-pulse' : ''}`}
+            className={`p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all group border border-white/5 flex flex-col items-center text-center ${s.highlight ? 'ring-2 ring-offset-2 ' + (s.color.replace('text-', 'ring-')) + ' animate-pulse' : ''}`}
           >
-            <div className="p-3 rounded-xl shadow-neo bg-neo-bg w-fit mb-4 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-              <div className={s.color}>{s.icon}</div>
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg w-fit mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <div className={s.color}>{React.cloneElement(s.icon, { size: 27 })}</div>
             </div>
             <h4 className="text-gray-800 dark:text-gray-100 text-xs font-bold uppercase mb-2">{s.title}</h4>
             <div className="text-4xl md:text-5xl font-black text-gray-900 dark:text-gray-100 mb-2">{s.value}</div>
@@ -152,10 +152,10 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       {/* Финансы и статистика за месяц */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Топливо */}
-        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-              <Fuel size={24} className="text-emerald-500"/>
+              <Fuel size={27} className="text-emerald-500"/>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Топливо за месяц</h3>
@@ -176,10 +176,10 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         </div>
 
         {/* Оплачено */}
-        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-              <span className="text-[24px] font-bold text-blue-500">₽</span>
+              <span className="text-[27px] font-bold text-blue-500">₽</span>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Оплачено заявок</h3>
@@ -196,10 +196,10 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         </div>
 
         {/* На складе */}
-        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-              <Package size={24} className="text-indigo-500"/>
+              <Package size={27} className="text-indigo-500"/>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Поступило на склад</h3>
@@ -218,13 +218,13 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         {/* Акты за месяц */}
-        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
-          <div className="flex justify-between items-center mb-6">
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
+          <div className="flex justify-between items-center mb-6 w-full">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <AlertTriangle size={24} className="text-red-500"/>
+                <AlertTriangle size={27} className="text-red-500"/>
               </div>
-              <div>
+              <div className="text-left">
                 <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Акты поломок</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">За этот месяц</p>
               </div>
@@ -248,10 +248,10 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         </div>
 
         {/* Самая ломающаяся техника */}
-        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-              <TrendingUp size={24} className="text-orange-500"/>
+              <TrendingUp size={27} className="text-orange-500"/>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Частые поломки</h3>
@@ -289,13 +289,13 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       </div>
 
       {/* Живая лента событий */}
-      <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
-        <div className="flex justify-between items-center mb-6">
+      <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
+        <div className="flex justify-between items-center mb-6 w-full">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-              <History size={24} className="text-orange-500"/>
+              <History size={27} className="text-orange-500"/>
             </div>
-            <div>
+            <div className="text-left">
               <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Живая лента</h3>
               <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Последние события</p>
             </div>
