@@ -92,7 +92,7 @@ const computeEquipmentStatus = (equipmentId: string, breakdowns: any[], plannedT
 
 export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({ onNavigate }) => {
   const { equipment } = useFleetStore();
-  const { selectedMaintenanceEquipId, setSelectedMaintenanceEquipId, addMaintenance, addBreakdown, records, breakdowns, plannedTOs, updateBreakdownStatus } = useMaintenanceStore();
+  const { selectedMaintenanceEquipId, setSelectedMaintenanceEquipId, addMaintenance, addBreakdown, records, breakdowns, plannedTOs, updateBreakdownStatus, updatePlannedTO } = useMaintenanceStore();
   const { requests } = useProcurementStore();
   const { user } = useAuthStore();
   
@@ -228,6 +228,23 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       isEarlyService = plannedDate > today;
     }
 
+    // Предотвращение дублирования: проверяем, не было ли уже проведено ТО с этим plannedTOId
+    if (plannedTOForService) {
+      const alreadyCompleted = records.some(r => r.plannedTOId === plannedTOForService.id);
+      if (alreadyCompleted) {
+        alert('Это ТО уже было проведено ранее. Дублирование предотвращено.');
+        setIsTOModalOpen(false);
+        setToChecklist([]);
+        setToTypeLabel('');
+        setToHoursInput('');
+        setToMileageInput('');
+        setQrDataUrl('');
+        setLastRecordedValues(null);
+        setPlannedTOForService(null);
+        return;
+      }
+    }
+
     addMaintenance({
       id: Math.random().toString(),
       equipmentId: selectedMaintenanceEquipId,
@@ -240,15 +257,15 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       isEarlyService: isEarlyService,
       plannedTOId: plannedTOForService?.id
     });
-    
+
     // update equipment last hours
     useFleetStore.getState().updateEquipment(selectedMaintenanceEquipId, { hours: hoursAt, mileage_km: mileageAt !== undefined ? mileageAt : equipToUpdate.mileage_km });
-    
+
     // Если ТО было запланировано - помечаем как выполненное
     if (plannedTOForService) {
-      useMaintenanceStore.getState().updatePlannedTO(plannedTOForService.id, { status: 'completed' });
+      updatePlannedTO(plannedTOForService.id, { status: 'completed' });
     }
-    
+
     setIsTOModalOpen(false);
     setToChecklist([]);
     setToTypeLabel('');
