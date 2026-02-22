@@ -1406,11 +1406,17 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
           setIsEditingInsurance(false);
         }}
         onSave={(insurance) => {
+          console.log('=== onSave called ===');
+          console.log('Insurance data:', insurance);
+          console.log('Is editing:', isEditingInsurance);
+          
           if (isEditingInsurance) {
             // Режим редактирования - просто обновляем текущий полис
+            console.log('Editing mode - updating current policy');
             setEditForm({...editForm, ...insurance});
           } else {
             // Режим добавления - старый полис в историю, новый текущий
+            console.log('Adding mode - moving old to history');
             if (editForm.insurance_end) {
               const currentPolicy = {
                 insuranceCompany: editForm.insuranceCompany || '',
@@ -1418,15 +1424,18 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                 insuranceStart: editForm.insuranceStart || '',
                 insuranceEnd: editForm.insurance_end
               };
+              console.log('Old policy to history:', currentPolicy);
               setEditForm({
                 ...editForm,
                 insuranceHistory: [...(editForm.insuranceHistory || []), currentPolicy],
                 ...insurance
               });
             } else {
+              console.log('No old policy - just setting new one');
               setEditForm({...editForm, ...insurance});
             }
           }
+          console.log('Edit form updated');
           setIsEditingInsurance(false);
           setIsInsuranceModalOpen(false);
         }}
@@ -1619,8 +1628,13 @@ const AddInsuranceModal: React.FC<{
   if (!isOpen) return null;
 
   const handleSubmit = () => {
+    console.log('=== Submitting insurance ===');
+    console.log('New insurance:', newInsurance);
+    
     if (newInsurance.insuranceCompany && newInsurance.insuranceEnd) {
+      console.log('Calling onSave with:', newInsurance);
       onSave(newInsurance);
+      console.log('onSave called, now closing modal');
       onClose(); // Закрываем модальное окно после сохранения
       setNewInsurance({
         insuranceCompany: '',

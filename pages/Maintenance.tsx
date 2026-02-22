@@ -300,15 +300,16 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       return;
     }
 
-    // Форматируем даты в правильный формат
+    // Форматируем даты в правильный формат YYYY-MM-DD
     const formatDate = (dateStr: string) => {
       if (!dateStr) return '';
-      const date = new Date(dateStr + 'T00:00:00');
-      return date.toISOString().split('T')[0];
+      // dateStr уже в формате YYYY-MM-DD из input type="date"
+      return dateStr;
     };
 
-    // Обновляем данные техники
-    useFleetStore.getState().updateEquipment(selectedMaintenanceEquipId, {
+    // Обновляем данные техники через store
+    const fleet = useFleetStore.getState();
+    fleet.updateEquipment(selectedMaintenanceEquipId, {
       insuranceCompany: newInsurance.insuranceCompany,
       insuranceNumber: newInsurance.insuranceNumber,
       insuranceStart: formatDate(newInsurance.insuranceStart),
