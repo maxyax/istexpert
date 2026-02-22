@@ -27,8 +27,8 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
 
   return (
     <div className="flex h-screen bg-neo-bg text-gray-700 dark:text-gray-300 overflow-hidden">
-      <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-neo-bg transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="p-6 flex flex-col h-full relative z-10">
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-neo-bg border-r border-white/30 dark:border-gray-800 transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="p-6 flex flex-col h-full">
           <div className="flex items-center space-x-3 mb-10 px-2">
             <Truck className="text-blue-500" size={28} />
             <span className="text-xl font-black tracking-tight">ISTExpert</span>
@@ -44,12 +44,11 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
             <LogOut size={18} /> <span>Выйти</span>
           </button>
         </div>
-        {/* Тень справа для эффекта глубины */}
-        <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-r from-transparent via-gray-400/20 to-transparent dark:via-gray-600/30"/>
-        <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-black/5 to-transparent dark:from-black/20 pointer-events-none"/>
+        {/* Легкая тень для глубины */}
+        <div className="absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-black/3 to-transparent dark:from-black/10 pointer-events-none"/>
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden relative z-20">
+      <main className="flex-1 flex flex-col overflow-hidden">
         <header className="h-20 px-8 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-neo-bg/80 backdrop-blur-md">
           <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-3 rounded-xl shadow-neo"><Menu size={20} /></button>
           <h2 className="text-lg font-black uppercase tracking-tight hidden md:block">{company?.name}</h2>
