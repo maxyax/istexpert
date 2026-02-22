@@ -583,6 +583,84 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         <div className="text-[9px] font-medium text-gray-500 dark:text-gray-400 truncate">{e.vin}</div>
                       </div>
                     </div>
+                    
+                    {/* Информационные блоки - в одну строку справа */}
+                    <div className="flex items-center gap-3 overflow-x-auto max-w-[50%]">
+                      {/* Запланированное ТО */}
+                      {nextPlannedTO ? (
+                        <button
+                          onClick={() => {
+                            setSelectedMaintenanceEquipId(e.id);
+                            const to = plannedTOs.find(t => t.id === nextPlannedTO.id);
+                            if (to) openTOForEquip(e, to);
+                          }}
+                          className="flex items-center gap-1 px-1.5 py-1 rounded hover:bg-white/5 transition-all shrink-0"
+                        >
+                          <Calendar size={11} className={
+                            new Date(nextPlannedTO.date + 'T00:00:00') < today
+                              ? 'text-red-600'
+                              : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
+                                ? 'text-emerald-600'
+                                : 'text-blue-600'
+                          }/>
+                          <p className={`text-[9px] font-bold whitespace-nowrap ${
+                            new Date(nextPlannedTO.date + 'T00:00:00') < today
+                              ? 'text-red-700 dark:text-red-500'
+                              : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
+                                ? 'text-emerald-700 dark:text-emerald-500'
+                                : 'text-blue-700 dark:text-blue-500'
+                          }`}>
+                            {nextPlannedTO.date.split('-').reverse().join('.')}
+                          </p>
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-1 px-1.5 py-1 rounded shrink-0">
+                          <Calendar size={11} className="text-gray-400"/>
+                          <p className="text-[9px] font-bold text-gray-400 whitespace-nowrap">—</p>
+                        </div>
+                      )}
+                      
+                      {/* Последняя заправка */}
+                      {lastFuelRecord && (
+                        <div
+                          className="flex items-center gap-1 px-1.5 py-1 rounded hover:bg-white/5 transition-all cursor-pointer shrink-0"
+                          onClick={() => setSelectedFuelDetail(lastFuelRecord)}
+                        >
+                          <Fuel size={11} className="text-emerald-600"/>
+                          <p className="text-[9px] font-bold text-emerald-700 dark:text-emerald-600 whitespace-nowrap">
+                            {lastFuelRecord.date.split('-').reverse().join('.')}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* ОСАГО - задача на продление */}
+                      {e.insurance_end && (
+                        <div
+                          className="flex items-center gap-1 px-1.5 py-1 rounded hover:bg-white/5 transition-all cursor-pointer shrink-0"
+                          onClick={() => setSelectedMaintenanceEquipId(e.id)}
+                        >
+                          <AlertTriangle size={11} className={
+                            isInsuranceOverdue ? 'text-red-600' :
+                            daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-600' :
+                            'text-gray-500'
+                          }/>
+                          <p className={`text-[9px] font-bold whitespace-nowrap ${
+                            isInsuranceOverdue ? 'text-red-700 dark:text-red-500' :
+                            daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-700 dark:text-orange-500' :
+                            'text-gray-700 dark:text-gray-600'
+                          }`}>
+                            {isInsuranceOverdue
+                              ? `Просрочено ${Math.abs(daysUntilInsuranceOverdue!)} дн.`
+                              : daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30
+                                ? `Истекает через ${daysUntilInsuranceOverdue} дн.`
+                                : `До ${e.insurance_end.split('-').reverse().join('.')}`
+                          }
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Кнопки */}
                     <div className="flex items-center gap-2 shrink-0">
                       <button onClick={() => { setSelectedMaintenanceEquipId(e.id); openTOForEquip(e); }} className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-xs text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
                         <Wrench size={14}/>
@@ -598,94 +676,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       </button>
                     </div>
                   </div>
-                  
-                  {/* Информационные блоки - в одну строку */}
-                  <div className="flex items-center gap-4 overflow-x-auto">
-                    {/* Запланированное ТО */}
-                    {nextPlannedTO ? (
-                      <button
-                        onClick={() => {
-                          setSelectedMaintenanceEquipId(e.id);
-                          const to = plannedTOs.find(t => t.id === nextPlannedTO.id);
-                          if (to) openTOForEquip(e, to);
-                        }}
-                        className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 transition-all shrink-0"
-                      >
-                        <Calendar size={12} className={
-                          new Date(nextPlannedTO.date + 'T00:00:00') < today
-                            ? 'text-red-600'
-                            : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
-                              ? 'text-emerald-600'
-                              : 'text-blue-600'
-                        }/>
-                        <div className="text-left">
-                          <p className="text-[8px] font-bold text-gray-700 dark:text-gray-200 uppercase">ТО</p>
-                          <p className={`text-[10px] font-bold ${
-                            new Date(nextPlannedTO.date + 'T00:00:00') < today
-                              ? 'text-red-700 dark:text-red-500'
-                              : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
-                                ? 'text-emerald-700 dark:text-emerald-500'
-                                : 'text-blue-700 dark:text-blue-500'
-                          }`}>
-                            {nextPlannedTO.date.split('-').reverse().join('.')}
-                          </p>
-                        </div>
-                      </button>
-                    ) : (
-                      <div className="flex items-center gap-1.5 px-2 py-1 rounded shrink-0">
-                        <Calendar size={12} className="text-gray-400"/>
-                        <div className="text-left">
-                          <p className="text-[8px] font-bold text-gray-700 dark:text-gray-200 uppercase">ТО</p>
-                          <p className="text-[10px] font-bold text-gray-500">—</p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Последняя заправка */}
-                    {lastFuelRecord && (
-                      <div
-                        className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 transition-all cursor-pointer shrink-0"
-                        onClick={() => setSelectedFuelDetail(lastFuelRecord)}
-                      >
-                        <Fuel size={12} className="text-emerald-600"/>
-                        <div className="text-left">
-                          <p className="text-[8px] font-bold text-gray-700 dark:text-gray-200 uppercase">Заправка</p>
-                          <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-600">
-                            {lastFuelRecord.date.split('-').reverse().join('.')}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* ОСАГО - задача на продление */}
-                    {e.insurance_end && (
-                      <div
-                        className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 transition-all cursor-pointer shrink-0"
-                        onClick={() => setSelectedMaintenanceEquipId(e.id)}
-                      >
-                        <AlertTriangle size={12} className={
-                          isInsuranceOverdue ? 'text-red-600' :
-                          daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-600' :
-                          'text-gray-500'
-                        }/>
-                        <div className="text-left">
-                          <p className="text-[8px] font-bold text-gray-700 dark:text-gray-200 uppercase">ОСАГО</p>
-                          <p className={`text-[10px] font-bold ${
-                            isInsuranceOverdue ? 'text-red-700 dark:text-red-500' :
-                            daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-700 dark:text-orange-500' :
-                            'text-gray-700 dark:text-gray-600'
-                          }`}>
-                            {isInsuranceOverdue
-                              ? `Просрочено ${Math.abs(daysUntilInsuranceOverdue!)} дн.`
-                              : daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30
-                                ? `Истекает через ${daysUntilInsuranceOverdue} дн.`
-                                : `До ${e.insurance_end.split('-').reverse().join('.')}`
-                          }
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+
                   {/* Прогресс-бары по заявкам */}
                   {relatedRequests.length > 0 && (
                     <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -913,6 +904,43 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       </button>
                     );
                   })}
+
+                  {/* Задача: Продлить ОСАГО */}
+                  {(() => {
+                    const insuranceEnd = selectedEquip.insurance_end ? new Date(selectedEquip.insurance_end + 'T00:00:00') : null;
+                    if (!insuranceEnd) return null;
+                    
+                    const daysUntilOverdue = Math.ceil((insuranceEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    const isOverdue = daysUntilOverdue < 0;
+                    const isExpiringSoon = !isOverdue && daysUntilOverdue <= 30;
+
+                    if (!isOverdue && !isExpiringSoon) return null;
+
+                    return (
+                      <div
+                        className="w-full flex items-center justify-between p-3 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-left group border border-orange-500/30 cursor-pointer"
+                        onClick={() => setSelectedMaintenanceEquipId(selectedEquip.id)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-orange-500 text-white">
+                            <AlertTriangle size={16}/>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-orange-700 dark:text-orange-400">Продлить ОСАГО</p>
+                            <p className="text-[9px] text-orange-600">
+                              {isOverdue
+                                ? `Просрочено ${Math.abs(daysUntilOverdue)} дн.`
+                                : `Истекает через ${daysUntilOverdue} дн.`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-bold text-orange-700">{selectedEquip.insurance_end.split('-').reverse().join('.')}</p>
+                          <ChevronRight size={16} className="text-orange-500 ml-auto"/>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })()}
