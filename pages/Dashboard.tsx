@@ -47,7 +47,13 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
   const { equipment } = useFleetStore();
   const { breakdowns, records, fuelRecords, plannedTOs } = useMaintenanceStore();
   const { requests } = useProcurementStore();
-  
+
+  // Вычисляем статусы для каждой единицы техники
+  const equipmentWithComputedStatus = equipment.map(e => ({
+    ...e,
+    computedStatus: computeEquipmentStatus(e.id, breakdowns, plannedTOs, equipment)
+  }));
+
   const activeBreakdowns = breakdowns.filter(b => b.status !== 'Исправлено');
   const criticalBreakdowns = activeBreakdowns.filter(b => b.severity === 'Критическая');
   const readyToWork = activeBreakdowns.filter(b => {
@@ -58,6 +64,9 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
     const plannedDate = new Date(t.date);
     return t.status === 'planned' && plannedDate < new Date();
   });
+
+  // Считаем технику "В работе" по вычисленному статусу
+  const equipmentInWork = equipmentWithComputedStatus.filter(e => e.computedStatus === EquipStatus.ACTIVE).length;
   
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -116,7 +125,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
     {
       title: 'Автопарк',
       value: equipment.length,
-      sub: `${equipment.filter(e => e.status === 'В работе').length} в работе`,
+      sub: `${equipmentInWork} в работе`,
       icon: <Truck size={24}/>,
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/10',

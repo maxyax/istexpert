@@ -122,15 +122,36 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
       if (calc) calc(b.equipmentId);
     }
   },
-  addPlannedTO: (to) => set((state) => ({
-    plannedTOs: [...state.plannedTOs, { ...to, id: `pto-${Math.random().toString(36).substr(2, 9)}` }]
-  })),
-  updatePlannedTO: (id, updates) => set((state) => ({
-    plannedTOs: state.plannedTOs.map(t => t.id === id ? { ...t, ...updates } : t)
-  })),
-  removePlannedTO: (id) => set((state) => ({
-    plannedTOs: state.plannedTOs.filter(t => t.id !== id)
-  })),
+  addPlannedTO: (to) => {
+    set((state) => ({
+      plannedTOs: [...state.plannedTOs, { ...to, id: `pto-${Math.random().toString(36).substr(2, 9)}` }]
+    }));
+    // Recalculate status for this equipment
+    const calc = useMaintenanceStore.getState()._recalculateEquipmentStatus;
+    if (calc) calc(to.equipmentId);
+  },
+  updatePlannedTO: (id, updates) => {
+    const to = useMaintenanceStore.getState().plannedTOs.find(t => t.id === id);
+    set((state) => ({
+      plannedTOs: state.plannedTOs.map(t => t.id === id ? { ...t, ...updates } : t)
+    }));
+    // Recalculate status for this equipment
+    if (to) {
+      const calc = useMaintenanceStore.getState()._recalculateEquipmentStatus;
+      if (calc) calc(to.equipmentId);
+    }
+  },
+  removePlannedTO: (id) => {
+    const to = useMaintenanceStore.getState().plannedTOs.find(t => t.id === id);
+    set((state) => ({
+      plannedTOs: state.plannedTOs.filter(t => t.id !== id)
+    }));
+    // Recalculate status for this equipment
+    if (to) {
+      const calc = useMaintenanceStore.getState()._recalculateEquipmentStatus;
+      if (calc) calc(to.equipmentId);
+    }
+  },
   addFuelRecord: (record) => set((state) => ({
     fuelRecords: [record, ...state.fuelRecords]
   })),
@@ -139,27 +160,89 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
     const state = useMaintenanceStore.getState();
     const fleet = useFleetStore.getState();
     const breakdowns = state.breakdowns.filter(b => b.equipmentId === equipmentId);
+    const plannedTOs = state.plannedTOs.filter(t => t.equipmentId === equipmentId);
     const active = breakdowns.filter(b => b.status !== 'Исправлено');
+    const equip = fleet.equipment.find(e => e.id === equipmentId);
 
-    if (active.length === 0) {
-      const hasPlanned = state.plannedTOs.some(t => t.equipmentId === equipmentId && t.status === 'planned');
-      const newStatus = hasPlanned ? EquipStatus.MAINTENANCE : EquipStatus.ACTIVE;
-      fleet.updateEquipment(equipmentId, { status: newStatus });
-      return;
-    }
-
-    if (active.some(b => b.severity === 'Критическая')) {
+    // 1. Критические поломки - В ремонте
+    const criticalBreakdowns = active.filter(b => b.severity === 'Критическая');
+    if (criticalBreakdowns.length > 0) {
       fleet.updateEquipment(equipmentId, { status: EquipStatus.REPAIR });
       return;
     }
 
-    if (active.some(b => b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены')) {
+    // 2. Поломки в работе - В ремонте
+    const inWorkBreakdowns = active.filter(b => b.status === 'В работе');
+    if (inWorkBreakdowns.length > 0) {
+      fleet.updateEquipment(equipmentId, { status: EquipStatus.REPAIR });
+      return;
+    }
+
+    // 3. Ожидание запчастей
+    const waitingForParts = active.filter(b =>
+      b.status === 'Запчасти заказаны' || b.status === 'Запчасти получены'
+    );
+    if (waitingForParts.length > 0) {
       fleet.updateEquipment(equipmentId, { status: EquipStatus.WAITING_PARTS });
       return;
     }
 
-    // default for non-critical active breakdowns
-    fleet.updateEquipment(equipmentId, { status: EquipStatus.ACTIVE_WITH_RESTRICTIONS });
+    // 4. Незначительные поломки (низкая/средняя) в статусе "Новая"
+    const minorBreakdowns = active.filter(b =>
+      (b.severity === 'Низкая' || b.severity === 'Средняя') && b.status === 'Новая'
+    );
+    if (minorBreakdowns.length > 0) {
+      fleet.updateEquipment(equipmentId, { status: EquipStatus.ACTIVE_WITH_RESTRICTIONS });
+      return;
+    }
+
+    // 5. Проверка просроченного ТО по пробегу/моточасам
+    if (equip && equip.regulations && equip.regulations.length > 0) {
+      const currHours = equip.hours || 0;
+      const currKm = equip.mileage_km || 0;
+
+      for (const reg of equip.regulations) {
+        const intervalHours = reg.intervalHours || 0;
+        const intervalKm = reg.intervalKm || 0;
+
+        let nextHours = intervalHours > 0 ? Math.ceil(currHours / intervalHours) * intervalHours : Infinity;
+        let nextKm = intervalKm > 0 ? Math.ceil(currKm / intervalKm) * intervalKm : Infinity;
+
+        const hoursOverdue = intervalHours > 0 && currHours >= nextHours;
+        const kmOverdue = intervalKm > 0 && currKm >= nextKm;
+
+        if (hoursOverdue || kmOverdue) {
+          fleet.updateEquipment(equipmentId, { status: EquipStatus.MAINTENANCE });
+          return;
+        }
+      }
+    }
+
+    // 6. Проверка просроченного ТО по календарю
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const overduePlannedTO = plannedTOs.filter(t => {
+      if (t.status !== 'planned') return false;
+      const plannedDate = new Date(t.date);
+      plannedDate.setHours(0, 0, 0, 0);
+      return plannedDate < today;
+    });
+
+    if (overduePlannedTO.length > 0) {
+      fleet.updateEquipment(equipmentId, { status: EquipStatus.MAINTENANCE });
+      return;
+    }
+
+    // 7. Проверка предстоящего планового ТО
+    const upcomingPlannedTO = plannedTOs.filter(t => t.status === 'planned');
+    if (upcomingPlannedTO.length > 0) {
+      fleet.updateEquipment(equipmentId, { status: EquipStatus.MAINTENANCE });
+      return;
+    }
+
+    // 8. Техника в работе (нет активных проблем)
+    fleet.updateEquipment(equipmentId, { status: EquipStatus.ACTIVE });
   }
 }));
 

@@ -29,6 +29,7 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
   const { requests } = useProcurementStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAllTOListOpen, setIsAllTOListOpen] = useState(false);
 
   const daysInMonth = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -76,58 +77,119 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
 
   return (
     <div className="space-y-4 md:space-y-6 h-full flex flex-col overflow-hidden px-1 md:px-0">
-      {/* Плитка предстоящих ТО */}
+      {/* Плитка предстоящих и просроченных ТО */}
       {(() => {
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const overdueTOs = plannedTOs
+          .filter(t => {
+            const tDate = new Date(t.date + 'T00:00:00');
+            tDate.setHours(0, 0, 0, 0);
+            return tDate < today && t.status === 'planned';
+          })
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
         const upcomingTOs = plannedTOs
           .filter(t => {
             const tDate = new Date(t.date + 'T00:00:00');
+            tDate.setHours(0, 0, 0, 0);
             return tDate >= today && t.status === 'planned';
           })
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
           .slice(0, 5);
 
-        if (upcomingTOs.length > 0) {
-          return (
-            <div className="bg-neo-bg rounded-2xl shadow-neo p-4 md:p-6 border border-white/5">
-              <div className="flex items-center gap-2 mb-4">
-                <CalendarIcon size={20} className="text-blue-500"/>
-                <h3 className="text-sm md:text-base font-bold uppercase text-gray-800 dark:text-gray-100">Предстоящие ТО</h3>
+        return (
+          <>
+            {/* Просроченные ТО */}
+            {overdueTOs.length > 0 && (
+              <div className="bg-neo-bg rounded-2xl shadow-neo p-4 md:p-6 border-2 border-red-500/30">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={20} className="text-red-500"/>
+                    <h3 className="text-sm md:text-base font-bold uppercase text-red-600">Просроченные ТО</h3>
+                  </div>
+                  <span className="text-xs font-black text-red-600 bg-red-500/20 px-3 py-1 rounded-full">{overdueTOs.length}</span>
+                </div>
+                <div className="space-y-2">
+                  {overdueTOs.slice(0, 5).map(to => {
+                    const eq = equipment.find(e => e.id === to.equipmentId);
+                    const toDate = new Date(to.date + 'T00:00:00');
+                    const daysOverdue = Math.ceil((today.getTime() - toDate.getTime()) / (1000 * 60 * 60 * 24));
+                    return (
+                      <button
+                        key={to.id}
+                        onClick={() => {
+                          setCurrentDate(new Date(to.date));
+                          handleEventClick(to.equipmentId);
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all text-left group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs md:text-sm font-semibold text-red-700 dark:text-red-400 truncate">{eq?.name || 'ТО'}</p>
+                          <p className="text-[9px] md:text-[10px] text-red-500 dark:text-red-300">{to.type}</p>
+                        </div>
+                        <div className="text-right shrink-0 ml-4">
+                          <p className="text-xs md:text-sm font-bold text-red-700 dark:text-red-400">{to.date.split('-').reverse().join('.')}</p>
+                          <p className="text-[9px] md:text-[10px] font-semibold text-red-600">
+                            Просрочено на {daysOverdue} дн.
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="space-y-2">
-                {upcomingTOs.map(to => {
-                  const eq = equipment.find(e => e.id === to.equipmentId);
-                  const toDate = new Date(to.date + 'T00:00:00');
-                  const daysUntil = Math.ceil((toDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                  return (
-                    <button
-                      key={to.id}
-                      onClick={() => {
-                        setCurrentDate(new Date(to.date));
-                        handleEventClick(to.equipmentId);
-                      }}
-                      className="w-full flex items-center justify-between p-3 rounded-xl bg-neo-bg hover:bg-white/5 transition-all text-left group"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs md:text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{eq?.name || 'ТО'}</p>
-                        <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400">{to.type}</p>
-                      </div>
-                      <div className="text-right shrink-0 ml-4">
-                        <p className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-200">{to.date.split('-').reverse().join('.')}</p>
-                        <p className={`text-[9px] md:text-[10px] font-semibold ${
-                          daysUntil <= 3 ? 'text-red-500' : daysUntil <= 7 ? 'text-orange-500' : 'text-gray-500'
-                        }`}>
-                          {daysUntil === 0 ? 'Сегодня' : daysUntil === 1 ? 'Завтра' : `через ${daysUntil} дн.`}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
+            )}
+
+            {/* Предстоящие ТО */}
+            {upcomingTOs.length > 0 && (
+              <div className="bg-neo-bg rounded-2xl shadow-neo p-4 md:p-6 border border-white/5">
+                <div className="flex items-center gap-2 mb-4">
+                  <CalendarIcon size={20} className="text-blue-500"/>
+                  <h3 className="text-sm md:text-base font-bold uppercase text-gray-800 dark:text-gray-100">Предстоящие ТО</h3>
+                </div>
+                <div className="space-y-2">
+                  {upcomingTOs.map(to => {
+                    const eq = equipment.find(e => e.id === to.equipmentId);
+                    const toDate = new Date(to.date + 'T00:00:00');
+                    const daysUntil = Math.ceil((toDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    return (
+                      <button
+                        key={to.id}
+                        onClick={() => {
+                          setCurrentDate(new Date(to.date));
+                          handleEventClick(to.equipmentId);
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-xl bg-neo-bg hover:bg-white/5 transition-all text-left group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs md:text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{eq?.name || 'ТО'}</p>
+                          <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400">{to.type}</p>
+                        </div>
+                        <div className="text-right shrink-0 ml-4">
+                          <p className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-200">{to.date.split('-').reverse().join('.')}</p>
+                          <p className={`text-[9px] md:text-[10px] font-semibold ${
+                            daysUntil <= 3 ? 'text-red-500' : daysUntil <= 7 ? 'text-orange-500' : 'text-gray-500'
+                          }`}>
+                            {daysUntil === 0 ? 'Сегодня' : daysUntil === 1 ? 'Завтра' : `через ${daysUntil} дн.`}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        }
-        return null;
+            )}
+
+            {overdueTOs.length === 0 && upcomingTOs.length === 0 && (
+              <div className="bg-neo-bg rounded-2xl shadow-neo p-6 md:p-8 border border-white/5 text-center">
+                <CalendarIcon size={32} className="text-gray-400 mx-auto mb-3"/>
+                <p className="text-sm font-bold text-gray-500 uppercase">Нет запланированных ТО</p>
+              </div>
+            )}
+          </>
+        );
       })()}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
@@ -146,8 +208,14 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
              <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-orange-500 rounded-full" /> План ТО</div>
              <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-cyan-500 rounded-full" /> ТО выполнено</div>
            </div>
+           <button
+             onClick={() => setIsAllTOListOpen(true)}
+             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 md:py-3.5 rounded-xl md:rounded-2xl shadow-neo bg-neo-bg text-gray-700 dark:text-gray-300 font-bold text-xs uppercase hover:shadow-neo-inset transition-all tracking-widest active:scale-95 border border-white/10"
+           >
+             <CalendarIcon size={18} /> <span className="hidden sm:inline">Все ТО</span>
+           </button>
            {equipment.length > 0 && (
-             <button 
+             <button
                onClick={() => setIsModalOpen(true)}
                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 md:py-3.5 rounded-xl md:rounded-2xl shadow-neo bg-blue-500 text-white font-bold text-xs uppercase hover:shadow-neo-inset transition-all tracking-widest active:scale-95"
              >
@@ -215,6 +283,7 @@ export const MaintenanceCalendar: React.FC<{onNavigate?: (page: any) => void}> =
       </div>
 
       {isModalOpen && <AddPlannedTOModal onClose={() => setIsModalOpen(false)} equipment={equipment} onAdd={addPlannedTO} />}
+      {isAllTOListOpen && <AllTOListModal onClose={() => setIsAllTOListOpen(false)} equipment={equipment} plannedTOs={plannedTOs} records={records} onNavigate={(id: string) => { setSelectedMaintenanceEquipId(id); if (onNavigate) onNavigate('maintenance'); }} />}
     </div>
   );
 };
@@ -264,6 +333,118 @@ const AddPlannedTOModal: React.FC<{onClose: () => void, equipment: Equipment[], 
           </div>
           <button type="submit" className="w-full py-5 rounded-2xl bg-blue-500 shadow-neo text-white font-black uppercase text-xs hover:shadow-neo-inset transition-all tracking-widest active:scale-95 mt-4">Запланировать</button>
         </form>
+      </div>
+    </div>
+  );
+};
+
+// Модальное окно просмотра всех ТО
+const AllTOListModal: React.FC<{onClose: () => void, equipment: Equipment[], plannedTOs: any[], records: any[], onNavigate: (id: string) => void}> = ({ onClose, equipment, plannedTOs, records, onNavigate }) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const allTOs = useMemo(() => {
+    const planned = plannedTOs
+      .filter(t => t.status === 'planned')
+      .map(t => ({
+        ...t,
+        _type: 'planned' as const,
+        isOverdue: new Date(t.date + 'T00:00:00') < today
+      }));
+    
+    const completed = records
+      .filter(r => r.type.includes('ТО') || r.type === 'Плановое ТО')
+      .map(r => ({
+        ...r,
+        _type: 'completed' as const,
+        isOverdue: false
+      }));
+
+    return [...planned, ...completed].sort((a, b) => {
+      // Сначала просроченные, потом по дате
+      if (a.isOverdue && !b.isOverdue) return -1;
+      if (!a.isOverdue && b.isOverdue) return 1;
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+  }, [plannedTOs, records, today]);
+
+  const overdueCount = allTOs.filter(t => t._type === 'planned' && t.isOverdue).length;
+  const upcomingCount = allTOs.filter(t => t._type === 'planned' && !t.isOverdue).length;
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div className="bg-neo-bg w-full max-w-2xl rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center mb-6 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-blue-500">
+              <CalendarIcon size={24}/>
+            </div>
+            <div>
+              <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Все ТО</h2>
+              <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">
+                {overdueCount > 0 ? `${overdueCount} просроченных • ${upcomingCount} предстоящих` : `${upcomingCount} предстоящих`}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+          {allTOs.length === 0 ? (
+            <div className="text-center py-10">
+              <CalendarIcon size={48} className="text-gray-400 mx-auto mb-3"/>
+              <p className="text-sm font-bold text-gray-500 uppercase">Нет запланированных ТО</p>
+            </div>
+          ) : (
+            allTOs.map((to: any) => {
+              const eq = equipment.find(e => e.id === to.equipmentId);
+              const toDate = new Date(to.date + 'T00:00:00');
+              const daysUntil = Math.ceil((toDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              const isPlanned = to._type === 'planned';
+              
+              return (
+                <button
+                  key={to.id}
+                  onClick={() => { onNavigate(to.equipmentId); onClose(); }}
+                  className={`w-full flex items-center justify-between p-4 rounded-xl transition-all text-left group ${
+                    isPlanned && to.isOverdue 
+                      ? 'bg-red-500/10 hover:bg-red-500/20 border border-red-500/30' 
+                      : isPlanned 
+                        ? 'bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20'
+                        : 'bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className={`p-2.5 rounded-xl shrink-0 ${
+                      isPlanned && to.isOverdue ? 'bg-red-500 text-white' : isPlanned ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'
+                    }`}>
+                      {isPlanned ? <CalendarIcon size={18}/> : <CheckCircle2 size={18}/>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{eq?.name || 'ТО'}</p>
+                      <p className="text-[9px] text-gray-500 dark:text-gray-400">{to.type}</p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0 ml-4">
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{to.date.split('-').reverse().join('.')}</p>
+                    {isPlanned && (
+                      <p className={`text-[9px] font-semibold ${
+                        to.isOverdue ? 'text-red-600' :
+                        daysUntil <= 3 ? 'text-red-500' : daysUntil <= 7 ? 'text-orange-500' : 'text-gray-500'
+                      }`}>
+                        {to.isOverdue ? `Просрочено на ${Math.abs(daysUntil)} дн.` :
+                         daysUntil === 0 ? 'Сегодня' : daysUntil === 1 ? 'Завтра' : `через ${daysUntil} дн.`}
+                      </p>
+                    )}
+                    {!isPlanned && (
+                      <p className="text-[9px] font-semibold text-emerald-600">Выполнено</p>
+                    )}
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

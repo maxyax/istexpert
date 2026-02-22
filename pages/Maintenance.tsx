@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera, Package, CheckCircle2, Wallet, ChevronRight } from 'lucide-react';
+import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera, Package, CheckCircle2, Wallet, ChevronRight, Calendar } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useProcurementStore } from '../store/useProcurementStore';
@@ -569,6 +569,132 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase">Наработка</p>
               <p className="text-xl md:text-3xl font-black text-gray-800 dark:text-gray-100">{selectedEquip.hours} м/ч</p>
             </div>
+          </div>
+
+          {/* Задачи ТО */}
+          <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5 mb-6">
+            <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Calendar size={16} className="text-blue-600"/> Задачи ТО
+            </h3>
+            {(() => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              
+              // Находим все запланированные ТО для этой техники
+              const equipPlannedTOs = plannedTOs.filter(t => 
+                t.equipmentId === selectedEquip.id && 
+                t.status === 'planned'
+              );
+              
+              // Просроченные ТО
+              const overdueTOs = equipPlannedTOs.filter(t => {
+                const tDate = new Date(t.date + 'T00:00:00');
+                tDate.setHours(0, 0, 0, 0);
+                return tDate < today;
+              }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+              
+              // ТО на сегодня
+              const todayTOs = equipPlannedTOs.filter(t => {
+                const tDate = new Date(t.date + 'T00:00:00');
+                tDate.setHours(0, 0, 0, 0);
+                return tDate.getTime() === today.getTime();
+              });
+              
+              // Предстоящие ТО (в будущем)
+              const upcomingTOs = equipPlannedTOs.filter(t => {
+                const tDate = new Date(t.date + 'T00:00:00');
+                tDate.setHours(0, 0, 0, 0);
+                return tDate > today;
+              }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 3);
+
+              if (overdueTOs.length === 0 && todayTOs.length === 0 && upcomingTOs.length === 0) {
+                return (
+                  <div className="text-center py-8">
+                    <Calendar size={32} className="text-gray-400 mx-auto mb-3"/>
+                    <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase">Нет запланированных ТО</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-3">
+                  {/* Просроченные ТО */}
+                  {overdueTOs.map(to => {
+                    const daysOverdue = Math.ceil((today.getTime() - new Date(to.date + 'T00:00:00').getTime()) / (1000 * 60 * 60 * 24));
+                    return (
+                      <button
+                        key={to.id}
+                        onClick={() => openTOForEquip(selectedEquip)}
+                        className="w-full flex items-center justify-between p-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all text-left group border border-red-500/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-red-500 text-white">
+                            <AlertTriangle size={16}/>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-red-700 dark:text-red-400">{to.type}</p>
+                            <p className="text-[9px] text-red-500">Просрочено на {daysOverdue} дн.</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-bold text-red-700">{to.date.split('-').reverse().join('.')}</p>
+                          <ChevronRight size={16} className="text-red-500 ml-auto"/>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  
+                  {/* ТО на сегодня */}
+                  {todayTOs.map(to => (
+                    <button
+                      key={to.id}
+                      onClick={() => openTOForEquip(selectedEquip)}
+                      className="w-full flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 transition-all text-left group border border-emerald-500/30"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-emerald-500 text-white">
+                          <CheckCircle2 size={16}/>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{to.type}</p>
+                          <p className="text-[9px] text-emerald-600">Провести сегодня</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-emerald-700">{to.date.split('-').reverse().join('.')}</p>
+                        <ChevronRight size={16} className="text-emerald-500 ml-auto"/>
+                      </div>
+                    </button>
+                  ))}
+                  
+                  {/* Предстоящие ТО */}
+                  {upcomingTOs.map(to => {
+                    const daysUntil = Math.ceil((new Date(to.date + 'T00:00:00').getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    return (
+                      <button
+                        key={to.id}
+                        onClick={() => openTOForEquip(selectedEquip)}
+                        className="w-full flex items-center justify-between p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 transition-all text-left group border border-blue-500/20"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-blue-500 text-white">
+                            <Calendar size={16}/>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-blue-700 dark:text-blue-400">{to.type}</p>
+                            <p className="text-[9px] text-blue-500">{daysUntil === 0 ? 'Сегодня' : daysUntil === 1 ? 'Завтра' : `через ${daysUntil} дн.`}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-bold text-blue-700">{to.date.split('-').reverse().join('.')}</p>
+                          <ChevronRight size={16} className="text-blue-500 ml-auto"/>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
           <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
