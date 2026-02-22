@@ -641,8 +641,14 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               
               // Обновляем статус поломки
               updateBreakdownStatus(selectedBreakdown.id, 'Запчасти заказаны');
-              
-              setNewRequestForm({ title: '', items: [{ sku: '', name: '', quantity: '1', unitPriceWithVAT: 0 }] });
+
+              // Формируем наименование заявки с номером акта и датой
+              const actNumber = selectedBreakdown.actNumber || '001';
+              const actDate = selectedBreakdown.date ? new Date(selectedBreakdown.date).toLocaleDateString('ru-RU') : new Date().toLocaleDateString('ru-RU');
+              const breakdownName = selectedBreakdown.partName || '';
+              const title = `Заявка по акту поломки №${actNumber} от ${actDate} (${breakdownName})`;
+
+              setNewRequestForm({ title: title, items: [{ sku: '', name: breakdownName, quantity: '1', unitPriceWithVAT: 0 }] });
               setSelectedBreakdown(null);
               setIsCreateRequestOpen(false);
             }} className="space-y-6">
