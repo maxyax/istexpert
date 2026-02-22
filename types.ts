@@ -144,6 +144,7 @@ export interface FuelRecord {
   id: string;
   equipmentId: string;
   date: string;
+  time?: string;
   quantity: number;
   totalCost: number;
   currentHours: number;
