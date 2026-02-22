@@ -184,6 +184,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
   
   // Модальное окно добавления полиса ОСАГО
   const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
+  const [isEditingInsurance, setIsEditingInsurance] = useState(false);
   const [newInsurance, setNewInsurance] = useState({
     insuranceCompany: '',
     insuranceNumber: '',
@@ -658,24 +659,45 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                     )}
                   </div>
 
-                  {/* Кнопка добавления нового полиса */}
+                  {/* Кнопка добавления/редактирования полиса */}
                   {isEditing && (
                     <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center">
-                      <button
-                        onClick={() => {
-                          // Открываем модальное окно с текущими данными
-                          setNewInsurance({
-                            insuranceCompany: '',
-                            insuranceNumber: '',
-                            insuranceStart: editForm.insurance_end || new Date().toISOString().split('T')[0],
-                            insuranceEnd: ''
-                          });
-                          setIsInsuranceModalOpen(true);
-                        }}
-                        className="px-8 py-4 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2 mx-auto"
-                      >
-                        <Plus size={16}/> {editForm.insurance_end ? 'Добавить новый полис' : 'Добавить полис ОСАГО'}
-                      </button>
+                      <div className="flex items-center justify-center gap-4">
+                        {editForm.insurance_end && (
+                          <button
+                            onClick={() => {
+                              // Открываем модальное окно с текущими данными для редактирования
+                              setNewInsurance({
+                                insuranceCompany: editForm.insuranceCompany || '',
+                                insuranceNumber: editForm.insuranceNumber || '',
+                                insuranceStart: editForm.insuranceStart || '',
+                                insuranceEnd: editForm.insurance_end
+                              });
+                              setIsEditingInsurance(true);
+                              setIsInsuranceModalOpen(true);
+                            }}
+                            className="px-6 py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2"
+                          >
+                            <Edit3 size={14}/> Редактировать текущий
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            // Открываем модальное окно с текущими данными
+                            setNewInsurance({
+                              insuranceCompany: '',
+                              insuranceNumber: '',
+                              insuranceStart: editForm.insurance_end || new Date().toISOString().split('T')[0],
+                              insuranceEnd: ''
+                            });
+                            setIsEditingInsurance(false);
+                            setIsInsuranceModalOpen(true);
+                          }}
+                          className="px-8 py-4 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2"
+                        >
+                          <Plus size={16}/> {editForm.insurance_end ? 'Добавить новый полис' : 'Добавить полис ОСАГО'}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1379,29 +1401,39 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
       {/* Модальное окно добавления полиса ОСАГО */}
       <AddInsuranceModal
         isOpen={isInsuranceModalOpen}
-        onClose={() => setIsInsuranceModalOpen(false)}
+        onClose={() => {
+          setIsInsuranceModalOpen(false);
+          setIsEditingInsurance(false);
+        }}
         onSave={(insurance) => {
-          // Добавляем текущий полис в историю
-          if (editForm.insurance_end) {
-            const currentPolicy = {
-              insuranceCompany: editForm.insuranceCompany || '',
-              insuranceNumber: editForm.insuranceNumber || '',
-              insuranceStart: editForm.insuranceStart || '',
-              insuranceEnd: editForm.insurance_end
-            };
-            setEditForm({
-              ...editForm,
-              insuranceHistory: [...(editForm.insuranceHistory || []), currentPolicy],
-              ...insurance
-            });
-          } else {
+          if (isEditingInsurance) {
+            // Режим редактирования - просто обновляем текущий полис
             setEditForm({...editForm, ...insurance});
+          } else {
+            // Режим добавления - старый полис в историю, новый текущий
+            if (editForm.insurance_end) {
+              const currentPolicy = {
+                insuranceCompany: editForm.insuranceCompany || '',
+                insuranceNumber: editForm.insuranceNumber || '',
+                insuranceStart: editForm.insuranceStart || '',
+                insuranceEnd: editForm.insurance_end
+              };
+              setEditForm({
+                ...editForm,
+                insuranceHistory: [...(editForm.insuranceHistory || []), currentPolicy],
+                ...insurance
+              });
+            } else {
+              setEditForm({...editForm, ...insurance});
+            }
           }
+          setIsEditingInsurance(false);
         }}
         currentInsurance={{ insurance_end: editForm.insurance_end }}
         newInsurance={newInsurance}
         setNewInsurance={setNewInsurance}
         equipmentName={selectedItem?.name || ''}
+        isEditing={isEditingInsurance}
       />
     </div>
   );
@@ -1581,7 +1613,8 @@ const AddInsuranceModal: React.FC<{
   newInsurance: any;
   setNewInsurance: (insurance: any) => void;
   equipmentName: string;
-}> = ({ isOpen, onClose, onSave, currentInsurance, newInsurance, setNewInsurance, equipmentName }) => {
+  isEditing?: boolean;
+}> = ({ isOpen, onClose, onSave, currentInsurance, newInsurance, setNewInsurance, equipmentName, isEditing = false }) => {
   if (!isOpen) return null;
 
   const handleSubmit = () => {
@@ -1605,7 +1638,7 @@ const AddInsuranceModal: React.FC<{
               <AlertTriangle size={24}/>
             </div>
             <div>
-              <h2 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Добавить полис ОСАГО</h2>
+              <h2 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">{isEditing ? 'Редактировать полис ОСАГО' : 'Добавить полис ОСАГО'}</h2>
               <p className="text-[8px] font-black text-orange-400 uppercase tracking-widest">{equipmentName}</p>
             </div>
           </div>
