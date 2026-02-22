@@ -688,12 +688,42 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
               {activeTab === 'docs' && (
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                     <DocCard label="СТС / ПТС" isEditing={isEditing} onUpload={() => handleUploadDocument('sts')} documents={editForm.documents?.filter(d => d.type === 'sts') || []} />
-                     <DocCard label="Страховка ОСАГО" isEditing={isEditing} onUpload={() => handleUploadDocument('osago')} documents={editForm.documents?.filter(d => d.type === 'osago') || []} />
-                     <DocCard label="Диагностическая карта" isEditing={isEditing} onUpload={() => handleUploadDocument('diagnostic')} documents={editForm.documents?.filter(d => d.type === 'diagnostic') || []} />
-                     <DocCard label="Каталог" isEditing={isEditing} onUpload={() => handleUploadDocument('catalog')} documents={editForm.documents?.filter(d => d.type === 'catalog') || []} />
-                     <DocCard label="Инструкция" isEditing={isEditing} onUpload={() => handleUploadDocument('manual')} documents={editForm.documents?.filter(d => d.type === 'manual') || []} />
-                     <DocCard label="Другое" isEditing={isEditing} onUpload={() => handleUploadDocument('other')} documents={editForm.documents?.filter(d => d.type === 'other') || []} />
+                     <DocCard label="СТС / ПТС" isEditing={isEditing} onUpload={() => handleUploadDocument('sts')} documents={editForm.documents?.filter(d => d.type === 'sts') || []} onDelete={(index: number) => {
+                       const docs = editForm.documents?.filter(d => d.type === 'sts') || [];
+                       const newDocs = docs.filter((_, i) => i !== index);
+                       const allOtherDocs = editForm.documents?.filter(d => d.type !== 'sts') || [];
+                       setEditForm({...editForm, documents: [...allOtherDocs, ...newDocs]});
+                     }} />
+                     <DocCard label="Страховка ОСАГО" isEditing={isEditing} onUpload={() => handleUploadDocument('osago')} documents={editForm.documents?.filter(d => d.type === 'osago') || []} onDelete={(index: number) => {
+                       const docs = editForm.documents?.filter(d => d.type === 'osago') || [];
+                       const newDocs = docs.filter((_, i) => i !== index);
+                       const allOtherDocs = editForm.documents?.filter(d => d.type !== 'osago') || [];
+                       setEditForm({...editForm, documents: [...allOtherDocs, ...newDocs]});
+                     }} />
+                     <DocCard label="Диагностическая карта" isEditing={isEditing} onUpload={() => handleUploadDocument('diagnostic')} documents={editForm.documents?.filter(d => d.type === 'diagnostic') || []} onDelete={(index: number) => {
+                       const docs = editForm.documents?.filter(d => d.type === 'diagnostic') || [];
+                       const newDocs = docs.filter((_, i) => i !== index);
+                       const allOtherDocs = editForm.documents?.filter(d => d.type !== 'diagnostic') || [];
+                       setEditForm({...editForm, documents: [...allOtherDocs, ...newDocs]});
+                     }} />
+                     <DocCard label="Каталог" isEditing={isEditing} onUpload={() => handleUploadDocument('catalog')} documents={editForm.documents?.filter(d => d.type === 'catalog') || []} onDelete={(index: number) => {
+                       const docs = editForm.documents?.filter(d => d.type === 'catalog') || [];
+                       const newDocs = docs.filter((_, i) => i !== index);
+                       const allOtherDocs = editForm.documents?.filter(d => d.type !== 'catalog') || [];
+                       setEditForm({...editForm, documents: [...allOtherDocs, ...newDocs]});
+                     }} />
+                     <DocCard label="Инструкция" isEditing={isEditing} onUpload={() => handleUploadDocument('manual')} documents={editForm.documents?.filter(d => d.type === 'manual') || []} onDelete={(index: number) => {
+                       const docs = editForm.documents?.filter(d => d.type === 'manual') || [];
+                       const newDocs = docs.filter((_, i) => i !== index);
+                       const allOtherDocs = editForm.documents?.filter(d => d.type !== 'manual') || [];
+                       setEditForm({...editForm, documents: [...allOtherDocs, ...newDocs]});
+                     }} />
+                     <DocCard label="Другое" isEditing={isEditing} onUpload={() => handleUploadDocument('other')} documents={editForm.documents?.filter(d => d.type === 'other') || []} onDelete={(index: number) => {
+                       const docs = editForm.documents?.filter(d => d.type === 'other') || [];
+                       const newDocs = docs.filter((_, i) => i !== index);
+                       const allOtherDocs = editForm.documents?.filter(d => d.type !== 'other') || [];
+                       setEditForm({...editForm, documents: [...allOtherDocs, ...newDocs]});
+                     }} />
                   </div>
                   {isEditing && (
                     <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
@@ -1364,7 +1394,7 @@ const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highl
   </div>
 );
 
-const DocCard = ({ label, isEditing, onUpload, documents = [] }: any) => {
+const DocCard = ({ label, isEditing, onUpload, documents = [], onDelete, onReplace }: any) => {
   const [selectedDocIndex, setSelectedDocIndex] = useState(0);
   const currentDoc = documents[selectedDocIndex];
 
@@ -1396,18 +1426,40 @@ const DocCard = ({ label, isEditing, onUpload, documents = [] }: any) => {
 
   const handleUploadClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onUpload();
+    if (documents.length > 0 && isEditing) {
+      // Если есть документы, спрашиваем - заменить или добавить
+      const action = window.confirm('Заменить текущий документ?\nOK - заменить\nОтмена - добавить новый');
+      if (action && onDelete) {
+        onDelete(selectedDocIndex);
+      }
+    }
+    setTimeout(() => onUpload(), 100);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    if (window.confirm('Удалить этот документ?')) {
+      if (onDelete) onDelete(index);
+      setSelectedDocIndex(Math.max(0, selectedDocIndex - 1));
+    }
+  };
+
+  const handleReplaceClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) onDelete(selectedDocIndex);
+    setTimeout(() => onUpload(), 100);
   };
 
   const hasMultipleDocs = documents.length > 1;
+  const hasDocs = documents.length > 0;
 
   return (
     <div onClick={handleViewDocument} className={`p-6 md:p-10 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-4 md:gap-8 group hover:shadow-neo-inset transition-all border border-white/5 ${currentDoc?.url && !isEditing ? 'cursor-pointer' : ''}`}>
        <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600"><FileText size={32}/></div>
        <div className="text-center">
           <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-gray-700">{label}</h4>
-          <p className={`text-[8px] font-bold uppercase opacity-60 ${currentDoc?.url ? 'text-green-600' : 'text-gray-400'}`}>
-            {currentDoc?.url ? `${documents.length} файл${documents.length > 1 ? 'а' : ''}` : 'Файл не загружен'}
+          <p className={`text-[8px] font-bold uppercase opacity-60 ${hasDocs ? 'text-green-600' : 'text-gray-400'}`}>
+            {hasDocs ? `${documents.length} файл${documents.length > 1 ? 'а' : ''}` : 'Файл не загружен'}
           </p>
           {currentDoc?.name && (
             <p className="text-[8px] font-bold text-gray-500 mt-1 truncate max-w-[150px]">{currentDoc.name}</p>
@@ -1432,7 +1484,34 @@ const DocCard = ({ label, isEditing, onUpload, documents = [] }: any) => {
            </button>
          </div>
        )}
-       {isEditing && <button onClick={handleUploadClick} className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Upload size={18}/></button>}
+       {isEditing && hasDocs && (
+         <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+           <button
+             onClick={handleReplaceClick}
+             className="p-2 rounded-lg bg-neo-bg shadow-neo text-orange-600 hover:bg-orange-500 hover:text-white transition-all"
+             title="Заменить документ"
+           >
+             <Upload size={16}/>
+           </button>
+           <button
+             onClick={(e) => handleDeleteClick(e, selectedDocIndex)}
+             className="p-2 rounded-lg bg-neo-bg shadow-neo text-red-600 hover:bg-red-500 hover:text-white transition-all"
+             title="Удалить документ"
+           >
+             <Trash2 size={16}/>
+           </button>
+         </div>
+       )}
+       {isEditing && !hasDocs && (
+         <button onClick={handleUploadClick} className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all">
+           <Upload size={18}/>
+         </button>
+       )}
+       {hasDocs && !isEditing && (
+         <div className="flex items-center gap-2 text-[8px] font-bold text-gray-400">
+           <span>Нажмите для просмотра</span>
+         </div>
+       )}
     </div>
   );
 };
