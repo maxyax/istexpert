@@ -1428,6 +1428,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
             }
           }
           setIsEditingInsurance(false);
+          setIsInsuranceModalOpen(false);
         }}
         currentInsurance={{ insurance_end: editForm.insurance_end }}
         newInsurance={newInsurance}
@@ -1620,12 +1621,15 @@ const AddInsuranceModal: React.FC<{
   const handleSubmit = () => {
     if (newInsurance.insuranceCompany && newInsurance.insuranceEnd) {
       onSave(newInsurance);
+      onClose(); // Закрываем модальное окно после сохранения
       setNewInsurance({
         insuranceCompany: '',
         insuranceNumber: '',
         insuranceStart: '',
         insuranceEnd: ''
       });
+    } else {
+      alert('Пожалуйста, заполните страховую компанию и дату окончания полиса');
     }
   };
 

@@ -295,10 +295,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
   // Сохранение полиса ОСАГО
   const handleSaveInsurance = () => {
-    if (!selectedMaintenanceEquipId || !newInsurance.insuranceEnd) return;
-
-    const equip = equipment.find(e => e.id === selectedMaintenanceEquipId);
-    if (!equip) return;
+    if (!selectedMaintenanceEquipId || !newInsurance.insuranceEnd) {
+      alert('Пожалуйста, заполните дату окончания полиса');
+      return;
+    }
 
     // Обновляем данные техники
     useFleetStore.getState().updateEquipment(selectedMaintenanceEquipId, {
@@ -308,6 +308,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       insurance_end: newInsurance.insuranceEnd
     });
 
+    // Закрываем модальное окно и сбрасываем форму
     setIsInsuranceModalOpen(false);
     setNewInsurance({
       insuranceCompany: '',
@@ -315,6 +316,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       insuranceStart: new Date().toISOString().split('T')[0],
       insuranceEnd: ''
     });
+    
+    // Показываем уведомление
+    alert('Полис ОСАГО успешно сохранён!');
   };
 
   const openTOForEquip = (e: any, plannedTO?: any) => {
@@ -994,10 +998,13 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       <div
                         className="w-full flex items-center justify-between p-3 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-left group border border-orange-500/30 cursor-pointer"
                         onClick={() => {
+                          // Устанавливаем текущую технику как выбранную
+                          setSelectedMaintenanceEquipId(selectedEquip.id);
+                          // Открываем модальное окно с текущими данными
                           setNewInsurance({
-                            insuranceCompany: '',
-                            insuranceNumber: '',
-                            insuranceStart: selectedEquip.insurance_end,
+                            insuranceCompany: selectedEquip.insuranceCompany || '',
+                            insuranceNumber: selectedEquip.insuranceNumber || '',
+                            insuranceStart: selectedEquip.insurance_end || new Date().toISOString().split('T')[0],
                             insuranceEnd: ''
                           });
                           setIsInsuranceModalOpen(true);
