@@ -344,7 +344,14 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           </div>
           {viewMode === 'tiles' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {equipment.map(e => (
+              {equipment.map(e => {
+                // Находим все активные заявки по этой технике
+                const relatedRequests = requests.filter(r => {
+                  const breakdown = breakdowns.find(b => b.id === r.breakdownId);
+                  return breakdown?.equipmentId === e.id && breakdown.status !== 'Исправлено';
+                });
+
+                return (
                 <div key={e.id} onClick={() => setSelectedMaintenanceEquipId(e.id)} className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo-inset bg-neo-bg cursor-pointer hover:shadow-neo transition-all flex flex-col justify-between group">
                   <div>
                     <div className="flex items-start gap-4 mb-4">
@@ -369,13 +376,54 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         <p className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{e.year}</p>
                       </div>
                     </div>
+                    {/* Прогресс-бары по заявкам */}
+                    {relatedRequests.length > 0 && (
+                      <div className="space-y-3 pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                        {relatedRequests.map(req => {
+                          const breakdown = breakdowns.find(b => b.id === req.breakdownId);
+                          if (!breakdown) return null;
+                          const statusOrder = ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'];
+                          const currentIndex = statusOrder.indexOf(req.status);
+                          return (
+                            <div key={req.id}>
+                              <p className="text-[9px] font-bold text-gray-600 dark:text-gray-300 mb-1 truncate">{breakdown.partName}</p>
+                              <div className="flex gap-0.5 mb-1">
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  currentIndex >= 0 ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-600'
+                                }`}/>
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  currentIndex >= 1 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                                }`}/>
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  currentIndex >= 2 ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'
+                                }`}/>
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  currentIndex >= 3 ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'
+                                }`}/>
+                                <div className={`flex-1 h-1.5 rounded-full ${
+                                  currentIndex >= 4 ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'
+                                }`}/>
+                              </div>
+                              <div className="flex justify-between text-[8px] font-semibold">
+                                <span className={`${currentIndex >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`}>Новая</span>
+                                <span className={`${currentIndex >= 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>Поиск</span>
+                                <span className={`${currentIndex >= 2 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'}`}>Оплачено</span>
+                                <span className={`${currentIndex >= 3 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>В пути</span>
+                                <span className={`${currentIndex >= 4 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'}`}>Склад</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                   <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <span className="text-[9px] font-black text-gray-400 uppercase">Наработка:</span>
                     <p className="text-sm font-black text-gray-800 dark:text-gray-200">{e.hours} м/ч</p>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="space-y-3 overflow-x-auto scrollbar-hide pb-2">
