@@ -231,18 +231,18 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             </div>
             <div className="text-2xl md:text-3xl font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{breakdownsThisMonth.length}</div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Критические</span>
-              <span className="text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Критические</span>
+              <span className="text-sm md:text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Средние</span>
-              <span className="text-lg font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Средние</span>
+              <span className="text-sm md:text-lg font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Низкие</span>
-              <span className="text-lg font-bold text-yellow-600 dark:text-yellow-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Низкие</span>
+              <span className="text-sm md:text-lg font-bold text-yellow-600 dark:text-yellow-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
             </div>
           </div>
         </div>
@@ -258,11 +258,11 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Топ-5 за месяц</p>
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center p-4 rounded-xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.05),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)]">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold whitespace-nowrap ${
+              <div key={idx} className="flex justify-between items-center p-3 md:p-4 rounded-xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.05),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)]">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-xs md:text-sm font-bold whitespace-nowrap ${
                     idx === 0 ? 'bg-red-500 text-white' :
                     idx === 1 ? 'bg-orange-500 text-white' :
                     idx === 2 ? 'bg-yellow-500 text-white' :
@@ -271,18 +271,18 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                     {idx + 1}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap">{item.equipment.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{item.equipment.vin}</p>
+                    <p className="text-xs md:text-sm font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap">{item.equipment.name}</p>
+                    <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{item.equipment.vin}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{item.breakdowns}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">поломок</p>
+                  <p className="text-sm md:text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{item.breakdowns}</p>
+                  <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">поломок</p>
                 </div>
               </div>
             ))}
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).length === 0 && (
-              <p className="text-center py-10 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">Поломок за месяц не было</p>
+              <p className="text-center py-8 md:py-10 text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">Поломок за месяц не было</p>
             )}
           </div>
         </div>
