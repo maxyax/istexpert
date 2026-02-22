@@ -674,7 +674,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                         }}
                         className="px-8 py-4 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2 mx-auto"
                       >
-                        <Plus size={16}/> Добавить новый полис
+                        <Plus size={16}/> {editForm.insurance_end ? 'Добавить новый полис' : 'Добавить полис ОСАГО'}
                       </button>
                     </div>
                   )}
