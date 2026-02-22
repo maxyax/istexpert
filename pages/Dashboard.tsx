@@ -142,9 +142,9 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg w-fit mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <div className={s.color}>{React.cloneElement(s.icon, { size: 27 })}</div>
             </div>
-            <h4 className="text-gray-800 dark:text-gray-100 text-xs font-bold uppercase mb-2">{s.title}</h4>
-            <div className="text-4xl md:text-5xl font-black text-gray-900 dark:text-gray-100 mb-2">{s.value}</div>
-            <p className={`text-sm font-bold ${s.highlight ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>{s.sub}</p>
+            <h4 className="text-gray-800 dark:text-gray-100 text-xs font-bold uppercase mb-2 whitespace-nowrap">{s.title}</h4>
+            <div className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-gray-100 mb-2 whitespace-nowrap overflow-hidden text-ellipsis">{s.value}</div>
+            <p className={`text-xs md:text-sm font-bold ${s.highlight ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'} whitespace-nowrap`}>{s.sub}</p>
           </div>
         ))}
       </div>
@@ -153,64 +153,64 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Топливо */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-4 md:mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <Fuel size={27} className="text-emerald-500"/>
             </div>
             <div>
-              <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Топливо за месяц</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">{new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Топливо за месяц</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">{new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
             </div>
           </div>
-          <div className="text-4xl md:text-5xl font-bold text-emerald-700 dark:text-emerald-400 mb-4">{formatMoney(fuelCostThisMonth)}</div>
-          <div className="space-y-3">
+          <div className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-emerald-700 dark:text-emerald-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(fuelCostThisMonth)}</div>
+          <div className="space-y-2 md:space-y-3 w-full">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заправок</span>
-              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{fuelThisMonth.length}</span>
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Заправок</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{fuelThisMonth.length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Объем</span>
-              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{fuelThisMonth.reduce((s, f) => s + f.quantity, 0)} л</span>
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Объем</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{fuelThisMonth.reduce((s, f) => s + f.quantity, 0)} л</span>
             </div>
           </div>
         </div>
 
         {/* Оплачено */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-4 md:mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <span className="text-[27px] font-bold text-blue-500">₽</span>
             </div>
             <div>
-              <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Оплачено заявок</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">Ожидание доставки</p>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Оплачено заявок</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Ожидание доставки</p>
             </div>
           </div>
-          <div className="text-4xl md:text-5xl font-bold text-blue-700 dark:text-blue-400 mb-4">{formatMoney(requestsPaidAmount)}</div>
-          <div className="space-y-3">
+          <div className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-blue-700 dark:text-blue-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(requestsPaidAmount)}</div>
+          <div className="space-y-2 md:space-y-3 w-full">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Заявок</span>
-              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{requestsPaid.length}</span>
+              <span className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 whitespace-nowrap">Заявок</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{requestsPaid.length}</span>
             </div>
           </div>
         </div>
 
         {/* На складе */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-4 md:mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <Package size={27} className="text-indigo-500"/>
             </div>
             <div>
-              <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Поступило на склад</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">Готово к выдаче</p>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Поступило на склад</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Готово к выдаче</p>
             </div>
           </div>
-          <div className="text-4xl md:text-5xl font-bold text-indigo-700 dark:text-indigo-400 mb-4">{formatMoney(requestsInWarehouseAmount)}</div>
-          <div className="space-y-3">
+          <div className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-indigo-700 dark:text-indigo-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(requestsInWarehouseAmount)}</div>
+          <div className="space-y-2 md:space-y-3 w-full">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Заявок</span>
-              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{requestsInWarehouse.length}</span>
+              <span className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 whitespace-nowrap">Заявок</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{requestsInWarehouse.length}</span>
             </div>
           </div>
         </div>
@@ -225,24 +225,24 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                 <AlertTriangle size={27} className="text-red-500"/>
               </div>
               <div className="text-left">
-                <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Акты поломок</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">За этот месяц</p>
+                <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Акты поломок</h3>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">За этот месяц</p>
               </div>
             </div>
-            <div className="text-2xl font-bold text-red-700 dark:text-red-400">{breakdownsThisMonth.length}</div>
+            <div className="text-2xl md:text-3xl font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{breakdownsThisMonth.length}</div>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Критические</span>
-              <span className="text-lg font-bold text-red-700 dark:text-red-400">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Критические</span>
+              <span className="text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Средние</span>
-              <span className="text-lg font-bold text-orange-600 dark:text-orange-400">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Средние</span>
+              <span className="text-lg font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Низкие</span>
-              <span className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
+              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Низкие</span>
+              <span className="text-lg font-bold text-yellow-600 dark:text-yellow-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
             </div>
           </div>
         </div>
@@ -254,15 +254,15 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <TrendingUp size={27} className="text-orange-500"/>
             </div>
             <div>
-              <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Частые поломки</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 uppercase">Топ-5 за месяц</p>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Частые поломки</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Топ-5 за месяц</p>
             </div>
           </div>
           <div className="space-y-3">
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).map((item, idx) => (
               <div key={idx} className="flex justify-between items-center p-4 rounded-xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.05),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)]">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold whitespace-nowrap ${
                     idx === 0 ? 'bg-red-500 text-white' :
                     idx === 1 ? 'bg-orange-500 text-white' :
                     idx === 2 ? 'bg-yellow-500 text-white' :
@@ -271,18 +271,18 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                     {idx + 1}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{item.equipment.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.equipment.vin}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap">{item.equipment.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{item.equipment.vin}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-red-700 dark:text-red-400">{item.breakdowns}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">поломок</p>
+                  <p className="text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{item.breakdowns}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">поломок</p>
                 </div>
               </div>
             ))}
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).length === 0 && (
-              <p className="text-center py-10 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Поломок за месяц не было</p>
+              <p className="text-center py-10 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">Поломок за месяц не было</p>
             )}
           </div>
         </div>
@@ -296,11 +296,11 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <History size={27} className="text-orange-500"/>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Живая лента</h3>
-              <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Последние события</p>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-200 whitespace-nowrap">Живая лента</h3>
+              <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">Последние события</p>
             </div>
           </div>
-          <button onClick={() => onNavigate('maintenance')} className="text-[9px] font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 uppercase flex items-center gap-1">
+          <button onClick={() => onNavigate('maintenance')} className="text-[9px] md:text-[10px] font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 uppercase flex items-center gap-1 whitespace-nowrap">
             Весь журнал <ChevronRight size={14}/>
           </button>
         </div>
@@ -330,9 +330,9 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                       <p className="text-[9px] md:text-[10px] font-bold text-gray-600 dark:text-gray-300 truncate">{equip?.name || 'Техника'}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
-                      <span className="text-[8px] md:text-[9px] font-bold text-gray-500 dark:text-gray-400">{formatDate(b.date)}</span>
+                      <span className="text-[8px] md:text-[9px] font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">{formatDate(b.date)}</span>
                       {req && (
-                        <span className={`text-[8px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                        <span className={`text-[8px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded-full whitespace-nowrap ${
                           req.status === 'На складе' ? 'bg-emerald-500 text-white' :
                           req.status === 'В пути' ? 'bg-indigo-500 text-white' :
                           req.status === 'Оплачено' ? 'bg-orange-500 text-white' :
@@ -358,7 +358,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                       <p className="text-[9px] md:text-[10px] font-bold text-gray-600 dark:text-gray-300 truncate">{equip?.name || 'Техника'}</p>
                     </div>
                     <div className="shrink-0 ml-4">
-                      <span className="text-[8px] md:text-[9px] font-bold text-gray-500 dark:text-gray-400">{formatDate(r.date)}</span>
+                      <span className="text-[8px] md:text-[9px] font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">{formatDate(r.date)}</span>
                     </div>
                   </div>
                 );
