@@ -356,7 +356,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
           </div>
           <div className="space-y-2 md:space-y-3 w-full">
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center p-3 md:p-4 rounded-xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.05),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)]">
+              <div key={idx} className="flex justify-between items-center p-3 md:p-4 rounded-xl bg-neo-bg">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-xs md:text-sm font-bold whitespace-nowrap ${
                     idx === 0 ? 'bg-red-500 text-white' :
