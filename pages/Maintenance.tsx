@@ -345,13 +345,19 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           {viewMode === 'tiles' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {equipment.map(e => (
-                <div key={e.id} onClick={() => setSelectedMaintenanceEquipId(e.id)} className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo-inset bg-neo-bg cursor-pointer hover:shadow-neo transition-all flex items-center gap-6 group">
-                  <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                    <Wrench size={30} strokeWidth={2.5}/>
+                <div key={e.id} onClick={() => setSelectedMaintenanceEquipId(e.id)} className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo-inset bg-neo-bg cursor-pointer hover:shadow-neo transition-all flex flex-col justify-between group">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shrink-0">
+                      <Wrench size={30} strokeWidth={2.5}/>
+                    </div>
+                    <div className="overflow-hidden flex-1">
+                       <h3 className="font-bold uppercase text-sm text-gray-800 dark:text-gray-200 truncate">{e.name}</h3>
+                       <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">{e.make} {e.model}</p>
+                       <p className="text-[9px] font-bold text-gray-500 dark:text-gray-300 truncate">{e.vin}</p>
+                    </div>
                   </div>
-                  <div className="overflow-hidden">
-                     <h3 className="font-bold uppercase text-sm text-gray-800 dark:text-gray-200 truncate">{e.name}</h3>
-                     <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400">{e.hours} м/ч</p>
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-xs font-black text-gray-700 dark:text-gray-300">{e.hours} м/ч</p>
                   </div>
                 </div>
               ))}
