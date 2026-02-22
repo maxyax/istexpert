@@ -393,7 +393,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   </div>
                   {/* Прогресс-бары по заявкам */}
                   {relatedRequests.length > 0 && (
-                    <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                       {relatedRequests
                         .filter(req => {
                           const breakdown = breakdowns.find(b => b.id === req.breakdownId);
@@ -405,7 +405,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           if (!breakdown) return null;
                           const statusOrder = ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'];
                           const currentIndex = statusOrder.indexOf(req.status);
-                          
+
                           const handleProgressClick = () => {
                             if (req.status === 'На складе') {
                               // Если запчасти на складе - открываем модальное окно смены статуса
@@ -416,51 +416,48 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                               setSelectedMaintenanceEquipId(e.id);
                             }
                           };
-                          
+
                           return (
-                            <button
-                              key={req.id}
-                              onClick={handleProgressClick}
-                              className="w-full text-left group"
-                            >
+                            <div key={req.id} onClick={handleProgressClick} className="group cursor-pointer">
+                              {/* Название детали слева */}
+                              <p className="text-[11px] md:text-[12px] font-bold text-gray-700 dark:text-gray-200 mb-2">{breakdown.partName}</p>
                               {/* Разделенная шкала статусов */}
-                              <div className="flex gap-0.5 mb-1">
-                                <div className={`flex-1 h-1.5 rounded-full ${
-                                  statusOrder.indexOf(req.status) >= 0 ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-700'
+                              <div className="flex gap-1 mb-2">
+                                <div className={`flex-1 h-2 rounded-full ${
+                                  currentIndex >= 0 ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
-                                <div className={`flex-1 h-1.5 rounded-full ${
-                                  statusOrder.indexOf(req.status) >= 1 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
+                                <div className={`flex-1 h-2 rounded-full ${
+                                  currentIndex >= 1 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
-                                <div className={`flex-1 h-1.5 rounded-full ${
-                                  statusOrder.indexOf(req.status) >= 2 ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'
+                                <div className={`flex-1 h-2 rounded-full ${
+                                  currentIndex >= 2 ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
-                                <div className={`flex-1 h-1.5 rounded-full ${
-                                  statusOrder.indexOf(req.status) >= 3 ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-700'
+                                <div className={`flex-1 h-2 rounded-full ${
+                                  currentIndex >= 3 ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
-                                <div className={`flex-1 h-1.5 rounded-full ${
-                                  statusOrder.indexOf(req.status) >= 4 ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
+                                <div className={`flex-1 h-2 rounded-full ${
+                                  currentIndex >= 4 ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
                               </div>
-                              <div className="flex items-center justify-between mt-1">
-                                <p className="text-[8px] md:text-[9px] font-semibold text-gray-500 dark:text-gray-400 truncate flex-1">
-                                  {breakdown.partName}
-                                </p>
-                                <span className={`text-[8px] md:text-[9px] font-semibold ml-2 whitespace-nowrap ${
-                                  req.status === 'На складе' ? 'text-emerald-500' :
-                                  req.status === 'В пути' ? 'text-indigo-500' :
-                                  req.status === 'Оплачено' ? 'text-orange-500' :
-                                  req.status === 'Поиск' ? 'text-blue-500' :
-                                  'text-purple-500'
-                                }`}>
-                                  {req.status}
-                                </span>
+                              {/* Подписи под каждым сегментом */}
+                              <div className="flex justify-between text-[10px] md:text-[11px] font-semibold">
+                                <span className={`${
+                                  currentIndex >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'
+                                }`}>Новая</span>
+                                <span className={`${
+                                  currentIndex >= 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                                }`}>Поиск</span>
+                                <span className={`${
+                                  currentIndex >= 2 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'
+                                }`}>Оплачено</span>
+                                <span className={`${
+                                  currentIndex >= 3 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'
+                                }`}>В пути</span>
+                                <span className={`${
+                                  currentIndex >= 4 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'
+                                }`}>Склад</span>
                               </div>
-                              {req.status === 'На складе' && (
-                                <p className="text-[7px] md:text-[8px] text-emerald-500 mt-0.5 flex items-center gap-1">
-                                  <CheckCircle2 size={10}/> Нажмите чтобы изменить статус
-                                </p>
-                              )}
-                            </button>
+                            </div>
                           );
                         })}
                     </div>
