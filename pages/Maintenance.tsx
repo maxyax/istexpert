@@ -292,10 +292,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 setSelectedMaintenanceEquipId(null);
                 setIsBreakdownEquipSelectOpen(true);
               }}
-              className="p-3 md:p-4 rounded-2xl shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
+              className="p-3 md:p-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-red-500 to-red-600 text-white"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white/20 group-hover:scale-110 transition-transform">
+                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
                   <AlertTriangle size={20} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
@@ -307,10 +307,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
             <button
               onClick={() => setIsTOEquipSelectOpen(true)}
-              className="p-3 md:p-4 rounded-2xl shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
+              className="p-3 md:p-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-blue-500 to-blue-600 text-white"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white/20 group-hover:scale-110 transition-transform">
+                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
                   <Wrench size={20} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
@@ -322,10 +322,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
             <button
               onClick={() => setIsBreakdownSelectOpen(true)}
-              className="p-3 md:p-4 rounded-2xl shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
+              className="p-3 md:p-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white/20 group-hover:scale-110 transition-transform">
+                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
                   <Package size={20} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
