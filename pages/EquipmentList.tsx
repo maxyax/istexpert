@@ -1397,6 +1397,7 @@ const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highl
 const DocCard = ({ label, isEditing, onUpload, documents = [], onDelete, onReplace }: any) => {
   const [selectedDocIndex, setSelectedDocIndex] = useState(0);
   const currentDoc = documents[selectedDocIndex];
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleViewDocument = (e: React.MouseEvent) => {
     if (!isEditing && currentDoc?.url) {
@@ -1431,13 +1432,16 @@ const DocCard = ({ label, isEditing, onUpload, documents = [], onDelete, onRepla
 
   const handleDeleteClick = (e: React.MouseEvent, index: number) => {
     e.stopPropagation();
-    if (window.confirm('Удалить этот документ?')) {
-      if (onDelete) onDelete(index);
-      // После удаления переключаемся на предыдущий или первый
-      if (documents.length > 1) {
-        setSelectedDocIndex(Math.min(index, documents.length - 2));
-      }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (onDelete) onDelete(selectedDocIndex);
+    // После удаления переключаемся на предыдущий или первый
+    if (documents.length > 1) {
+      setSelectedDocIndex(Math.min(selectedDocIndex, documents.length - 2));
     }
+    setShowDeleteConfirm(false);
   };
 
   const hasMultipleDocs = documents.length > 1;
@@ -1505,6 +1509,39 @@ const DocCard = ({ label, isEditing, onUpload, documents = [], onDelete, onRepla
        {hasDocs && isEditing && (
          <div className="text-[8px] font-bold text-gray-400">
            <span>Выбран: {selectedDocIndex + 1} из {documents.length}</span>
+         </div>
+       )}
+
+       {/* Модальное окно подтверждения */}
+       {showDeleteConfirm && (
+         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+           <div className="bg-neo-bg w-full max-w-md rounded-[2.5rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20">
+             <div className="flex items-center gap-4 mb-6">
+               <div className="p-3 rounded-xl bg-neo-bg border border-red-500/30">
+                 <AlertTriangle size={24} className="text-red-600"/>
+               </div>
+               <h3 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Удалить документ</h3>
+             </div>
+
+             <p className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-6 ml-[52px]">Вы уверены, что хотите удалить этот документ? Это действие нельзя отменить.</p>
+
+             <div className="flex gap-3 ml-[52px]">
+               <button
+                 type="button"
+                 onClick={() => setShowDeleteConfirm(false)}
+                 className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs hover:shadow-neo-inset transition-all"
+               >
+                 Отмена
+               </button>
+               <button
+                 type="button"
+                 onClick={confirmDelete}
+                 className="flex-1 py-3 rounded-2xl bg-red-500 font-black uppercase text-xs text-white shadow-lg hover:opacity-90 transition-all"
+               >
+                 Удалить
+               </button>
+             </div>
+           </div>
          </div>
        )}
     </div>
