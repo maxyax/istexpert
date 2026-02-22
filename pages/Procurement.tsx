@@ -359,7 +359,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                    <div className="p-4 md:p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
                      <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-3">Позиции</p>
                      <div className="space-y-2">
-                       {/* Заголовки - скрыты на мобильных */}
+                       {/* Заголовки */}
                        <div className="hidden md:grid md:grid-cols-12 gap-2 items-center text-[9px] font-bold text-gray-500 mb-2">
                          <div className="col-span-1 text-center">×</div>
                          <div className="col-span-2">Артикул</div>
@@ -368,25 +368,25 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                          <div className="col-span-2 text-right">Цена с НДС</div>
                          <div className="col-span-1 text-right">Сумма</div>
                        </div>
-                       {/* Позиции */}
+                       {/* Позиции - на всю ширину */}
                        {(editReq.items || []).map((it: any, idx: number) => (
-                         <div key={it.id || idx} className="grid grid-cols-12 gap-2 items-center bg-white/5 p-2 rounded-xl">
-                           <button className="col-span-1 text-red-500 font-bold text-lg hover:text-red-600 text-center" onClick={() => { const arr = [...editReq.items]; arr.splice(idx,1); setEditReq({...editReq, items: arr}); }}>×</button>
-                           <input className="col-span-2 md:col-span-2 p-2 rounded-xl shadow-neo-inset bg-neo-bg border-none app-input text-xs" placeholder="Арт" value={it.sku || ''} onChange={e=>{ const arr = [...editReq.items]; arr[idx].sku = e.target.value; setEditReq({...editReq, items: arr}); }} />
-                           <input className="col-span-9 md:col-span-5 p-2 rounded-xl shadow-neo-inset bg-neo-bg border-none app-input text-xs" placeholder="Наименование" value={it.name} onChange={e=>{ const arr = [...editReq.items]; arr[idx].name = e.target.value; setEditReq({...editReq, items: arr}); }} />
-                           <div className="col-span-2 md:col-span-1 relative">
+                         <div key={it.id || idx} className="grid grid-cols-[auto_100px_1fr_80px_120px_100px_auto] gap-2 items-center bg-white/5 p-2 rounded-xl">
+                           <button className="text-red-500 font-bold text-lg hover:text-red-600 text-center w-8" onClick={() => { const arr = [...editReq.items]; arr.splice(idx,1); setEditReq({...editReq, items: arr}); }}>×</button>
+                           <input className="w-full p-2 rounded-xl shadow-neo-inset bg-neo-bg border-none app-input text-xs" placeholder="Арт" value={it.sku || ''} onChange={e=>{ const arr = [...editReq.items]; arr[idx].sku = e.target.value; setEditReq({...editReq, items: arr}); }} />
+                           <input className="w-full p-2 rounded-xl shadow-neo-inset bg-neo-bg border-none app-input text-xs" placeholder="Наименование" value={it.name} onChange={e=>{ const arr = [...editReq.items]; arr[idx].name = e.target.value; setEditReq({...editReq, items: arr}); }} />
+                           <div className="relative">
                              <input type="number" className="w-full p-2 rounded-xl shadow-neo-inset bg-neo-bg border-none app-input pr-4 text-xs text-center" placeholder="Кол" value={it.quantity} onChange={e=>{ const arr=[...editReq.items]; arr[idx].quantity = e.target.value; arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (parseFloat(arr[idx].unitPriceWithVAT || '0') || 0); setEditReq({...editReq, items: arr}); }} />
                              {it.quantity && it.quantity !== '' && (
-                               <button type="button" onClick={()=>{ const arr=[...editReq.items]; arr[idx].quantity = ''; arr[idx].total = 0; setEditReq({...editReq, items: arr}); }} className="absolute right-0.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs font-bold">×</button>
+                               <button type="button" onClick={()=>{ const arr=[...editReq.items]; arr[idx].quantity = ''; arr[idx].total = 0; setEditReq({...editReq, items: arr}); }} className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs font-bold">×</button>
                              )}
                            </div>
-                           <div className="col-span-4 md:col-span-2 relative">
+                           <div className="relative">
                              <input type="number" step="0.01" className="w-full p-2 rounded-xl shadow-neo-inset bg-neo-bg border-none app-input pr-4 text-xs text-right" placeholder="Цена" value={it.unitPriceWithVAT || ''} onChange={e=>{ const arr=[...editReq.items]; arr[idx].unitPriceWithVAT = parseFloat(e.target.value || '0') || 0; arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (arr[idx].unitPriceWithVAT || 0); setEditReq({...editReq, items: arr}); }} />
                              {it.unitPriceWithVAT && it.unitPriceWithVAT !== 0 && (
-                               <button type="button" onClick={()=>{ const arr=[...editReq.items]; arr[idx].unitPriceWithVAT = 0; arr[idx].total = 0; setEditReq({...editReq, items: arr}); }} className="absolute right-0.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs font-bold">×</button>
+                               <button type="button" onClick={()=>{ const arr=[...editReq.items]; arr[idx].unitPriceWithVAT = 0; arr[idx].total = 0; setEditReq({...editReq, items: arr}); }} className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs font-bold">×</button>
                              )}
                            </div>
-                           <div className="col-span-2 md:col-span-1 text-right text-xs font-black text-emerald-600">{formatMoney(it.total || 0)}</div>
+                           <div className="text-right text-xs font-black text-emerald-600 min-w-[80px]">{formatMoney(it.total || 0)}</div>
                          </div>
                        ))}
                        <button onClick={()=> setEditReq({...editReq, items: [...(editReq.items||[]), { id: `i-${Date.now()}`, sku: '', name: '', quantity: '1', unitPriceWithVAT: 0, total: 0 }]})} className="mt-2 px-3 py-2 rounded-xl bg-neo-bg border border-white/5 font-bold text-xs shadow-neo hover:shadow-neo-inset transition-all">+ Добавить позицию</button>
