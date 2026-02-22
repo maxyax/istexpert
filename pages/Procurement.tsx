@@ -485,20 +485,16 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Контрагент</label>
-                         <select
+                         <input
                            disabled={readOnlyMode}
-                           className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
+                           className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed"
+                           placeholder="Введите название или выберите из списка"
                            value={editReq.contractorName || ''}
-                           onChange={e=>{
-                             setEditReq({...editReq, contractorName: e.target.value});
-                             if (e.target.value && !contractors.includes(e.target.value)) {
-                               setContractors([...contractors, e.target.value].sort());
-                             }
-                           }}
-                         >
-                           <option value="">-- Выбрать из списка --</option>
-                           {contractors.map((c, i) => <option key={i} value={c}>{c}</option>)}
-                         </select>
+                           onChange={e=>setEditReq({...editReq, contractorName: e.target.value})}
+                         />
+                         {editReq.contractorName && !contractors.includes(editReq.contractorName) && (
+                           <p className="text-[9px] text-orange-500 font-bold">* Будет добавлен в список при сохранении</p>
+                         )}
                        </div>
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Номер счета / спецификации</label>
@@ -609,19 +605,15 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                    <div className="grid grid-cols-2 gap-6">
                      <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
                        <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Перевозчик</label>
-                       <select
-                         className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input text-sm font-bold"
+                       <input
+                         className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input"
+                         placeholder="Введите название или выберите из списка"
                          value={editReq.carrierName || ''}
-                         onChange={e=>{
-                           setEditReq({...editReq, carrierName: e.target.value});
-                           if (e.target.value && !carriers.includes(e.target.value)) {
-                             setCarriers([...carriers, e.target.value].sort());
-                           }
-                         }}
-                       >
-                         <option value="">-- Выбрать из списка --</option>
-                         {carriers.map((c, i) => <option key={i} value={c}>{c}</option>)}
-                       </select>
+                         onChange={e=>setEditReq({...editReq, carrierName: e.target.value})}
+                       />
+                       {editReq.carrierName && !carriers.includes(editReq.carrierName) && (
+                         <p className="text-[9px] text-orange-500 font-bold mt-1">* Будет добавлен в список при сохранении</p>
+                       )}
                        <label className="text-xs font-bold text-gray-600 dark:text-gray-300 mt-3">Трек/накладная</label>
                        <input className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
                      </div>
@@ -720,7 +712,15 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                          // save updates
                          const totalCost = (editReq.items||[]).reduce((s:any,it:any)=> s + (it.total||0), 0);
                          const statusChanged = selectedReq.status !== editReq.status;
-                         
+
+                         // Добавляем новых контрагентов и перевозчиков в списки
+                         if (editReq.contractorName && !contractors.includes(editReq.contractorName)) {
+                           setContractors([...contractors, editReq.contractorName].sort());
+                         }
+                         if (editReq.carrierName && !carriers.includes(editReq.carrierName)) {
+                           setCarriers([...carriers, editReq.carrierName].sort());
+                         }
+
                          // Сначала обновляем остальные поля (кроме статуса)
                          updateRequest(editReq.id, {
                            title: editReq.title,
@@ -733,12 +733,12 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                            invoiceFiles: editReq.invoiceFiles,
                            cost: totalCost
                          });
-                         
+
                          // Затем, если статус изменился, вызываем updateRequestStatus для триггеров
                          if (statusChanged) {
                            updateRequestStatus(editReq.id, editReq.status);
                          }
-                         
+
                          setSelectedRequestId(null);
                        }} className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs">Сохранить</button>
                        <button onClick={() => setSelectedRequestId(null)} className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs">Отмена</button>
@@ -855,7 +855,15 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               e.preventDefault();
               const totalCost = newRequestForm.items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0) * (item.unitPriceWithVAT || 0), 0);
               const requestNumber = `З-${String(requests.length + 1).padStart(4, '0')}`;
-              
+
+              // Добавляем новых контрагентов и перевозчиков в списки
+              if (newRequestForm.contractorName && !contractors.includes(newRequestForm.contractorName)) {
+                setContractors([...contractors, newRequestForm.contractorName].sort());
+              }
+              if (newRequestForm.carrierName && !carriers.includes(newRequestForm.carrierName)) {
+                setCarriers([...carriers, newRequestForm.carrierName].sort());
+              }
+
               addRequest({
                 id: `pr-${Date.now()}`,
                 title: `${requestNumber}: ${newRequestForm.title}`,
@@ -933,35 +941,21 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-600 dark:text-gray-300 ml-2">Контрагент</label>
-                  <select
-                    className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700 text-sm font-bold"
+                  <input
+                    className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700"
+                    placeholder="Введите название"
                     value={newRequestForm.contractorName}
-                    onChange={e => {
-                      setNewRequestForm({...newRequestForm, contractorName: e.target.value});
-                      if (e.target.value && !contractors.includes(e.target.value)) {
-                        setContractors([...contractors, e.target.value].sort());
-                      }
-                    }}
-                  >
-                    <option value="">-- Выбрать из списка --</option>
-                    {contractors.map((c, i) => <option key={i} value={c}>{c}</option>)}
-                  </select>
+                    onChange={e => setNewRequestForm({...newRequestForm, contractorName: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-600 dark:text-gray-300 ml-2">Перевозчик</label>
-                  <select
-                    className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700 text-sm font-bold"
+                  <input
+                    className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700"
+                    placeholder="Введите название"
                     value={newRequestForm.carrierName}
-                    onChange={e => {
-                      setNewRequestForm({...newRequestForm, carrierName: e.target.value});
-                      if (e.target.value && !carriers.includes(e.target.value)) {
-                        setCarriers([...carriers, e.target.value].sort());
-                      }
-                    }}
-                  >
-                    <option value="">-- Выбрать из списка --</option>
-                    {carriers.map((c, i) => <option key={i} value={c}>{c}</option>)}
-                  </select>
+                    onChange={e => setNewRequestForm({...newRequestForm, carrierName: e.target.value})}
+                  />
                 </div>
               </div>
 
