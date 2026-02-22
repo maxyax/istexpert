@@ -204,20 +204,20 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
           {viewMode === 'list' && (
         <div className="space-y-3 overflow-y-auto custom-scrollbar pr-2 flex-1 px-1">
           {sortedRequests.map(req => (
-            <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-4 md:p-6 rounded-[2rem] bg-neo-bg flex flex-col gap-3 group cursor-pointer hover:shadow-neo transition-all border border-white/5 min-w-0">
+            <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-4 md:p-6 rounded-[2rem] bg-white dark:bg-neo-bg shadow-[4px_4px_12px_rgba(0,0,0,0.08),-4px_-4px_12px_rgba(255,255,255,0.8)] dark:shadow-[4px_4px_12px_rgba(0,0,0,0.3),-4px_-4px_12px_rgba(60,75,95,0.15)] hover:shadow-[6px_6px_16px_rgba(0,0,0,0.12),-6px_-6px_16px_rgba(255,255,255,0.9)] dark:hover:shadow-[6px_6px_16px_rgba(0,0,0,0.4),-6px_-6px_16px_rgba(60,75,95,0.2)] transition-all flex flex-col gap-3 group cursor-pointer min-w-0">
               <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                 <div className="p-3 md:p-4 rounded-2xl text-blue-500 shrink-0"><Package size={20} className="md:w-6 md:h-6"/></div>
                 <div className="overflow-hidden flex-1 min-w-0">
-                  <h4 className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate line-clamp-2">{req.title}</h4>
+                  <h4 className="text-xs md:text-sm font-black uppercase text-gray-800 dark:text-gray-100 truncate line-clamp-2">{req.title}</h4>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className={`text-[7px] md:text-[9px] font-bold uppercase px-2 py-0.5 rounded ${COLUMNS.find(c=>c.id===req.status)?.color || 'bg-gray-300'} text-white`}>{req.status}</span>
-                    <span className="text-[7px] md:text-[9px] text-gray-400 font-bold uppercase truncate flex-1 min-w-0">{equipment.find(e=>e.id===req.equipmentId)?.name || 'Общий'}</span>
+                    <span className="text-[7px] md:text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase truncate flex-1 min-w-0">{equipment.find(e=>e.id===req.equipmentId)?.name || 'Общий'}</span>
                   </div>
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3 md:gap-10">
                 <p className="text-sm md:text-lg font-black text-emerald-600 whitespace-nowrap">{req.cost ? formatMoney(req.cost) : '—'}</p>
-                <div className="p-2 rounded-xl text-gray-300 group-hover:text-blue-600"><ChevronRight size={18} className="md:w-5 md:h-5"/></div>
+                <div className="p-2 rounded-xl text-gray-400 group-hover:text-blue-600"><ChevronRight size={18} className="md:w-5 md:h-5"/></div>
               </div>
             </div>
           ))}
@@ -554,7 +554,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           setIsBreakdownSelectOpen(false);
                           setIsCreateRequestOpen(true);
                         }}
-                        className="w-full p-4 rounded-2xl bg-neo-bg hover:shadow-neo transition-all flex justify-between items-center group"
+                        className="w-full p-4 rounded-2xl bg-white dark:bg-neo-bg shadow-[4px_4px_12px_rgba(0,0,0,0.08),-4px_-4px_12px_rgba(255,255,255,0.8)] dark:shadow-[4px_4px_12px_rgba(0,0,0,0.3),-4px_-4px_12px_rgba(60,75,95,0.15)] hover:shadow-[6px_6px_16px_rgba(0,0,0,0.12),-6px_-6px_16px_rgba(255,255,255,0.9)] dark:hover:shadow-[6px_6px_16px_rgba(0,0,0,0.4),-6px_-6px_16px_rgba(60,75,95,0.2)] transition-all flex justify-between items-center group"
                       >
                         <div className="flex items-center gap-4 flex-1">
                           <div className="p-3 rounded-xl text-red-600 group-hover:scale-110 transition-transform">
@@ -562,18 +562,18 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           </div>
                           <div className="text-left flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{b.partName}</p>
+                              <p className="text-sm font-black uppercase text-gray-800 dark:text-gray-100">{b.partName}</p>
                               <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded ${
                                 b.severity === 'Критическая' ? 'bg-red-500 text-white' :
                                 b.severity === 'Средняя' ? 'bg-orange-500 text-white' :
                                 'bg-yellow-500 text-white'
                               }`}>{b.severity}</span>
                             </div>
-                            <p className="text-[8px] text-gray-400">{equip?.name || 'Техника'} • {b.node}</p>
-                            <p className="text-[7px] text-gray-500">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
+                            <p className="text-[8px] text-gray-500 dark:text-gray-400">{equip?.name || 'Техника'} • {b.node}</p>
+                            <p className="text-[7px] text-gray-500 dark:text-gray-400">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
                           </div>
                         </div>
-                        <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                        <ChevronRight size={18} className="text-gray-400 group-hover:text-blue-500 transition-colors"/>
                       </button>
                     );
                   });

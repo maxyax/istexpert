@@ -677,18 +677,18 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       setIsBreakdownEquipSelectOpen(false);
                       setIsBreakdownModalOpen(true);
                     }}
-                    className="w-full p-4 rounded-2xl bg-neo-bg hover:shadow-neo transition-all flex justify-between items-center group"
+                    className="w-full p-4 rounded-2xl bg-white dark:bg-neo-bg shadow-[4px_4px_12px_rgba(0,0,0,0.08),-4px_-4px_12px_rgba(255,255,255,0.8)] dark:shadow-[4px_4px_12px_rgba(0,0,0,0.3),-4px_-4px_12px_rgba(60,75,95,0.15)] hover:shadow-[6px_6px_16px_rgba(0,0,0,0.12),-6px_-6px_16px_rgba(255,255,255,0.9)] dark:hover:shadow-[6px_6px_16px_rgba(0,0,0,0.4),-6px_-6px_16px_rgba(60,75,95,0.2)] transition-all flex justify-between items-center group"
                   >
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
                         <Truck size={20}/>
                       </div>
                       <div className="text-left">
-                        <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{e.name}</p>
-                        <p className="text-[8px] text-gray-400">{e.vin} • {e.hours} м/ч</p>
+                        <p className="text-sm font-black uppercase text-gray-800 dark:text-gray-100">{e.name}</p>
+                        <p className="text-[8px] text-gray-500 dark:text-gray-400">{e.vin} • {e.hours} м/ч</p>
                       </div>
                     </div>
-                    <ChevronRight size={18} className="text-gray-300 group-hover:text-red-500"/>
+                    <ChevronRight size={18} className="text-gray-400 group-hover:text-red-500 transition-colors"/>
                   </button>
                 ))}
               </div>
