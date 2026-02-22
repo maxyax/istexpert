@@ -153,8 +153,22 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
   const [newContractor, setNewContractor] = useState({ name: '', category: 'Поставщики запчастей' });
   const [newCarrier, setNewCarrier] = useState({ name: '', category: 'Транспортные компании' });
   
+  // Для автокомплита
+  const [contractorFilter, setContractorFilter] = useState('');
+  const [carrierFilter, setCarrierFilter] = useState('');
+  const [showContractorSuggestions, setShowContractorSuggestions] = useState(false);
+  const [showCarrierSuggestions, setShowCarrierSuggestions] = useState(false);
+  
   const contractorCategories = ['Поставщики запчастей', 'Поставщики ГСМ', 'Сервисные центры', 'Арендодатели', 'Другие'];
   const carrierCategories = ['Транспортные компании', 'Курьерские службы', 'Грузоперевозки', 'Другие'];
+
+  // Фильтрация для автокомплита
+  const filteredContractors = contractors.filter(c => 
+    c.toLowerCase().includes(contractorFilter.toLowerCase())
+  );
+  const filteredCarriers = carriers.filter(c => 
+    c.toLowerCase().includes(carrierFilter.toLowerCase())
+  );
 
   const addContractor = () => {
     if (newContractor.name && !contractors.includes(newContractor.name)) {
@@ -483,17 +497,44 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                      </div>
 
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                       <div className="space-y-2">
+                       <div className="space-y-2 relative">
                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Контрагент</label>
                          <input
                            disabled={readOnlyMode}
                            className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed"
-                           placeholder="Введите название или выберите из списка"
+                           placeholder="Введите название"
                            value={editReq.contractorName || ''}
-                           onChange={e=>setEditReq({...editReq, contractorName: e.target.value})}
+                           onFocus={() => {
+                             setContractorFilter(editReq.contractorName || '');
+                             setShowContractorSuggestions(true);
+                           }}
+                           onChange={e => {
+                             setEditReq({...editReq, contractorName: e.target.value});
+                             setContractorFilter(e.target.value);
+                             setShowContractorSuggestions(true);
+                           }}
+                           onBlur={() => setTimeout(() => setShowContractorSuggestions(false), 200)}
                          />
                          {editReq.contractorName && !contractors.includes(editReq.contractorName) && (
                            <p className="text-[9px] text-orange-500 font-bold">* Будет добавлен в список при сохранении</p>
+                         )}
+                         {/* Выпадающий список с подсказками */}
+                         {showContractorSuggestions && filteredContractors.length > 0 && (
+                           <div className="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto rounded-xl shadow-neo bg-neo-bg border border-white/10">
+                             {filteredContractors.map((c, i) => (
+                               <button
+                                 key={i}
+                                 type="button"
+                                 className="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-blue-500/10 transition-all"
+                                 onMouseDown={() => {
+                                   setEditReq({...editReq, contractorName: c});
+                                   setShowContractorSuggestions(false);
+                                 }}
+                               >
+                                 {c}
+                               </button>
+                             ))}
+                           </div>
                          )}
                        </div>
                        <div className="space-y-2">
@@ -605,15 +646,44 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                    <div className="grid grid-cols-2 gap-6">
                      <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
                        <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Перевозчик</label>
-                       <input
-                         className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input"
-                         placeholder="Введите название или выберите из списка"
-                         value={editReq.carrierName || ''}
-                         onChange={e=>setEditReq({...editReq, carrierName: e.target.value})}
-                       />
-                       {editReq.carrierName && !carriers.includes(editReq.carrierName) && (
-                         <p className="text-[9px] text-orange-500 font-bold mt-1">* Будет добавлен в список при сохранении</p>
-                       )}
+                       <div className="relative">
+                         <input
+                           className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input"
+                           placeholder="Введите название"
+                           value={editReq.carrierName || ''}
+                           onFocus={() => {
+                             setCarrierFilter(editReq.carrierName || '');
+                             setShowCarrierSuggestions(true);
+                           }}
+                           onChange={e => {
+                             setEditReq({...editReq, carrierName: e.target.value});
+                             setCarrierFilter(e.target.value);
+                             setShowCarrierSuggestions(true);
+                           }}
+                           onBlur={() => setTimeout(() => setShowCarrierSuggestions(false), 200)}
+                         />
+                         {editReq.carrierName && !carriers.includes(editReq.carrierName) && (
+                           <p className="text-[9px] text-orange-500 font-bold mt-1">* Будет добавлен в список при сохранении</p>
+                         )}
+                         {/* Выпадающий список с подсказками */}
+                         {showCarrierSuggestions && filteredCarriers.length > 0 && (
+                           <div className="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto rounded-xl shadow-neo bg-neo-bg border border-white/10">
+                             {filteredCarriers.map((c, i) => (
+                               <button
+                                 key={i}
+                                 type="button"
+                                 className="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-emerald-500/10 transition-all"
+                                 onMouseDown={() => {
+                                   setEditReq({...editReq, carrierName: c});
+                                   setShowCarrierSuggestions(false);
+                                 }}
+                               >
+                                 {c}
+                               </button>
+                             ))}
+                           </div>
+                         )}
+                       </div>
                        <label className="text-xs font-bold text-gray-600 dark:text-gray-300 mt-3">Трек/накладная</label>
                        <input className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
                      </div>
