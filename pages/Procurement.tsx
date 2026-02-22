@@ -359,16 +359,18 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                    <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
                      <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-3">Позиции</p>
                      <div className="space-y-3">
-                       <div className="grid grid-cols-12 gap-2 items-center text-[10px] font-bold text-gray-500 mb-2">
-                         <div className="col-span-5">Наименование</div>
+                       <div className="grid grid-cols-16 gap-2 items-center text-[10px] font-bold text-gray-500 mb-2">
+                         <div className="col-span-6">Наименование</div>
+                         <div className="col-span-3">Артикул / №</div>
                          <div className="col-span-2">Кол-во</div>
                          <div className="col-span-3">Цена с НДС</div>
                          <div className="col-span-1 text-right">Сумма</div>
                          <div className="col-span-1"></div>
                        </div>
                        {(editReq.items || []).map((it: any, idx: number) => (
-                         <div key={it.id || idx} className="grid grid-cols-12 gap-2 items-center bg-white/5 p-3 rounded-2xl">
-                           <input className="col-span-5 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none app-input" placeholder="Наименование" value={it.name} onChange={e=>{ const arr = [...editReq.items]; arr[idx].name = e.target.value; setEditReq({...editReq, items: arr}); }} />
+                         <div key={it.id || idx} className="grid grid-cols-16 gap-2 items-center bg-white/5 p-3 rounded-2xl">
+                           <input className="col-span-6 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none app-input" placeholder="Наименование" value={it.name} onChange={e=>{ const arr = [...editReq.items]; arr[idx].name = e.target.value; setEditReq({...editReq, items: arr}); }} />
+                           <input className="col-span-3 p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none app-input" placeholder="Артикул" value={it.sku || ''} onChange={e=>{ const arr = [...editReq.items]; arr[idx].sku = e.target.value; setEditReq({...editReq, items: arr}); }} />
                            <div className="col-span-2 relative">
                              <input type="number" className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none app-input pr-8" placeholder="Кол-во" value={it.quantity} onChange={e=>{ const arr=[...editReq.items]; arr[idx].quantity = e.target.value; arr[idx].total = (parseFloat(arr[idx].quantity || '0') || 0) * (parseFloat(arr[idx].unitPriceWithVAT || '0') || 0); setEditReq({...editReq, items: arr}); }} />
                              {it.quantity && it.quantity !== '' && (
@@ -385,7 +387,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                            <button className="col-span-1 text-red-500 font-bold text-lg hover:text-red-600" onClick={() => { const arr = [...editReq.items]; arr.splice(idx,1); setEditReq({...editReq, items: arr}); }}>×</button>
                          </div>
                        ))}
-                       <button onClick={()=> setEditReq({...editReq, items: [...(editReq.items||[]), { id: `i-${Date.now()}`, name: '', quantity: '1', unitPriceWithVAT: 0, total: 0 }]})} className="mt-3 px-4 py-3 rounded-2xl bg-neo-bg border border-white/5 font-bold text-xs shadow-neo hover:shadow-neo-inset transition-all">+ Добавить позицию</button>
+                       <button onClick={()=> setEditReq({...editReq, items: [...(editReq.items||[]), { id: `i-${Date.now()}`, sku: '', name: '', quantity: '1', unitPriceWithVAT: 0, total: 0 }]})} className="mt-3 px-4 py-3 rounded-2xl bg-neo-bg border border-white/5 font-bold text-xs shadow-neo hover:shadow-neo-inset transition-all">+ Добавить позицию</button>
                      </div>
                    </div>
 
@@ -597,7 +599,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
       {/* Модальное окно создания новой заявки */}
       {isCreateRequestOpen && selectedBreakdown && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-neo-bg w-full max-w-3xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+          <div className="bg-neo-bg w-full max-w-5xl rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-4">
                 <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Package size={28}/></div>
@@ -606,7 +608,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   <p className="text-[8px] font-black text-gray-400 uppercase">Акт: {selectedBreakdown.actNumber || 'АКТ-001'}</p>
                 </div>
               </div>
-              <button onClick={() => { setIsCreateRequestOpen(false); setSelectedBreakdown(null); }} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all">
+              <button onClick={() => { setIsCreateRequestOpen(false); setSelectedBreakdown(null); }} className="p-3 rounded-xl shadow-neo text-gray-600 dark:text-gray-300 hover:text-red-500 transition-all">
                 <X size={20}/>
               </button>
             </div>
