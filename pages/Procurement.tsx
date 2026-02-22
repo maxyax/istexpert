@@ -22,13 +22,25 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
   const { breakdowns, updateBreakdownStatus } = useMaintenanceStore();
   const [viewMode, setViewMode] = useState<'kanban' | 'list' | 'table'>('table');
   const [readOnlyMode, setReadOnlyMode] = useState(false);
-  
+
+  // Списки контрагентов и перевозчиков (извлекаем из всех заявок)
+  const [contractors, setContractors] = useState<string[]>(() => {
+    const unique = new Set(requests.map(r => r.contractorName).filter(Boolean));
+    return Array.from(unique).sort();
+  });
+  const [carriers, setCarriers] = useState<string[]>(() => {
+    const unique = new Set(requests.map(r => r.carrierName).filter(Boolean));
+    return Array.from(unique).sort();
+  });
+
   // Для создания новой заявки
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
   const [isBreakdownSelectOpen, setIsBreakdownSelectOpen] = useState(false);
   const [selectedBreakdown, setSelectedBreakdown] = useState<any>(null);
   const [newRequestForm, setNewRequestForm] = useState({
     title: '',
+    contractorName: '',
+    carrierName: '',
     items: [{ sku: '', name: '', quantity: '1', unitPriceWithVAT: 0 }]
   });
 
@@ -327,14 +339,50 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                        <input disabled={readOnlyMode} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border-none outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed" value={editReq.title} onChange={e=>setEditReq({...editReq, title: e.target.value})} />
                      </div>
 
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Контрагент</label>
-                         <input disabled={readOnlyMode} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed" value={editReq.contractorName || ''} onChange={e=>setEditReq({...editReq, contractorName: e.target.value})} />
+                         <div className="relative">
+                           <input
+                             list="contractors-list-edit"
+                             disabled={readOnlyMode}
+                             className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed"
+                             value={editReq.contractorName || ''}
+                             onChange={e=>{
+                               setEditReq({...editReq, contractorName: e.target.value});
+                               if (e.target.value && !contractors.includes(e.target.value)) {
+                                 setContractors([...contractors, e.target.value].sort());
+                               }
+                             }}
+                           />
+                           <datalist id="contractors-list-edit">
+                             {contractors.map((c, i) => <option key={i} value={c} />)}
+                           </datalist>
+                         </div>
                        </div>
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Номер счета / спецификации</label>
                          <input disabled={readOnlyMode} className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed" value={editReq.invoiceNumber || ''} onChange={e=>setEditReq({...editReq, invoiceNumber: e.target.value})} />
+                       </div>
+                       <div className="space-y-2">
+                         <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Перевозчик</label>
+                         <div className="relative">
+                           <input
+                             list="carriers-list-edit"
+                             disabled={readOnlyMode}
+                             className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed"
+                             value={editReq.carrierName || ''}
+                             onChange={e=>{
+                               setEditReq({...editReq, carrierName: e.target.value});
+                               if (e.target.value && !carriers.includes(e.target.value)) {
+                                 setCarriers([...carriers, e.target.value].sort());
+                               }
+                             }}
+                           />
+                           <datalist id="carriers-list-edit">
+                             {carriers.map((c, i) => <option key={i} value={c} />)}
+                           </datalist>
+                         </div>
                        </div>
                      </div>
 
@@ -612,6 +660,8 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           setSelectedBreakdown(b);
                           setNewRequestForm({
                             title: `Запрос по акту ${b.actNumber || 'АКТ-001'}: ${b.partName}`,
+                            contractorName: '',
+                            carrierName: '',
                             items: [{ sku: '', name: b.partName, quantity: '1', unitPriceWithVAT: 0 }]
                           });
                           setIsBreakdownSelectOpen(false);
@@ -701,7 +751,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               const breakdownName = selectedBreakdown.partName || '';
               const title = `Заявка по акту поломки №${actNumber} от ${actDate} (${breakdownName})`;
 
-              setNewRequestForm({ title: title, items: [{ sku: '', name: breakdownName, quantity: '1', unitPriceWithVAT: 0 }] });
+              setNewRequestForm({ title: title, contractorName: '', carrierName: '', items: [{ sku: '', name: breakdownName, quantity: '1', unitPriceWithVAT: 0 }] });
               setSelectedBreakdown(null);
               setIsCreateRequestOpen(false);
             }}>
@@ -741,6 +791,51 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   onChange={e => setNewRequestForm({...newRequestForm, title: e.target.value})}
                   required
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-600 dark:text-gray-300 ml-2">Контрагент</label>
+                  <div className="relative">
+                    <input
+                      list="contractors-list"
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700"
+                      placeholder="Выбрать или ввести"
+                      value={newRequestForm.contractorName}
+                      onChange={e => {
+                        setNewRequestForm({...newRequestForm, contractorName: e.target.value});
+                        // Добавляем в список если нет
+                        if (e.target.value && !contractors.includes(e.target.value)) {
+                          setContractors([...contractors, e.target.value].sort());
+                        }
+                      }}
+                    />
+                    <datalist id="contractors-list">
+                      {contractors.map((c, i) => <option key={i} value={c} />)}
+                    </datalist>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-600 dark:text-gray-300 ml-2">Перевозчик</label>
+                  <div className="relative">
+                    <input
+                      list="carriers-list"
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700"
+                      placeholder="Выбрать или ввести"
+                      value={newRequestForm.carrierName}
+                      onChange={e => {
+                        setNewRequestForm({...newRequestForm, carrierName: e.target.value});
+                        // Добавляем в список если нет
+                        if (e.target.value && !carriers.includes(e.target.value)) {
+                          setCarriers([...carriers, e.target.value].sort());
+                        }
+                      }}
+                    />
+                    <datalist id="carriers-list">
+                      {carriers.map((c, i) => <option key={i} value={c} />)}
+                    </datalist>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-3">
