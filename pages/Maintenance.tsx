@@ -1794,18 +1794,43 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               </div>
 
               <div className="p-4 md:p-6 rounded-[1.5rem] shadow-neo bg-neo-bg">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Чек-лист работ</p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Чек-лист работ</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newText = prompt('Введите название работы:');
+                      if (newText && newText.trim()) {
+                        setToChecklist([...toChecklist, { text: newText.trim(), done: false, note: '' }]);
+                      }
+                    }}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all text-[9px] font-black uppercase"
+                  >
+                    <Plus size={12}/> Добавить работу
+                  </button>
+                </div>
                 <div className="space-y-3">
                   {toChecklist.length === 0 && <p className="text-sm text-gray-400">Нет задач в регламенте — добавьте вручную.</p>}
                   {toChecklist.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
+                    <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-neo-bg border border-white/5 group">
                       <input type="checkbox" checked={item.done} onChange={e=>{
                         const arr = [...toChecklist]; arr[idx] = { ...arr[idx], done: e.target.checked }; setToChecklist(arr);
-                      }} className="mt-1" />
+                      }} className="mt-1 w-4 h-4 rounded" />
                       <div className="flex-1">
                         <div className="font-black uppercase text-sm">{item.text}</div>
-                        <input placeholder="Примечание" value={item.note || ''} onChange={e=>{ const arr=[...toChecklist]; arr[idx] = { ...arr[idx], note: e.target.value }; setToChecklist(arr); }} className="w-full p-2 mt-1 rounded-lg bg-neo-bg shadow-neo-inset text-xs font-black uppercase text-gray-700 dark:text-gray-200 outline-none" />
+                        <input placeholder="Примечание (опционально)" value={item.note || ''} onChange={e=>{ const arr=[...toChecklist]; arr[idx] = { ...arr[idx], note: e.target.value }; setToChecklist(arr); }} className="w-full p-2 mt-1 rounded-lg bg-neo-bg shadow-neo-inset text-xs font-black uppercase text-gray-700 dark:text-gray-200 outline-none" />
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const arr = toChecklist.filter((_, i) => i !== idx);
+                          setToChecklist(arr);
+                        }}
+                        className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                        title="Удалить работу"
+                      >
+                        <X size={14}/>
+                      </button>
                     </div>
                   ))}
                 </div>
