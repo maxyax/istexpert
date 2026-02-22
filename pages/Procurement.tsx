@@ -600,9 +600,9 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
       {/* Модальное окно создания новой заявки */}
       {isCreateRequestOpen && selectedBreakdown && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-1 bg-black/60 backdrop-blur-md">
-          <div className="bg-neo-bg w-[98vw] max-w-[1600px] rounded-[3rem] shadow-neo p-4 md:p-6 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 md:p-4 bg-black/60 backdrop-blur-md">
+          <div className="md:w-[95%] md:max-w-7xl bg-neo-bg md:h-[90vh] md:rounded-[3rem] shadow-neo overflow-y-auto flex flex-col border-0 md:border md:border-white/20 animate-in zoom-in duration-300 w-full max-w-full h-full max-h-full">
+            <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-4">
                 <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Package size={28}/></div>
                 <div>
@@ -615,7 +615,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               </button>
             </div>
 
-            <form onSubmit={(e) => {
+            <form className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" onSubmit={(e) => {
               e.preventDefault();
               const totalCost = newRequestForm.items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0) * (item.unitPriceWithVAT || 0), 0);
               const requestNumber = `З-${String(requests.length + 1).padStart(4, '0')}`;
@@ -655,7 +655,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               setNewRequestForm({ title: title, items: [{ sku: '', name: breakdownName, quantity: '1', unitPriceWithVAT: 0 }] });
               setSelectedBreakdown(null);
               setIsCreateRequestOpen(false);
-            }} className="space-y-6">
+            }}>
               {/* Информация о поломке */}
               <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-red-500/20 space-y-3">
                 <div className="flex items-center gap-2">
