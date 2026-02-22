@@ -677,10 +677,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       setIsBreakdownEquipSelectOpen(false);
                       setIsBreakdownModalOpen(true);
                     }}
-                    className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-red-500/50 transition-all flex justify-between items-center group"
+                    className="w-full p-4 rounded-2xl bg-neo-bg hover:shadow-neo transition-all flex justify-between items-center group"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-xl bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform">
+                      <div className="p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
                         <Truck size={20}/>
                       </div>
                       <div className="text-left">

@@ -204,9 +204,9 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
           {viewMode === 'list' && (
         <div className="space-y-3 overflow-y-auto custom-scrollbar pr-2 flex-1 px-1">
           {sortedRequests.map(req => (
-            <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-4 md:p-6 rounded-[2rem] shadow-neo bg-neo-bg flex flex-col gap-3 group cursor-pointer hover:shadow-neo-inset transition-all border border-white/5 min-w-0">
+            <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-4 md:p-6 rounded-[2rem] bg-neo-bg flex flex-col gap-3 group cursor-pointer hover:shadow-neo transition-all border border-white/5 min-w-0">
               <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                <div className="p-3 md:p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500 shrink-0"><Package size={20} className="md:w-6 md:h-6"/></div>
+                <div className="p-3 md:p-4 rounded-2xl text-blue-500 shrink-0"><Package size={20} className="md:w-6 md:h-6"/></div>
                 <div className="overflow-hidden flex-1 min-w-0">
                   <h4 className="text-xs md:text-sm font-black uppercase text-gray-700 dark:text-gray-200 truncate line-clamp-2">{req.title}</h4>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -217,7 +217,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               </div>
               <div className="flex items-center justify-between gap-3 md:gap-10">
                 <p className="text-sm md:text-lg font-black text-emerald-600 whitespace-nowrap">{req.cost ? formatMoney(req.cost) : '—'}</p>
-                <div className="p-2 rounded-xl shadow-neo text-gray-300 group-hover:text-blue-600"><ChevronRight size={18} className="md:w-5 md:h-5"/></div>
+                <div className="p-2 rounded-xl text-gray-300 group-hover:text-blue-600"><ChevronRight size={18} className="md:w-5 md:h-5"/></div>
               </div>
             </div>
           ))}
@@ -244,7 +244,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 <tr key={req.id} onClick={() => setSelectedRequestId(req.id)} className={`border-l-4 ${borderColor} hover:bg-white/5 transition-colors cursor-pointer group`}>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
-                      <div className="p-2.5 rounded-xl shadow-neo-sm bg-neo-bg text-blue-500 group-hover:scale-110 transition-transform"><Package size={18}/></div>
+                      <div className="p-2.5 rounded-xl text-blue-500 group-hover:scale-110 transition-transform"><Package size={18}/></div>
                       <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200 group-hover:text-blue-600 transition-colors">{req.title}</span>
                     </div>
                   </td>
@@ -554,10 +554,10 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           setIsBreakdownSelectOpen(false);
                           setIsCreateRequestOpen(true);
                         }}
-                        className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                        className="w-full p-4 rounded-2xl bg-neo-bg hover:shadow-neo transition-all flex justify-between items-center group"
                       >
                         <div className="flex items-center gap-4 flex-1">
-                          <div className="p-3 rounded-xl bg-neo-bg text-red-600 group-hover:scale-110 transition-transform">
+                          <div className="p-3 rounded-xl text-red-600 group-hover:scale-110 transition-transform">
                             <AlertTriangle size={20}/>
                           </div>
                           <div className="text-left flex-1">
