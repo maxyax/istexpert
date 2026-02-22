@@ -498,10 +498,6 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase">Наработка</p>
               <p className="text-xl md:text-3xl font-black text-gray-800 dark:text-gray-100">{selectedEquip.hours} м/ч</p>
             </div>
-            <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center justify-center gap-1 md:gap-2 border border-white/5">
-              <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase">Регламент</p>
-              <p className="text-xl md:text-3xl font-black text-orange-600">250</p>
-            </div>
           </div>
 
           <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
@@ -886,18 +882,18 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       <button
                         key={e.id}
                         onClick={() => setRequestEquipmentId(e.id)}
-                        className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                        className="w-full p-4 rounded-2xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.1),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,1)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(60,75,95,0.25)] transition-all flex justify-between items-center group"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="p-3 rounded-xl bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform">
+                          <div className="p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
                             <Truck size={20}/>
                           </div>
                           <div className="text-left">
-                            <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{e.name}</p>
-                            <p className="text-[8px] text-gray-400">{e.vin} • {e.hours} м/ч</p>
+                            <p className="text-sm font-black uppercase text-gray-800 dark:text-gray-100">{e.name}</p>
+                            <p className="text-[9px] md:text-[10px] font-bold text-gray-700 dark:text-gray-300">{e.vin} • {e.hours} м/ч</p>
                           </div>
                         </div>
-                        <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                        <ChevronRight size={18} className="text-gray-400 group-hover:text-blue-500 transition-colors"/>
                       </button>
                     ))}
                   </div>
@@ -935,26 +931,26 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                                     setIsBreakdownSelectOpen(false);
                                     setIsCreateRequestOpen(true);
                                   }}
-                                  className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                                  className="w-full p-4 rounded-2xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.1),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,1)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(60,75,95,0.25)] transition-all flex justify-between items-center group"
                                 >
                                   <div className="flex items-center gap-4 flex-1">
-                                    <div className="p-3 rounded-xl bg-neo-bg text-red-600 group-hover:scale-110 transition-transform">
+                                    <div className="p-3 rounded-xl text-red-600 group-hover:scale-110 transition-transform">
                                       <AlertTriangle size={20}/>
                                     </div>
                                     <div className="text-left flex-1">
                                       <div className="flex items-center gap-2">
-                                        <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{b.partName}</p>
+                                        <p className="text-sm font-black uppercase text-gray-800 dark:text-gray-100">{b.partName}</p>
                                         <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded ${
                                           b.severity === 'Критическая' ? 'bg-red-500 text-white' :
                                           b.severity === 'Средняя' ? 'bg-orange-500 text-white' :
                                           'bg-yellow-500 text-white'
                                         }`}>{b.severity}</span>
                                       </div>
-                                      <p className="text-[8px] text-gray-400">{b.node}</p>
-                                      <p className="text-[7px] text-gray-500">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
+                                      <p className="text-[8px] text-gray-500 dark:text-gray-400">{b.node}</p>
+                                      <p className="text-[7px] text-gray-500 dark:text-gray-400">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
                                     </div>
                                   </div>
-                                  <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                                  <ChevronRight size={18} className="text-gray-400 group-hover:text-blue-500 transition-colors"/>
                                 </button>
                               ))}
                             </>
@@ -971,18 +967,17 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                               setIsCreateRequestOpen(true);
                               setSelectedBreakdownDetail(null);
                             }}
-                            className="w-full p-4 rounded-2xl shadow-neo bg-emerald-600 text-white font-black uppercase text-xs hover:bg-emerald-700 transition-all mt-4"
+                            className="w-full p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-black uppercase text-xs shadow-lg hover:shadow-xl hover:from-emerald-600 hover:to-emerald-700 transition-all mt-4"
                           >
                             + Создать заявку без акта (для ТО / на склад)
                           </button>
-                          
-                          {/* Кнопка назад к выбору техники */}
+
                           <button
                             onClick={() => {
                               setRequestEquipmentId(null);
                               setSelectedMaintenanceEquipId(null);
                             }}
-                            className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/10 font-black uppercase text-xs hover:shadow-neo-inset transition-all"
+                            className="w-full p-4 rounded-2xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.1),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,1)] font-black uppercase text-xs transition-all"
                           >
                             ← Назад к выбору техники
                           </button>
@@ -1023,18 +1018,18 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       openTOForEquip(e);
                       setIsTOEquipSelectOpen(false);
                     }}
-                    className="w-full p-4 rounded-2xl shadow-neo bg-neo-bg border border-white/5 hover:border-blue-500/50 transition-all flex justify-between items-center group"
+                    className="w-full p-4 rounded-2xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.1),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,1)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(60,75,95,0.25)] transition-all flex justify-between items-center group"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-xl bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform">
+                      <div className="p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
                         <Truck size={20}/>
                       </div>
                       <div className="text-left">
-                        <p className="text-sm font-black uppercase text-gray-700 dark:text-gray-200">{e.name}</p>
-                        <p className="text-[8px] text-gray-400">{e.vin} • {e.hours} м/ч</p>
+                        <p className="text-sm font-black uppercase text-gray-800 dark:text-gray-100">{e.name}</p>
+                        <p className="text-[9px] md:text-[10px] font-bold text-gray-700 dark:text-gray-300">{e.vin} • {e.hours} м/ч</p>
                       </div>
                     </div>
-                    <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500"/>
+                    <ChevronRight size={18} className="text-gray-400 group-hover:text-blue-500 transition-colors"/>
                   </button>
                 ))}
               </div>
