@@ -377,18 +377,18 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       <div className="text-[9px] font-medium text-gray-500 dark:text-gray-400 truncate">{e.vin}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); openTOForEquip(e); }} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <Wrench size={12}/>
-                      <span>ТО</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); openTOForEquip(e); }} className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-xs text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <Wrench size={14}/>
+                      <span className="hidden md:inline">ТО</span>
                     </button>
-                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '' }); setIsBreakdownModalOpen(true); }} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <AlertTriangle size={12}/>
-                      <span>Акт</span>
+                    <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '' }); setIsBreakdownModalOpen(true); }} className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-xs text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <AlertTriangle size={14}/>
+                      <span className="hidden md:inline">Акт</span>
                     </button>
-                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold text-[9px] text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                      <Package size={12}/>
-                      <span>Заявка</span>
+                    <button onClick={() => { setRequestEquipmentId(e.id); setIsBreakdownSelectOpen(true); }} className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold text-xs text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <Package size={14}/>
+                      <span className="hidden md:inline">Заявка</span>
                     </button>
                   </div>
                   {/* Прогресс-бары по заявкам */}
