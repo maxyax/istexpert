@@ -415,7 +415,8 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                           {(() => {
                             const relatedRequest = useProcurementStore.getState().requests.find(r => {
                               const reqBreakdown = useMaintenanceStore.getState().breakdowns.find(b => b.id === r.breakdownId);
-                              return reqBreakdown?.equipmentId === e.id;
+                              // Показываем только если поломка не исправлена
+                              return reqBreakdown?.equipmentId === e.id && reqBreakdown.status !== 'Исправлено';
                             });
                             if (relatedRequest) {
                               const statusOrder = ['Новая', 'Поиск', 'Оплачено', 'В пути', 'На складе'];

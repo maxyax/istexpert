@@ -1605,6 +1605,27 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 {(() => {
                   const relatedReq = useProcurementStore.getState().requests.find(r => r.breakdownId === selectedBreakdownDetail.id);
                   const canTakeToWork = relatedReq && relatedReq.status === 'На складе';
+                  const isFixed = breakdownStatusForm.status === 'Исправлено';
+                  const notOnWarehouse = !relatedReq || relatedReq.status !== 'На складе';
+                  
+                  // Предупреждение если "Исправлено" но запчасти нет на складе
+                  if (isFixed && notOnWarehouse) {
+                    return (
+                      <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle size={14} className="text-orange-500 mt-0.5"/>
+                          <div>
+                            <p className="text-[7px] font-black text-orange-400 uppercase tracking-widest mb-1">Внимание</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">
+                              Запчасти еще нет на складе ({relatedReq?.status || 'заявка не создана'}). 
+                              Вы подтверждаете что поломка исправлена альтернативным способом?
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  
                   return breakdownStatusForm.status === 'В работе' && !canTakeToWork && (
                     <p className="text-[8px] font-black text-orange-600">⚠ Статус "В работе" доступен только после получения запчастей со склада</p>
                   );
