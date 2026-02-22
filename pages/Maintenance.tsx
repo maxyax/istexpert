@@ -292,45 +292,45 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 setSelectedMaintenanceEquipId(null);
                 setIsBreakdownEquipSelectOpen(true);
               }}
-              className="p-3 md:p-4 rounded-2xl shadow-neo bg-white dark:bg-neo-bg hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
+              className="p-3 md:p-4 rounded-2xl shadow-neo bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-red-500 group-hover:scale-110 transition-transform">
+                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white/20 group-hover:scale-110 transition-transform">
                   <AlertTriangle size={20} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm md:text-base font-bold text-gray-800 dark:text-gray-100">Акт</h4>
-                  <p className="text-[9px] md:text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Поломки</p>
+                  <h4 className="text-sm md:text-base font-bold uppercase">Акт</h4>
+                  <p className="text-[9px] md:text-[10px] font-medium text-white/80 uppercase">Поломки</p>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => setIsTOEquipSelectOpen(true)}
-              className="p-3 md:p-4 rounded-2xl shadow-neo bg-white dark:bg-neo-bg hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
+              className="p-3 md:p-4 rounded-2xl shadow-neo bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-blue-500 group-hover:scale-110 transition-transform">
+                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white/20 group-hover:scale-110 transition-transform">
                   <Wrench size={20} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm md:text-base font-bold text-gray-800 dark:text-gray-100">ТО</h4>
-                  <p className="text-[9px] md:text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Обслуживание</p>
+                  <h4 className="text-sm md:text-base font-bold uppercase">ТО</h4>
+                  <p className="text-[9px] md:text-[10px] font-medium text-white/80 uppercase">Обслуживание</p>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => setIsBreakdownSelectOpen(true)}
-              className="p-3 md:p-4 rounded-2xl shadow-neo bg-white dark:bg-neo-bg hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
+              className="p-3 md:p-4 rounded-2xl shadow-neo bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-lg hover:-translate-y-0.5 transition-all group active:scale-95"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-emerald-500 group-hover:scale-110 transition-transform">
+                <div className="p-2.5 md:p-3 rounded-xl shadow-neo bg-white/20 group-hover:scale-110 transition-transform">
                   <Package size={20} className="md:w-6 md:h-6"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm md:text-base font-bold text-gray-800 dark:text-gray-100">Заявка</h4>
-                  <p className="text-[9px] md:text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Снабжение</p>
+                  <h4 className="text-sm md:text-base font-bold uppercase">Заявка</h4>
+                  <p className="text-[9px] md:text-[10px] font-medium text-white/80 uppercase">Снабжение</p>
                 </div>
               </div>
             </button>
