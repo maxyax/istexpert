@@ -61,29 +61,53 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
   
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  
+
   const breakdownsThisMonth = breakdowns.filter(b => {
     const date = new Date(b.date);
     return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   });
-  
+
+  // Топливо за текущий месяц
   const fuelThisMonth = fuelRecords.filter(f => {
     const date = new Date(f.date);
     return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   });
-  
   const fuelCostThisMonth = fuelThisMonth.reduce((sum, f) => sum + f.totalCost, 0);
-  
+
+  // Топливо за предыдущий месяц
+  const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const fuelPrevMonth = fuelRecords.filter(f => {
+    const date = new Date(f.date);
+    return date.getMonth() === prevMonth && date.getFullYear() === prevYear;
+  });
+  const fuelCostPrevMonth = fuelPrevMonth.reduce((sum, f) => sum + f.totalCost, 0);
+
+  // Топливо за весь период
+  const fuelAllTime = fuelRecords.reduce((sum, f) => sum + f.totalCost, 0);
+
+  // Снабжение - заявки за текущий месяц
+  const requestsThisMonth = requests.filter(r => {
+    const date = r.createdAt ? new Date(r.createdAt) : new Date();
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+  });
+  const requestsThisMonthCount = requestsThisMonth.length;
+
+  // Снабжение - оплаченные заявки
   const requestsPaid = requests.filter(r => r.status === 'Оплачено');
   const requestsPaidAmount = requestsPaid.reduce((sum, r) => sum + (r.cost || 0), 0);
-  
+
+  // Снабжение - на складе
   const requestsInWarehouse = requests.filter(r => r.status === 'На складе');
   const requestsInWarehouseAmount = requestsInWarehouse.reduce((sum, r) => sum + (r.cost || 0), 0);
-  
+
+  // Поломки за весь период
+  const breakdownsAllTime = breakdowns.length;
+
   const breakdownsByEquipment = equipment.map(e => ({
     equipment: e,
-    breakdowns: breakdowns.filter(b => b.equipmentId === e.id && 
-      new Date(b.date).getMonth() === currentMonth && 
+    breakdowns: breakdowns.filter(b => b.equipmentId === e.id &&
+      new Date(b.date).getMonth() === currentMonth &&
       new Date(b.date).getFullYear() === currentYear
     ).length
   })).sort((a, b) => b.breakdowns - a.breakdowns).slice(0, 5);
@@ -149,9 +173,33 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         ))}
       </div>
 
-      {/* Финансы и статистика за месяц */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-        {/* Топливо */}
+      {/* Ряд 2: Топливо (3 плитки) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        {/* Топливо за предыдущий месяц */}
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
+          <div className="flex items-center gap-3 mb-4 md:mb-6">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <Fuel size={27} className="text-emerald-500"/>
+            </div>
+            <div>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Топливо за прошлый месяц</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">{new Date(currentYear, prevMonth, 1).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
+            </div>
+          </div>
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-emerald-700 dark:text-emerald-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(fuelCostPrevMonth)}</div>
+          <div className="space-y-2 md:space-y-3 w-full">
+            <div className="flex justify-between items-center">
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Заправок</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{fuelPrevMonth.length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Объем</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{fuelPrevMonth.reduce((s, f) => s + f.quantity, 0)} л</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Топливо за текущий месяц */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex items-center gap-3 mb-4 md:mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -162,7 +210,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">{new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</p>
             </div>
           </div>
-          <div className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-emerald-700 dark:text-emerald-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(fuelCostThisMonth)}</div>
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-emerald-700 dark:text-emerald-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(fuelCostThisMonth)}</div>
           <div className="space-y-2 md:space-y-3 w-full">
             <div className="flex justify-between items-center">
               <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Заправок</span>
@@ -175,7 +223,54 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Оплачено */}
+        {/* Топливо за весь период */}
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
+          <div className="flex items-center gap-3 mb-4 md:mb-6">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <Fuel size={27} className="text-emerald-500"/>
+            </div>
+            <div>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Топливо за весь период</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Всего</p>
+            </div>
+          </div>
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-emerald-700 dark:text-emerald-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(fuelAllTime)}</div>
+          <div className="space-y-2 md:space-y-3 w-full">
+            <div className="flex justify-between items-center">
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Заправок</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{fuelRecords.length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Объем</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{fuelRecords.reduce((s, f) => s + f.quantity, 0)} л</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ряд 3: Снабжение (3 плитки) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        {/* Заявки за месяц */}
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
+          <div className="flex items-center gap-3 mb-4 md:mb-6">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <Package size={27} className="text-blue-500"/>
+            </div>
+            <div>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Заявок за месяц</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Поступило</p>
+            </div>
+          </div>
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-700 dark:text-blue-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{requestsThisMonthCount}</div>
+          <div className="space-y-2 md:space-y-3 w-full">
+            <div className="flex justify-between items-center">
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Всего заявок</span>
+              <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{requests.length}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Оплачено заявок */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex items-center gap-3 mb-4 md:mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -186,16 +281,16 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Ожидание доставки</p>
             </div>
           </div>
-          <div className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-blue-700 dark:text-blue-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(requestsPaidAmount)}</div>
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-700 dark:text-blue-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(requestsPaidAmount)}</div>
           <div className="space-y-2 md:space-y-3 w-full">
             <div className="flex justify-between items-center">
-              <span className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 whitespace-nowrap">Заявок</span>
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Заявок</span>
               <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{requestsPaid.length}</span>
             </div>
           </div>
         </div>
 
-        {/* На складе */}
+        {/* Поступило на склад */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex items-center gap-3 mb-4 md:mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -206,17 +301,18 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Готово к выдаче</p>
             </div>
           </div>
-          <div className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-indigo-700 dark:text-indigo-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(requestsInWarehouseAmount)}</div>
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-indigo-700 dark:text-indigo-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{formatMoney(requestsInWarehouseAmount)}</div>
           <div className="space-y-2 md:space-y-3 w-full">
             <div className="flex justify-between items-center">
-              <span className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 whitespace-nowrap">Заявок</span>
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Заявок</span>
               <span className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap">{requestsInWarehouse.length}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+      {/* Ряд 4: Поломки (3 плитки) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         {/* Акты за месяц */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex justify-between items-center mb-6 w-full">
@@ -231,7 +327,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             </div>
             <div className="text-2xl md:text-3xl font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{breakdownsThisMonth.length}</div>
           </div>
-          <div className="space-y-2 md:space-y-3">
+          <div className="space-y-2 md:space-y-3 w-full">
             <div className="flex justify-between items-center">
               <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Критические</span>
               <span className="text-sm md:text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap ml-4">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
@@ -247,7 +343,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Самая ломающаяся техника */}
+        {/* Частые поломки */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -258,7 +354,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
               <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Топ-5 за месяц</p>
             </div>
           </div>
-          <div className="space-y-2 md:space-y-3">
+          <div className="space-y-2 md:space-y-3 w-full">
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).map((item, idx) => (
               <div key={idx} className="flex justify-between items-center p-3 md:p-4 rounded-xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.05),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)]">
                 <div className="flex items-center gap-2 md:gap-3">
@@ -284,6 +380,34 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             {breakdownsByEquipment.filter(b => b.breakdowns > 0).length === 0 && (
               <p className="text-center py-8 md:py-10 text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">Поломок за месяц не было</p>
             )}
+          </div>
+        </div>
+
+        {/* Поломки за весь период */}
+        <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <AlertTriangle size={27} className="text-red-500"/>
+            </div>
+            <div>
+              <h3 className="text-sm md:text-base font-semibold uppercase text-gray-800 dark:text-gray-100 whitespace-nowrap">Поломок за весь период</h3>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Всего</p>
+            </div>
+          </div>
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-red-700 dark:text-red-400 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">{breakdownsAllTime}</div>
+          <div className="space-y-2 md:space-y-3 w-full">
+            <div className="flex justify-between items-center">
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Критические</span>
+              <span className="text-sm md:text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap ml-4">{breakdowns.filter(b => b.severity === 'Критическая').length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Средние</span>
+              <span className="text-sm md:text-lg font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap ml-4">{breakdowns.filter(b => b.severity === 'Средняя').length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Низкие</span>
+              <span className="text-sm md:text-lg font-bold text-yellow-600 dark:text-yellow-400 whitespace-nowrap ml-4">{breakdowns.filter(b => b.severity === 'Низкая').length}</span>
+            </div>
           </div>
         </div>
       </div>
