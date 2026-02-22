@@ -139,12 +139,12 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             onClick={() => onNavigate(s.id)}
             className={`p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all group border border-white/5 ${s.highlight ? 'ring-2 ring-offset-2 ' + (s.color.replace('text-', 'ring-')) + ' animate-pulse' : ''}`}
           >
-            <div className={`p-4 rounded-2xl w-fit mb-4 md:mb-6 ${s.bgColor} group-hover:scale-110 transition-transform`}>
+            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg w-fit mb-4 md:mb-6 group-hover:scale-110 transition-transform">
               <div className={s.color}>{s.icon}</div>
             </div>
-            <h4 className="text-gray-700 dark:text-gray-200 text-[11px] font-semibold uppercase tracking-wide mb-1">{s.title}</h4>
+            <h4 className="text-gray-800 dark:text-gray-100 text-xs font-bold uppercase mb-2">{s.title}</h4>
             <div className="text-4xl md:text-5xl font-black text-gray-900 dark:text-gray-100 mb-2">{s.value}</div>
-            <p className={`text-sm font-medium mt-1 ${s.highlight ? 'text-red-700 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>{s.sub}</p>
+            <p className={`text-sm font-bold ${s.highlight ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>{s.sub}</p>
           </div>
         ))}
       </div>
@@ -154,7 +154,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Топливо */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-emerald-500">
               <Fuel size={24}/>
             </div>
             <div>
@@ -178,8 +178,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Оплачено */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
-              <DollarSign size={24}/>
+            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-blue-500">
+              <span className="text-2xl font-bold">₽</span>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Оплачено заявок</h3>
@@ -189,7 +189,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
           <div className="text-4xl md:text-5xl font-bold text-blue-700 dark:text-blue-400 mb-4">{formatMoney(requestsPaidAmount)}</div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заявок</span>
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Заявок</span>
               <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{requestsPaid.length}</span>
             </div>
           </div>
@@ -198,7 +198,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* На складе */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400">
+            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-indigo-500">
               <Package size={24}/>
             </div>
             <div>
@@ -209,7 +209,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
           <div className="text-4xl md:text-5xl font-bold text-indigo-700 dark:text-indigo-400 mb-4">{formatMoney(requestsInWarehouseAmount)}</div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium uppercase text-gray-600 dark:text-gray-300">Заявок</span>
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Заявок</span>
               <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{requestsInWarehouse.length}</span>
             </div>
           </div>
@@ -221,7 +221,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+              <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-red-500">
                 <AlertTriangle size={24}/>
               </div>
               <div>
@@ -250,7 +250,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Самая ломающаяся техника */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
+            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-orange-500">
               <TrendingUp size={24}/>
             </div>
             <div>
@@ -292,7 +292,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
+            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-orange-500">
               <History size={24}/>
             </div>
             <div>
