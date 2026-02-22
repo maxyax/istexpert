@@ -597,7 +597,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   </div>
                   
                   {/* Информационные блоки - в одну строку */}
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-4 overflow-x-auto">
                     {/* Запланированное ТО */}
                     {nextPlannedTO ? (
                       <button
@@ -606,34 +606,34 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           const to = plannedTOs.find(t => t.id === nextPlannedTO.id);
                           if (to) openTOForEquip(e, to);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all"
+                        className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 transition-all shrink-0"
                       >
-                        <Calendar size={14} className={
+                        <Calendar size={12} className={
                           new Date(nextPlannedTO.date + 'T00:00:00') < today
-                            ? 'text-red-500'
+                            ? 'text-red-600'
                             : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
-                              ? 'text-emerald-500'
-                              : 'text-blue-500'
+                              ? 'text-emerald-600'
+                              : 'text-blue-600'
                         }/>
                         <div className="text-left">
-                          <p className="text-[7px] font-black text-gray-400 uppercase">ТО</p>
-                          <p className={`text-[9px] font-bold ${
+                          <p className="text-[8px] font-bold text-gray-700 dark:text-gray-200 uppercase">ТО</p>
+                          <p className={`text-[10px] font-bold ${
                             new Date(nextPlannedTO.date + 'T00:00:00') < today
-                              ? 'text-red-600'
+                              ? 'text-red-700 dark:text-red-500'
                               : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
-                                ? 'text-emerald-600'
-                                : 'text-blue-600'
+                                ? 'text-emerald-700 dark:text-emerald-500'
+                                : 'text-blue-700 dark:text-blue-500'
                           }`}>
                             {nextPlannedTO.date.split('-').reverse().join('.')}
                           </p>
                         </div>
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg">
-                        <Calendar size={14} className="text-gray-400"/>
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded shrink-0">
+                        <Calendar size={12} className="text-gray-400"/>
                         <div className="text-left">
-                          <p className="text-[7px] font-black text-gray-400 uppercase">ТО</p>
-                          <p className="text-[9px] font-bold text-gray-400">—</p>
+                          <p className="text-[8px] font-bold text-gray-700 dark:text-gray-200 uppercase">ТО</p>
+                          <p className="text-[10px] font-bold text-gray-500">—</p>
                         </div>
                       </div>
                     )}
@@ -641,13 +641,13 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     {/* Последняя заправка */}
                     {lastFuelRecord && (
                       <div
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all cursor-pointer"
+                        className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 transition-all cursor-pointer shrink-0"
                         onClick={() => setSelectedMaintenanceEquipId(e.id)}
                       >
-                        <Fuel size={14} className="text-emerald-500"/>
+                        <Fuel size={12} className="text-emerald-600"/>
                         <div className="text-left">
-                          <p className="text-[7px] font-black text-gray-400 uppercase">Заправка</p>
-                          <p className="text-[9px] font-bold text-emerald-600">
+                          <p className="text-[8px] font-bold text-gray-700 dark:text-gray-200 uppercase">Заправка</p>
+                          <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-600">
                             {lastFuelRecord.date.split('-').reverse().join('.')}
                           </p>
                         </div>
@@ -657,22 +657,20 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     {/* ОСАГО - задача на продление */}
                     {e.insurance_end && (
                       <div
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all cursor-pointer ${
-                          isInsuranceOverdue ? '' : ''
-                        }`}
+                        className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 transition-all cursor-pointer shrink-0"
                         onClick={() => setSelectedMaintenanceEquipId(e.id)}
                       >
-                        <AlertTriangle size={14} className={
-                          isInsuranceOverdue ? 'text-red-500' :
-                          daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-500' :
-                          'text-gray-400'
+                        <AlertTriangle size={12} className={
+                          isInsuranceOverdue ? 'text-red-600' :
+                          daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-600' :
+                          'text-gray-500'
                         }/>
                         <div className="text-left">
-                          <p className="text-[7px] font-black text-gray-400 uppercase">ОСАГО</p>
-                          <p className={`text-[9px] font-bold ${
-                            isInsuranceOverdue ? 'text-red-600' :
-                            daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-600' :
-                            'text-gray-600'
+                          <p className="text-[8px] font-bold text-gray-700 dark:text-gray-200 uppercase">ОСАГО</p>
+                          <p className={`text-[10px] font-bold ${
+                            isInsuranceOverdue ? 'text-red-700 dark:text-red-500' :
+                            daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-700 dark:text-orange-500' :
+                            'text-gray-700 dark:text-gray-600'
                           }`}>
                             {isInsuranceOverdue
                               ? `Просрочено ${Math.abs(daysUntilInsuranceOverdue!)} дн.`
