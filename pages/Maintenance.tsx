@@ -345,8 +345,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           {viewMode === 'tiles' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {equipment.map(e => (
-                <div key={e.id} onClick={() => setSelectedMaintenanceEquipId(e.id)} className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-white dark:bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all flex items-center gap-6 group">
-                  <div className="w-16 h-16 rounded-2xl shadow-neo bg-white dark:bg-neo-bg flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                <div key={e.id} onClick={() => setSelectedMaintenanceEquipId(e.id)} className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo-inset bg-neo-bg cursor-pointer hover:shadow-neo transition-all flex items-center gap-6 group">
+                  <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
                     <Wrench size={30} strokeWidth={2.5}/>
                   </div>
                   <div className="overflow-hidden">
@@ -367,9 +367,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 });
 
                 return (
-                <div key={e.id} className="p-4 rounded-xl shadow-neo bg-white dark:bg-neo-bg flex flex-col gap-3 min-w-[280px]">
+                <div key={e.id} className="p-4 rounded-xl shadow-neo-inset bg-neo-bg flex flex-col gap-3 min-w-[280px]">
                   <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedMaintenanceEquipId(e.id)}>
-                    <div className="w-12 h-12 rounded-xl shadow-neo bg-white dark:bg-neo-bg flex items-center justify-center text-blue-600 shrink-0">
+                    <div className="w-12 h-12 rounded-xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600 shrink-0">
                       <Wrench size={22} strokeWidth={2.5}/>
                     </div>
                     <div className="min-w-0 flex-1">
