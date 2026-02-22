@@ -181,6 +181,15 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history' | 'regulations' | 'insurance'>('main')
   const [isNewEquipment, setIsNewEquipment] = useState(false);
   const [selectedHistoryRecord, setSelectedHistoryRecord] = useState<any>(null);
+  
+  // Модальное окно добавления полиса ОСАГО
+  const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
+  const [newInsurance, setNewInsurance] = useState({
+    insuranceCompany: '',
+    insuranceNumber: '',
+    insuranceStart: '',
+    insuranceEnd: ''
+  });
 
   const selectedItem = equipment.find(e => e.id === selectedEquipmentId);
   const [editForm, setEditForm] = useState<Partial<Equipment>>({});
@@ -654,27 +663,14 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                     <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center">
                       <button
                         onClick={() => {
-                          // Добавляем текущий полис в историю
-                          if (editForm.insurance_end) {
-                            const currentPolicy = {
-                              insuranceCompany: editForm.insuranceCompany || '',
-                              insuranceNumber: editForm.insuranceNumber || '',
-                              insuranceStart: editForm.insuranceStart || '',
-                              insuranceEnd: editForm.insurance_end
-                            };
-                            setEditForm({
-                              ...editForm,
-                              insuranceHistory: [...(editForm.insuranceHistory || []), currentPolicy]
-                            });
-                          }
-                          // Очищаем поля для нового полиса
-                          setEditForm({
-                            ...editForm,
+                          // Открываем модальное окно с текущими данными
+                          setNewInsurance({
                             insuranceCompany: '',
                             insuranceNumber: '',
-                            insuranceStart: new Date().toISOString().split('T')[0],
-                            insurance_end: ''
+                            insuranceStart: editForm.insurance_end || new Date().toISOString().split('T')[0],
+                            insuranceEnd: ''
                           });
+                          setIsInsuranceModalOpen(true);
                         }}
                         className="px-8 py-4 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2 mx-auto"
                       >
@@ -1379,6 +1375,34 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
         </div>
         );
       })()}
+
+      {/* Модальное окно добавления полиса ОСАГО */}
+      <AddInsuranceModal
+        isOpen={isInsuranceModalOpen}
+        onClose={() => setIsInsuranceModalOpen(false)}
+        onSave={(insurance) => {
+          // Добавляем текущий полис в историю
+          if (editForm.insurance_end) {
+            const currentPolicy = {
+              insuranceCompany: editForm.insuranceCompany || '',
+              insuranceNumber: editForm.insuranceNumber || '',
+              insuranceStart: editForm.insuranceStart || '',
+              insuranceEnd: editForm.insurance_end
+            };
+            setEditForm({
+              ...editForm,
+              insuranceHistory: [...(editForm.insuranceHistory || []), currentPolicy],
+              ...insurance
+            });
+          } else {
+            setEditForm({...editForm, ...insurance});
+          }
+        }}
+        currentInsurance={{ insurance_end: editForm.insurance_end }}
+        newInsurance={newInsurance}
+        setNewInsurance={setNewInsurance}
+        equipmentName={selectedItem?.name || ''}
+      />
     </div>
   );
 };
@@ -1544,6 +1568,126 @@ const DocCard = ({ label, isEditing, onUpload, documents = [], onDelete, onRepla
            </div>
          </div>
        )}
+    </div>
+  );
+};
+
+// Модальное окно добавления полиса ОСАГО
+const AddInsuranceModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (insurance: any) => void;
+  currentInsurance: any;
+  newInsurance: any;
+  setNewInsurance: (insurance: any) => void;
+  equipmentName: string;
+}> = ({ isOpen, onClose, onSave, currentInsurance, newInsurance, setNewInsurance, equipmentName }) => {
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    if (newInsurance.insuranceCompany && newInsurance.insuranceEnd) {
+      onSave(newInsurance);
+      setNewInsurance({
+        insuranceCompany: '',
+        insuranceNumber: '',
+        insuranceStart: '',
+        insuranceEnd: ''
+      });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg pb-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-orange-500">
+              <AlertTriangle size={24}/>
+            </div>
+            <div>
+              <h2 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Добавить полис ОСАГО</h2>
+              <p className="text-[8px] font-black text-orange-400 uppercase tracking-widest">{equipmentName}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+        </div>
+
+        <div className="space-y-4 pt-4">
+          {/* Текущий полис */}
+          {currentInsurance?.insurance_end && (
+            <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-orange-500/20">
+              <p className="text-[8px] font-black text-orange-400 uppercase mb-2">Текущий полис</p>
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                Действует до: <span className="text-orange-600">{formatToDDMMYYYY(currentInsurance.insurance_end)}</span>
+              </p>
+            </div>
+          )}
+
+          {/* Страховая компания */}
+          <div className="space-y-2">
+            <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Страховая компания</label>
+            <input
+              type="text"
+              className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+              placeholder="АльфаСтрахование, Росгосстрах..."
+              value={newInsurance.insuranceCompany}
+              onChange={e => setNewInsurance({...newInsurance, insuranceCompany: e.target.value})}
+            />
+          </div>
+
+          {/* Номер полиса */}
+          <div className="space-y-2">
+            <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Номер полиса</label>
+            <input
+              type="text"
+              className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+              placeholder="XXX-1234567890"
+              value={newInsurance.insuranceNumber}
+              onChange={e => setNewInsurance({...newInsurance, insuranceNumber: e.target.value})}
+            />
+          </div>
+
+          {/* Даты */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Дата начала</label>
+              <input
+                type="date"
+                className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                value={newInsurance.insuranceStart}
+                onChange={e => setNewInsurance({...newInsurance, insuranceStart: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Дата окончания</label>
+              <input
+                type="date"
+                className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                value={newInsurance.insuranceEnd}
+                onChange={e => setNewInsurance({...newInsurance, insuranceEnd: e.target.value})}
+              />
+            </div>
+          </div>
+
+          {/* Кнопки */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs hover:shadow-neo-inset transition-all"
+            >
+              Отмена
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="flex-1 py-3 rounded-2xl bg-orange-500 text-white font-black uppercase text-xs hover:bg-orange-600 transition-all shadow-lg"
+            >
+              Сохранить
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
