@@ -139,7 +139,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             onClick={() => onNavigate(s.id)}
             className={`p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all group border border-white/5 ${s.highlight ? 'ring-2 ring-offset-2 ' + (s.color.replace('text-', 'ring-')) + ' animate-pulse' : ''}`}
           >
-            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg w-fit mb-4 md:mb-6 group-hover:scale-110 transition-transform">
+            <div className="p-3 rounded-xl w-fit mb-4 md:mb-6 group-hover:scale-110 transition-transform">
               <div className={s.color}>{s.icon}</div>
             </div>
             <h4 className="text-gray-800 dark:text-gray-100 text-xs font-bold uppercase mb-2">{s.title}</h4>
@@ -154,8 +154,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Топливо */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-emerald-500">
-              <Fuel size={24}/>
+            <div className="p-3 rounded-xl w-fit">
+              <Fuel size={24} className="text-emerald-500"/>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Топливо за месяц</h3>
@@ -178,8 +178,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Оплачено */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-blue-500">
-              <span className="text-2xl font-bold">₽</span>
+            <div className="p-3 rounded-xl w-fit">
+              <span className="text-2xl font-bold text-blue-500">₽</span>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Оплачено заявок</h3>
@@ -198,8 +198,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* На складе */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-indigo-500">
-              <Package size={24}/>
+            <div className="p-3 rounded-xl w-fit">
+              <Package size={24} className="text-indigo-500"/>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Поступило на склад</h3>
@@ -221,8 +221,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-red-500">
-                <AlertTriangle size={24}/>
+              <div className="p-3 rounded-xl w-fit">
+                <AlertTriangle size={24} className="text-red-500"/>
               </div>
               <div>
                 <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Акты поломок</h3>
@@ -250,8 +250,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Самая ломающаяся техника */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-orange-500">
-              <TrendingUp size={24}/>
+            <div className="p-3 rounded-xl w-fit">
+              <TrendingUp size={24} className="text-orange-500"/>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase text-gray-800 dark:text-gray-100">Частые поломки</h3>
@@ -292,8 +292,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl shadow-neo bg-white dark:bg-neo-bg text-orange-500">
-              <History size={24}/>
+            <div className="p-3 rounded-xl w-fit">
+              <History size={24} className="text-orange-500"/>
             </div>
             <div>
               <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Живая лента</h3>

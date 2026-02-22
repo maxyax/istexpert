@@ -1268,7 +1268,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
 
 const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highlight = false, font = "", suffix = "" }: any) => (
   <div className="p-6 rounded-2xl shadow-neo bg-neo-bg border border-white/5">
-    <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 tracking-widest">{label}</p>
+    <p className="text-[9px] font-black text-gray-600 dark:text-gray-400 uppercase mb-2 tracking-widest">{label}</p>
     {isEditing ? (
       <input type={type} className={`w-full bg-neo-bg shadow-neo-inset p-3 rounded-xl border-none outline-none text-xs font-black uppercase text-blue-600 dark:text-blue-400 ${font}`} value={value} onChange={e => onChange(e.target.value)} />
     ) : (
