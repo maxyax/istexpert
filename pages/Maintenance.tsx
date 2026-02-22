@@ -130,6 +130,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
   const [toChecklist, setToChecklist] = useState<{ text: string; done: boolean; note?: string }[]>([]);
   const [toTypeLabel, setToTypeLabel] = useState<string>('');
   const [toHoursInput, setToHoursInput] = useState<number | ''>('');
+  const [toMileageInput, setToMileageInput] = useState<number | ''>('');
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [selectedRecordDetail, setSelectedRecordDetail] = useState<any>(null);
   const [selectedBreakdownDetail, setSelectedBreakdownDetail] = useState<any>(null);
@@ -137,6 +138,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
   
   // Состояние для открытия формы обновления статуса
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  
+  // Последние зафиксированные значения для автозаполнения
+  const [lastRecordedValues, setLastRecordedValues] = useState<{ hours?: number; mileage?: number } | null>(null);
+  const [plannedTOForService, setPlannedTOForService] = useState<any>(null);
 
   const selectedEquip = equipment.find(e => e.id === selectedMaintenanceEquipId);
 
@@ -156,35 +161,121 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
     return { type: nearest.reg.type, next: nearest.next, remaining: nearest.next - curr };
   };
 
+  // Получение последних зафиксированных значений моточасов и пробега
+  const getLastRecordedValues = (equipmentId: string) => {
+    // Собираем все записи с моточасами/пробегом
+    const allRecords = [
+      // Записи ТО
+      ...records.filter(r => r.equipmentId === equipmentId).map(r => ({
+        date: r.date,
+        hours: r.hoursAtMaintenance,
+        mileage: undefined,
+        type: 'TO'
+      })),
+      // Записи поломок с исправлением
+      ...breakdowns.filter(b => b.equipmentId === equipmentId && b.status === 'Исправлено' && b.hoursAtFix).map(b => ({
+        date: b.fixedDate || b.date,
+        hours: b.hoursAtFix,
+        mileage: b.mileageAtFix,
+        type: 'Поломка'
+      })),
+      // Записи заправок
+      ...useMaintenanceStore.getState().fuelRecords.filter(f => f.equipmentId === equipmentId).map(f => ({
+        date: f.date,
+        hours: f.currentHours,
+        mileage: f.currentMileage,
+        type: 'Заправка'
+      }))
+    ];
+
+    // Сортируем по дате (новые первые)
+    allRecords.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    // Берем последнюю запись
+    const last = allRecords[0];
+    return {
+      hours: last?.hours || undefined,
+      mileage: last?.mileage || undefined
+    };
+  };
+
   const handleFinishTO = () => {
     if (!selectedMaintenanceEquipId) return;
     const equipToUpdate = equipment.find(eq => eq.id === selectedMaintenanceEquipId);
     if (!equipToUpdate) return;
-    
+
     const hoursAt = typeof toHoursInput === 'number' && toHoursInput > 0 ? toHoursInput : equipToUpdate.hours;
+    const mileageAt = typeof toMileageInput === 'number' && toMileageInput >= 0 ? toMileageInput : undefined;
+
+    // Валидация: проверка что значения не меньше последних зафиксированных
+    if (lastRecordedValues) {
+      if (lastRecordedValues.hours && hoursAt < lastRecordedValues.hours) {
+        alert(`Ошибка: наработка (${hoursAt} м/ч) не может быть меньше последней зафиксированной (${lastRecordedValues.hours} м/ч). Проверьте данные.`);
+        return;
+      }
+      if (lastRecordedValues.mileage && mileageAt !== undefined && mileageAt < lastRecordedValues.mileage) {
+        alert(`Ошибка: пробег (${mileageAt} км) не может быть меньше последнего зафиксированного (${lastRecordedValues.mileage} км). Проверьте данные.`);
+        return;
+      }
+    }
+
+    // Проверка на досрочное проведение ТО
+    let isEarlyService = false;
+    if (plannedTOForService) {
+      const plannedDate = new Date(plannedTOForService.date + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      isEarlyService = plannedDate > today;
+    }
+
     addMaintenance({
       id: Math.random().toString(),
       equipmentId: selectedMaintenanceEquipId,
       date: new Date().toISOString().split('T')[0],
       type: toTypeLabel || 'Плановое ТО',
       hoursAtMaintenance: hoursAt,
+      mileageAtMaintenance: mileageAt,
       performedBy: user?.full_name || 'Механик',
-      checklistItems: toChecklist
+      checklistItems: toChecklist,
+      isEarlyService: isEarlyService,
+      plannedTOId: plannedTOForService?.id
     });
+    
     // update equipment last hours
-    useFleetStore.getState().updateEquipment(selectedMaintenanceEquipId, { hours: hoursAt });
+    useFleetStore.getState().updateEquipment(selectedMaintenanceEquipId, { hours: hoursAt, mileage_km: mileageAt !== undefined ? mileageAt : equipToUpdate.mileage_km });
+    
+    // Если ТО было запланировано - помечаем как выполненное
+    if (plannedTOForService) {
+      useMaintenanceStore.getState().updatePlannedTO(plannedTOForService.id, { status: 'completed' });
+    }
+    
     setIsTOModalOpen(false);
     setToChecklist([]);
     setToTypeLabel('');
     setToHoursInput('');
+    setToMileageInput('');
     setQrDataUrl('');
+    setLastRecordedValues(null);
+    setPlannedTOForService(null);
   };
 
-  const openTOForEquip = (e: any) => {
+  const openTOForEquip = (e: any, plannedTO?: any) => {
     setSelectedMaintenanceEquipId(e.id);
+    
+    // Получаем последние зафиксированные значения
+    const lastValues = getLastRecordedValues(e.id);
+    setLastRecordedValues(lastValues);
+    setPlannedTOForService(plannedTO || null);
+    
     const n = computeNextTO(e);
     let reg = null;
-    if (n) reg = e.regulations?.find((r: any) => r.type === n.type) || e.regulations[0];
+    if (plannedTO) {
+      // Если ТО запланировано - используем его тип
+      reg = e.regulations?.find((r: any) => r.type === plannedTO.type) || e.regulations?.[0];
+    } else if (n) {
+      reg = e.regulations?.find((r: any) => r.type === n.type) || e.regulations[0];
+    }
+    
     if (reg) {
       setToTypeLabel(reg.type || 'Плановое ТО');
       setToChecklist((reg.works || []).map((w: string) => ({ text: w, done: false })));
@@ -192,7 +283,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       setToTypeLabel('Плановое ТО');
       setToChecklist([]);
     }
-    setToHoursInput(e.hours || '');
+    
+    // Автозаполнение: последние зафиксированные значения или текущие
+    setToHoursInput(lastValues.hours !== undefined ? lastValues.hours : (e.hours || ''));
+    setToMileageInput(lastValues.mileage !== undefined ? lastValues.mileage : (e.mileage_km || ''));
     setIsTOModalOpen(true);
   };
 
@@ -624,7 +718,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     return (
                       <button
                         key={to.id}
-                        onClick={() => openTOForEquip(selectedEquip)}
+                        onClick={() => openTOForEquip(selectedEquip, to)}
                         className="w-full flex items-center justify-between p-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all text-left group border border-red-500/30"
                       >
                         <div className="flex items-center gap-3">
@@ -648,7 +742,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   {todayTOs.map(to => (
                     <button
                       key={to.id}
-                      onClick={() => openTOForEquip(selectedEquip)}
+                      onClick={() => openTOForEquip(selectedEquip, to)}
                       className="w-full flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 transition-all text-left group border border-emerald-500/30"
                     >
                       <div className="flex items-center gap-3">
@@ -673,7 +767,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     return (
                       <button
                         key={to.id}
-                        onClick={() => openTOForEquip(selectedEquip)}
+                        onClick={() => openTOForEquip(selectedEquip, to)}
                         className="w-full flex items-center justify-between p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 transition-all text-left group border border-blue-500/20"
                       >
                         <div className="flex items-center gap-3">
@@ -1372,11 +1466,83 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               <button onClick={()=>setIsTOModalOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={24}/></button>
             </div>
             <div className="space-y-6 md:space-y-8">
+              {/* Информация о запланированном ТО */}
+              {plannedTOForService && (
+                <div className={`p-4 md:p-6 rounded-[1.5rem] shadow-neo-inset bg-neo-bg border-2 ${
+                  new Date(plannedTOForService.date + 'T00:00:00') > new Date() 
+                    ? 'border-orange-500/30 bg-orange-500/5' 
+                    : new Date(plannedTOForService.date + 'T00:00:00').getTime() === new Date().setHours(0,0,0,0)
+                      ? 'border-emerald-500/30 bg-emerald-500/5'
+                      : 'border-red-500/30 bg-red-500/5'
+                }`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar size={18} className={
+                      new Date(plannedTOForService.date + 'T00:00:00') > new Date() 
+                        ? 'text-orange-500' 
+                        : new Date(plannedTOForService.date + 'T00:00:00').getTime() === new Date().setHours(0,0,0,0)
+                          ? 'text-emerald-500'
+                          : 'text-red-500'
+                    }/>
+                    <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-400">
+                      {new Date(plannedTOForService.date + 'T00:00:00') > new Date() 
+                        ? 'ДОСРОЧНОЕ ПРОВЕДЕНИЕ' 
+                        : new Date(plannedTOForService.date + 'T00:00:00').getTime() === new Date().setHours(0,0,0,0)
+                          ? 'ТО ЗАПЛАНИРОВАНО НА СЕГОДНЯ'
+                          : 'ПРОСРОЧЕНО'}
+                    </p>
+                  </div>
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                    Запланировано на: <span className="font-black">{plannedTOForService.date.split('-').reverse().join('.')}</span>
+                  </p>
+                </div>
+              )}
+
               <div className="p-4 md:p-6 rounded-[1.5rem] shadow-neo-inset bg-neo-bg">
                 <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Тип ТО</p>
                 <div className="font-black text-lg mb-3">{toTypeLabel || 'Плановое ТО'}</div>
-                <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Наработка при ТО (М/Ч)</p>
-                <input type="number" value={toHoursInput as any} onChange={e=>setToHoursInput(e.target.value === '' ? '' : parseInt(e.target.value))} className="w-full text-3xl font-black text-blue-600 bg-transparent outline-none" />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Наработка (М/Ч)</p>
+                    <input 
+                      type="number" 
+                      value={toHoursInput as any} 
+                      onChange={e=>setToHoursInput(e.target.value === '' ? '' : parseInt(e.target.value))} 
+                      className="w-full text-2xl md:text-3xl font-black text-blue-600 bg-transparent outline-none" 
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Пробег (КМ)</p>
+                    <input 
+                      type="number" 
+                      value={toMileageInput as any} 
+                      onChange={e=>setToMileageInput(e.target.value === '' ? '' : parseInt(e.target.value))} 
+                      className="w-full text-2xl md:text-3xl font-black text-blue-600 bg-transparent outline-none" 
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                
+                {/* Информация о последних значениях */}
+                {lastRecordedValues && (lastRecordedValues.hours !== undefined || lastRecordedValues.mileage !== undefined) && (
+                  <div className="mt-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                    <p className="text-[8px] font-black text-blue-400 uppercase mb-2">Последние зафиксированные значения</p>
+                    <div className="flex gap-4 text-xs">
+                      {lastRecordedValues.hours !== undefined && (
+                        <p className="text-gray-600 dark:text-gray-300">
+                          Наработка: <span className="font-bold text-gray-800 dark:text-gray-100">{lastRecordedValues.hours} м/ч</span>
+                        </p>
+                      )}
+                      {lastRecordedValues.mileage !== undefined && (
+                        <p className="text-gray-600 dark:text-gray-300">
+                          Пробег: <span className="font-bold text-gray-800 dark:text-gray-100">{lastRecordedValues.mileage} км</span>
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-[8px] text-gray-500 mt-2">Введите значения не меньше указанных</p>
+                  </div>
+                )}
               </div>
 
               <div className="p-4 md:p-6 rounded-[1.5rem] shadow-neo bg-neo-bg">

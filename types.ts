@@ -70,10 +70,13 @@ export interface MaintenanceRecord {
   date: string;
   type: string;
   hoursAtMaintenance: number;
+  mileageAtMaintenance?: number;
   performedBy: string;
   checklistItems: { text: string; done: boolean; note?: string }[];
   cost?: number;
   fluids?: FluidRecord[];
+  isEarlyService?: boolean;
+  plannedTOId?: string;
 }
 
 // Added PlannedTO and PlannedTOStatus for maintenance tracking
