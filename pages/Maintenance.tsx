@@ -685,7 +685,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       </div>
                       <div className="text-left">
                         <p className="text-sm font-black uppercase text-gray-800 dark:text-gray-100">{e.name}</p>
-                        <p className="text-[8px] text-gray-500 dark:text-gray-400">{e.vin} • {e.hours} м/ч</p>
+                        <p className="text-[9px] md:text-[10px] font-bold text-gray-700 dark:text-gray-300">{e.vin} • {e.hours} м/ч</p>
                       </div>
                     </div>
                     <ChevronRight size={18} className="text-gray-400 group-hover:text-red-500 transition-colors"/>

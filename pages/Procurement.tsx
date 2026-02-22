@@ -211,7 +211,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   <h4 className="text-xs md:text-sm font-black uppercase text-gray-800 dark:text-gray-100 truncate line-clamp-2">{req.title}</h4>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className={`text-[7px] md:text-[9px] font-bold uppercase px-2 py-0.5 rounded ${COLUMNS.find(c=>c.id===req.status)?.color || 'bg-gray-300'} text-white`}>{req.status}</span>
-                    <span className="text-[7px] md:text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase truncate flex-1 min-w-0">{equipment.find(e=>e.id===req.equipmentId)?.name || 'Общий'}</span>
+                    <span className="text-[9px] md:text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate flex-1 min-w-0">{equipment.find(e=>e.id===req.equipmentId)?.name || 'Общий'}</span>
                   </div>
                 </div>
               </div>
@@ -569,8 +569,8 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                                 'bg-yellow-500 text-white'
                               }`}>{b.severity}</span>
                             </div>
-                            <p className="text-[8px] text-gray-500 dark:text-gray-400">{equip?.name || 'Техника'} • {b.node}</p>
-                            <p className="text-[7px] text-gray-500 dark:text-gray-400">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
+                            <p className="text-[9px] md:text-[10px] font-bold text-gray-700 dark:text-gray-300">{equip?.name || 'Техника'} • {b.node}</p>
+                            <p className="text-[8px] md:text-[9px] font-bold text-gray-600 dark:text-gray-400">Акт: {b.actNumber || 'АКТ-001'} • {formatDate(b.date)}</p>
                           </div>
                         </div>
                         <ChevronRight size={18} className="text-gray-400 group-hover:text-blue-500 transition-colors"/>
