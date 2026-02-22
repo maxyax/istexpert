@@ -77,7 +77,7 @@ export const FuelManagement: React.FC = () => {
                    <div className="p-3 md:p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500 group-hover:scale-110 transition-transform flex-shrink-0"><Fuel size={24} className="md:w-7 md:h-7"/></div>
                    <div className="min-w-0 flex-1">
                       <p className="text-xs md:text-sm font-black uppercase tracking-tight text-gray-800 dark:text-gray-100 truncate">{equipment.find(e=>e.id===r.equipmentId)?.name || 'Неизвестно'}</p>
-                      <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{r.station} • {new Date(r.date).toLocaleDateString('ru-RU')}</p>
+                      <p className="text-[9px] md:text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-widest truncate">{r.station} • {new Date(r.date).toLocaleDateString('ru-RU')}</p>
                    </div>
                 </div>
                 <div className="text-left md:text-right flex-shrink-0">
@@ -158,7 +158,7 @@ const StatCard = ({ label, value, icon }: any) => (
   <div className="p-10 rounded-[3rem] shadow-neo bg-neo-bg flex flex-col justify-between border border-white/5 min-h-[180px] group hover:shadow-neo-inset transition-all">
      <div className="p-4 rounded-2xl shadow-neo bg-neo-bg w-fit mb-6 group-hover:scale-110 transition-transform">{icon}</div>
      <div>
-        <p className="text-[10px] font-black text-gray-400 uppercase mb-2 tracking-[0.2em]">{label}</p>
+        <p className="text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase mb-2 tracking-[0.2em]">{label}</p>
         <p className="text-3xl font-black text-gray-800 dark:text-gray-100 tracking-tighter">{value}</p>
      </div>
   </div>

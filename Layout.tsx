@@ -35,7 +35,7 @@ export const Layout: React.FC<any> = ({ children, activePage, onNavigate }) => {
           </div>
           <nav className="flex-1 space-y-4">
             {navItems.map(item => (
-              <button key={item.id} onClick={() => { onNavigate(item.id); setIsMobileMenuOpen(false); }} className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all ${activePage === item.id ? 'shadow-neo-inset text-blue-500 font-bold' : 'shadow-neo hover:shadow-neo-inset text-gray-500'}`}>
+              <button key={item.id} onClick={() => { onNavigate(item.id); setIsMobileMenuOpen(false); }} className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all ${activePage === item.id ? 'shadow-neo-inset text-blue-500 font-bold' : 'shadow-neo hover:shadow-neo-inset text-gray-600 dark:text-gray-300'}`}>
                 <item.icon size={20} /> <span className="text-sm font-bold">{item.label}</span>
               </button>
             ))}
