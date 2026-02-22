@@ -596,8 +596,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     </div>
                   </div>
                   
-                  {/* Информационные блоки */}
-                  <div className="grid grid-cols-2 gap-2">
+                  {/* Информационные блоки - в одну строку */}
+                  <div className="flex items-center gap-3 flex-wrap">
                     {/* Запланированное ТО */}
                     {nextPlannedTO ? (
                       <button
@@ -606,13 +606,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                           const to = plannedTOs.find(t => t.id === nextPlannedTO.id);
                           if (to) openTOForEquip(e, to);
                         }}
-                        className={`p-2.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all hover:scale-105 ${
-                          new Date(nextPlannedTO.date + 'T00:00:00') < today
-                            ? 'bg-red-500/10 border-red-500/30'
-                            : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
-                              ? 'bg-emerald-500/10 border-emerald-500/30'
-                              : 'bg-blue-500/10 border-blue-500/20'
-                        }`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all"
                       >
                         <Calendar size={14} className={
                           new Date(nextPlannedTO.date + 'T00:00:00') < today
@@ -621,8 +615,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                               ? 'text-emerald-500'
                               : 'text-blue-500'
                         }/>
-                        <div className="text-center">
-                          <p className="text-[8px] font-black text-gray-500 uppercase">ТО</p>
+                        <div className="text-left">
+                          <p className="text-[7px] font-black text-gray-400 uppercase">ТО</p>
                           <p className={`text-[9px] font-bold ${
                             new Date(nextPlannedTO.date + 'T00:00:00') < today
                               ? 'text-red-600'
@@ -635,54 +629,60 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         </div>
                       </button>
                     ) : (
-                      <div className="p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center gap-1">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg">
                         <Calendar size={14} className="text-gray-400"/>
-                        <div className="text-center">
-                          <p className="text-[8px] font-black text-gray-400 uppercase">ТО</p>
+                        <div className="text-left">
+                          <p className="text-[7px] font-black text-gray-400 uppercase">ТО</p>
                           <p className="text-[9px] font-bold text-gray-400">—</p>
                         </div>
                       </div>
                     )}
                     
-                    {/* Последняя заправка или ОСАГО */}
-                    {isInsuranceOverdue ? (
+                    {/* Последняя заправка */}
+                    {lastFuelRecord && (
                       <div
-                        className="p-2.5 rounded-lg border border-red-500/30 bg-red-500/10 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-red-500/20 transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all cursor-pointer"
                         onClick={() => setSelectedMaintenanceEquipId(e.id)}
                       >
-                        <AlertTriangle size={14} className="text-red-500"/>
-                        <div className="text-center">
-                          <p className="text-[8px] font-black text-gray-500 uppercase">ОСАГО</p>
-                          <p className="text-[9px] font-bold text-red-600">
-                            {daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue < 0
-                              ? `Просрочено ${Math.abs(daysUntilInsuranceOverdue)} дн.`
-                              : `Истекает ${e.insurance_end?.split('-').reverse().join('.')}`}
+                        <Fuel size={14} className="text-emerald-500"/>
+                        <div className="text-left">
+                          <p className="text-[7px] font-black text-gray-400 uppercase">Заправка</p>
+                          <p className="text-[9px] font-bold text-emerald-600">
+                            {lastFuelRecord.date.split('-').reverse().join('.')}
                           </p>
                         </div>
                       </div>
-                    ) : (
-                      lastFuelRecord ? (
-                        <div
-                          className="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-emerald-500/20 transition-all"
-                          onClick={() => setSelectedMaintenanceEquipId(e.id)}
-                        >
-                          <Fuel size={14} className="text-emerald-500"/>
-                          <div className="text-center">
-                            <p className="text-[8px] font-black text-gray-500 uppercase">Заправка</p>
-                            <p className="text-[9px] font-bold text-emerald-600">
-                              {lastFuelRecord.date.split('-').reverse().join('.')}
-                            </p>
-                          </div>
+                    )}
+                    
+                    {/* ОСАГО - задача на продление */}
+                    {e.insurance_end && (
+                      <div
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all cursor-pointer ${
+                          isInsuranceOverdue ? '' : ''
+                        }`}
+                        onClick={() => setSelectedMaintenanceEquipId(e.id)}
+                      >
+                        <AlertTriangle size={14} className={
+                          isInsuranceOverdue ? 'text-red-500' :
+                          daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-500' :
+                          'text-gray-400'
+                        }/>
+                        <div className="text-left">
+                          <p className="text-[7px] font-black text-gray-400 uppercase">ОСАГО</p>
+                          <p className={`text-[9px] font-bold ${
+                            isInsuranceOverdue ? 'text-red-600' :
+                            daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30 ? 'text-orange-600' :
+                            'text-gray-600'
+                          }`}>
+                            {isInsuranceOverdue
+                              ? `Просрочено ${Math.abs(daysUntilInsuranceOverdue!)} дн.`
+                              : daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue <= 30
+                                ? `Истекает через ${daysUntilInsuranceOverdue} дн.`
+                                : `До ${e.insurance_end.split('-').reverse().join('.')}`
+                          }
+                          </p>
                         </div>
-                      ) : (
-                        <div className="p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center gap-1">
-                          <Fuel size={14} className="text-gray-400"/>
-                          <div className="text-center">
-                            <p className="text-[8px] font-black text-gray-400 uppercase">Заправка</p>
-                            <p className="text-[9px] font-bold text-gray-400">—</p>
-                          </div>
-                        </div>
-                      )
+                      </div>
                     )}
                   </div>
                   {/* Прогресс-бары по заявкам */}
