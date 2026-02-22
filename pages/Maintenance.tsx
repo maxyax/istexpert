@@ -292,45 +292,45 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 setSelectedMaintenanceEquipId(null);
                 setIsBreakdownEquipSelectOpen(true);
               }}
-              className="p-3 md:p-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-red-500 to-red-600 text-white"
+              className="p-3 md:p-4 rounded-2xl shadow-[6px_6px_12px_rgba(0,0,0,0.3),-6px_-6px_12px_rgba(255,255,255,0.1)] hover:shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(255,255,255,0.15)] hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-red-500 to-red-600 text-white"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <AlertTriangle size={20} className="md:w-6 md:h-6"/>
+                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 backdrop-blur-sm group-hover:scale-110 transition-transform shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,0.1)]">
+                  <AlertTriangle size={20} className="md:w-6 md:h-6 drop-shadow-lg"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm md:text-base font-bold uppercase">Акт</h4>
-                  <p className="text-[9px] md:text-[10px] font-medium text-white/80 uppercase">Поломки</p>
+                  <h4 className="text-sm md:text-base font-bold uppercase drop-shadow-md">Акт</h4>
+                  <p className="text-[9px] md:text-[10px] font-medium text-white/90 uppercase drop-shadow-sm">Поломки</p>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => setIsTOEquipSelectOpen(true)}
-              className="p-3 md:p-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+              className="p-3 md:p-4 rounded-2xl shadow-[6px_6px_12px_rgba(0,0,0,0.3),-6px_-6px_12px_rgba(255,255,255,0.1)] hover:shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(255,255,255,0.15)] hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-blue-500 to-blue-600 text-white"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <Wrench size={20} className="md:w-6 md:h-6"/>
+                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 backdrop-blur-sm group-hover:scale-110 transition-transform shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,0.1)]">
+                  <Wrench size={20} className="md:w-6 md:h-6 drop-shadow-lg"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm md:text-base font-bold uppercase">ТО</h4>
-                  <p className="text-[9px] md:text-[10px] font-medium text-white/80 uppercase">Обслуживание</p>
+                  <h4 className="text-sm md:text-base font-bold uppercase drop-shadow-md">ТО</h4>
+                  <p className="text-[9px] md:text-[10px] font-medium text-white/90 uppercase drop-shadow-sm">Обслуживание</p>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => setIsBreakdownSelectOpen(true)}
-              className="p-3 md:p-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
+              className="p-3 md:p-4 rounded-2xl shadow-[6px_6px_12px_rgba(0,0,0,0.3),-6px_-6px_12px_rgba(255,255,255,0.1)] hover:shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(255,255,255,0.15)] hover:-translate-y-0.5 transition-all group active:scale-95 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
             >
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
-                  <Package size={20} className="md:w-6 md:h-6"/>
+                <div className="p-2.5 md:p-3 rounded-xl bg-white/20 backdrop-blur-sm group-hover:scale-110 transition-transform shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,0.1)]">
+                  <Package size={20} className="md:w-6 md:h-6 drop-shadow-lg"/>
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm md:text-base font-bold uppercase">Заявка</h4>
-                  <p className="text-[9px] md:text-[10px] font-medium text-white/80 uppercase">Снабжение</p>
+                  <h4 className="text-sm md:text-base font-bold uppercase drop-shadow-md">Заявка</h4>
+                  <p className="text-[9px] md:text-[10px] font-medium text-white/90 uppercase drop-shadow-sm">Снабжение</p>
                 </div>
               </div>
             </button>
