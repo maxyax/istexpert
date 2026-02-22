@@ -385,18 +385,22 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                      </div>
                    </div>
 
-                   <div className="grid grid-cols-2 gap-3">
-                     <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
+                   <div className="grid grid-cols-2 gap-6">
+                     <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
                        <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Перевозчик</label>
-                       <input className="w-full p-2 rounded-lg shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.carrierName || ''} onChange={e=>setEditReq({...editReq, carrierName: e.target.value})} />
-                       <label className="text-xs font-bold text-gray-600 dark:text-gray-300 mt-2">Трек/накладная</label>
-                       <input className="w-full p-2 rounded-lg shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
+                       <input className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.carrierName || ''} onChange={e=>setEditReq({...editReq, carrierName: e.target.value})} />
+                       <label className="text-xs font-bold text-gray-600 dark:text-gray-300 mt-3">Трек/накладная</label>
+                       <input className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
                      </div>
-                     <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
-                       <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Ответственный</label>
-                       <input className="w-full p-2 rounded-lg shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.responsible || ''} onChange={e=>setEditReq({...editReq, responsible: e.target.value})} />
-                       <label className="text-xs font-bold text-gray-600 dark:text-gray-300 mt-2">Сумма всех позиций</label>
-                       <div className="text-2xl font-black text-emerald-600">{formatMoney((editReq.items||[]).reduce((s:any,it:any)=>s + (it.total||0),0) || 0)}</div>
+                     <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10 flex flex-col justify-between">
+                       <div>
+                         <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Ответственный</label>
+                         <input className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.responsible || ''} onChange={e=>setEditReq({...editReq, responsible: e.target.value})} />
+                       </div>
+                       <div className="mt-4">
+                         <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Сумма всех позиций</label>
+                         <div className="text-3xl font-black text-emerald-600 mt-2">{formatMoney((editReq.items||[]).reduce((s:any,it:any)=>s + (it.total||0),0) || 0)}</div>
+                       </div>
                      </div>
                    </div>
 
@@ -592,8 +596,8 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
       {/* Модальное окно создания новой заявки */}
       {isCreateRequestOpen && selectedBreakdown && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 bg-black/60 backdrop-blur-md">
-          <div className="w-[98vw] max-w-[1800px] bg-neo-bg rounded-[3rem] shadow-neo overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in duration-300">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-1 bg-black/60 backdrop-blur-md">
+          <div className="w-[99vw] max-w-[1920px] bg-neo-bg rounded-[3rem] shadow-neo overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in duration-300">
             <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-4">
                 <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Package size={28}/></div>
