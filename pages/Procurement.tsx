@@ -906,8 +906,8 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
       {/* Модальное окно создания новой заявки */}
       {isCreateRequestOpen && selectedBreakdown && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-1 bg-black/60 backdrop-blur-md">
-          <div className="w-[99vw] max-w-[1920px] bg-neo-bg rounded-[3rem] shadow-neo overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in duration-300">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="w-full max-w-6xl bg-neo-bg rounded-[3rem] shadow-neo overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-300">
             <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-4">
                 <div className="p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500"><Package size={28}/></div>
@@ -921,7 +921,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               </button>
             </div>
 
-            <form className="flex-1 overflow-y-auto p-6 space-y-6" onSubmit={(e) => {
+            <form className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar" onSubmit={(e) => {
               e.preventDefault();
               const totalCost = newRequestForm.items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0) * (item.unitPriceWithVAT || 0), 0);
               const requestNumber = `З-${String(requests.length + 1).padStart(4, '0')}`;
