@@ -308,7 +308,7 @@ export const FuelManagement: React.FC = () => {
                   <div>
                     <h2 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Заправка</h2>
                     <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">
-                      {selectedFuelDetail.date?.split('-').reverse().join('.')} {selectedFuelDetail.time || ''}
+                      {selectedFuelDetail.date ? new Date(selectedFuelDetail.date + 'T00:00:00').toLocaleDateString('ru-RU') : ''} {selectedFuelDetail.time || ''}
                     </p>
                   </div>
                 </div>
@@ -322,7 +322,7 @@ export const FuelManagement: React.FC = () => {
                     <div>
                       <p className="text-[8px] font-black text-gray-400 uppercase">Дата</p>
                       <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
-                        {selectedFuelDetail.date?.split('-').reverse().join('.')}
+                        {selectedFuelDetail.date ? new Date(selectedFuelDetail.date + 'T00:00:00').toLocaleDateString('ru-RU') : '—'}
                       </p>
                     </div>
                     <div>
