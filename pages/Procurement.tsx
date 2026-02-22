@@ -860,11 +860,13 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         key={b.id}
                         onClick={() => {
                           setSelectedBreakdown(b);
+                          console.log('Breakdown items:', b.items);
                           // Передаем все позиции из акта если они есть
-                          const items = b.items && b.items.length > 0 
+                          const items = b.items && b.items.length > 0
                             ? b.items.map(item => ({ ...item, unitPriceWithVAT: 0 }))
                             : [{ sku: '', name: b.partName, quantity: '1', unitPriceWithVAT: 0 }];
                           
+                          console.log('Request items:', items);
                           setNewRequestForm({
                             title: `Заявка по акту ${b.actNumber || 'АКТ-001'} от ${new Date(b.date).toLocaleDateString('ru-RU')} (${b.partName})`,
                             contractorName: '',

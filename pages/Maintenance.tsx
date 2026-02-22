@@ -300,12 +300,19 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       return;
     }
 
+    // Форматируем даты в правильный формат
+    const formatDate = (dateStr: string) => {
+      if (!dateStr) return '';
+      const date = new Date(dateStr + 'T00:00:00');
+      return date.toISOString().split('T')[0];
+    };
+
     // Обновляем данные техники
     useFleetStore.getState().updateEquipment(selectedMaintenanceEquipId, {
       insuranceCompany: newInsurance.insuranceCompany,
       insuranceNumber: newInsurance.insuranceNumber,
-      insuranceStart: newInsurance.insuranceStart,
-      insurance_end: newInsurance.insuranceEnd
+      insuranceStart: formatDate(newInsurance.insuranceStart),
+      insurance_end: formatDate(newInsurance.insuranceEnd)
     });
 
     // Закрываем модальное окно и сбрасываем форму
@@ -2436,7 +2443,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       {isInsuranceModalOpen && selectedEquip && (
         <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg z-10">
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg z-10 pb-4 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-orange-500">
                   <AlertTriangle size={24}/>
@@ -2449,7 +2456,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               <button onClick={() => setIsInsuranceModalOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4">
               {/* Текущий полис */}
               {selectedEquip.insurance_end && (
                 <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-orange-500/20">
@@ -2465,7 +2472,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Страховая компания</label>
                 <input
                   type="text"
-                  className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                  className="w-full p-3 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold text-gray-800 dark:text-gray-100 placeholder-gray-500"
                   placeholder="АльфаСтрахование, Росгосстрах..."
                   value={newInsurance.insuranceCompany}
                   onChange={e => setNewInsurance({...newInsurance, insuranceCompany: e.target.value})}
@@ -2477,7 +2484,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Номер полиса</label>
                 <input
                   type="text"
-                  className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                  className="w-full p-3 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold text-gray-800 dark:text-gray-100 placeholder-gray-500"
                   placeholder="XXX-1234567890"
                   value={newInsurance.insuranceNumber}
                   onChange={e => setNewInsurance({...newInsurance, insuranceNumber: e.target.value})}
@@ -2490,7 +2497,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Дата начала</label>
                   <input
                     type="date"
-                    className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                    className="w-full p-3 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold text-gray-800 dark:text-gray-100"
                     value={newInsurance.insuranceStart}
                     onChange={e => setNewInsurance({...newInsurance, insuranceStart: e.target.value})}
                   />
@@ -2499,27 +2506,26 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Дата окончания</label>
                   <input
                     type="date"
-                    className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                    className="w-full p-3 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold text-gray-800 dark:text-gray-100"
                     value={newInsurance.insuranceEnd}
                     onChange={e => setNewInsurance({...newInsurance, insuranceEnd: e.target.value})}
-                    required
                   />
                 </div>
               </div>
 
               {/* Кнопки */}
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsInsuranceModalOpen(false)}
-                  className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs"
+                  className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs text-gray-700 dark:text-gray-200 hover:shadow-neo-inset transition-all"
                 >
                   Отмена
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveInsurance}
-                  className="flex-1 py-3 rounded-2xl bg-orange-500 text-white font-black uppercase text-xs hover:bg-orange-600 transition-all"
+                  className="flex-1 py-3 rounded-2xl bg-orange-500 text-white font-black uppercase text-xs hover:bg-orange-600 transition-all shadow-lg"
                 >
                   Сохранить
                 </button>
