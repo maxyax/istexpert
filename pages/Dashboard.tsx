@@ -234,15 +234,15 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
           <div className="space-y-2 md:space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Критические</span>
-              <span className="text-sm md:text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
+              <span className="text-sm md:text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap ml-4">{breakdownsThisMonth.filter(b => b.severity === 'Критическая').length}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Средние</span>
-              <span className="text-sm md:text-lg font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
+              <span className="text-sm md:text-lg font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap ml-4">{breakdownsThisMonth.filter(b => b.severity === 'Средняя').length}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs md:text-sm font-medium uppercase text-gray-600 dark:text-gray-300 whitespace-nowrap">Низкие</span>
-              <span className="text-sm md:text-lg font-bold text-yellow-600 dark:text-yellow-400 whitespace-nowrap">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
+              <span className="text-sm md:text-lg font-bold text-yellow-600 dark:text-yellow-400 whitespace-nowrap ml-4">{breakdownsThisMonth.filter(b => b.severity === 'Низкая').length}</span>
             </div>
           </div>
         </div>
@@ -276,8 +276,8 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm md:text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap">{item.breakdowns}</p>
-                  <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">поломок</p>
+                  <p className="text-sm md:text-lg font-bold text-red-700 dark:text-red-400 whitespace-nowrap ml-4">{item.breakdowns}</p>
+                  <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap ml-2">поломок</p>
                 </div>
               </div>
             ))}
