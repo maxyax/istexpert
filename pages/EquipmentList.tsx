@@ -337,7 +337,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                 <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">{e.year} г.в.</span>
               </div>
               <h3 className="text-xl font-black uppercase tracking-tight text-gray-700 dark:text-gray-200 group-hover:text-blue-600 transition-colors">{e.name}</h3>
-              <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase mt-1 tracking-widest">{e.make} {e.model}</p>
+              <p className="text-[14px] font-black text-gray-700 dark:text-gray-300 uppercase mt-1 tracking-widest">{e.make} {e.model}</p>
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
                 <div className={`text-[8px] font-black uppercase px-2 py-1 rounded-lg inline-block ${
                   computedStatus.status === EquipStatus.ACTIVE ? 'bg-green-100 text-green-700' :
@@ -396,7 +396,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                          <div className="p-2 md:p-3 rounded-xl shadow-neo-sm bg-neo-bg text-blue-600 group-hover:scale-110 transition-transform shrink-0"><Truck size={18} className="md:w-5 md:h-5"/></div>
                          <div className="min-w-0 flex-1">
                             <p className="text-xs md:text-sm font-black uppercase text-gray-800 group-hover:text-blue-600 transition-colors truncate">{e.name}</p>
-                            <p className="text-[8px] md:text-[9px] text-gray-400 uppercase font-bold truncate">{e.vin}</p>
+                            <p className="text-[11px] md:text-[12px] text-gray-700 dark:text-gray-300 font-bold truncate">{e.vin}</p>
                          </div>
                       </td>
                       <td className="px-3 md:px-4 py-4 md:py-6">
