@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera, Package, CheckCircle2, Wallet, ChevronRight, Calendar } from 'lucide-react';
+import { Wrench, AlertTriangle, History, ChevronLeft, Plus, X, ClipboardCheck, Truck, LayoutGrid, List, Edit3, Camera, Package, CheckCircle2, Wallet, ChevronRight, Calendar, Fuel } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useProcurementStore } from '../store/useProcurementStore';
@@ -549,6 +549,25 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   return breakdown?.equipmentId === e.id;
                 });
 
+                // Получаем информацию для информационных блоков
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // Ближайшее запланированное ТО
+                const nextPlannedTO = plannedTOs
+                  .filter(t => t.equipmentId === e.id && t.status === 'planned')
+                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+                
+                // Последняя заправка
+                const lastFuelRecord = useMaintenanceStore.getState().fuelRecords
+                  .filter(f => f.equipmentId === e.id)
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+                
+                // Проверка ОСАГО
+                const insuranceEnd = e.insurance_end ? new Date(e.insurance_end + 'T00:00:00') : null;
+                const isInsuranceOverdue = insuranceEnd && insuranceEnd < today;
+                const daysUntilInsuranceOverdue = insuranceEnd ? Math.ceil((insuranceEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
+
                 return (
                 <div key={e.id} className="p-4 rounded-xl shadow-neo-inset bg-neo-bg flex flex-col gap-3 min-w-[280px]">
                   <div className="flex items-center justify-between">
@@ -575,6 +594,96 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         <span className="hidden md:inline">Заявка</span>
                       </button>
                     </div>
+                  </div>
+                  
+                  {/* Информационные блоки */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Запланированное ТО */}
+                    {nextPlannedTO ? (
+                      <button
+                        onClick={() => {
+                          setSelectedMaintenanceEquipId(e.id);
+                          const to = plannedTOs.find(t => t.id === nextPlannedTO.id);
+                          if (to) openTOForEquip(e, to);
+                        }}
+                        className={`p-2.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all hover:scale-105 ${
+                          new Date(nextPlannedTO.date + 'T00:00:00') < today
+                            ? 'bg-red-500/10 border-red-500/30'
+                            : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
+                              ? 'bg-emerald-500/10 border-emerald-500/30'
+                              : 'bg-blue-500/10 border-blue-500/20'
+                        }`}
+                      >
+                        <Calendar size={14} className={
+                          new Date(nextPlannedTO.date + 'T00:00:00') < today
+                            ? 'text-red-500'
+                            : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
+                              ? 'text-emerald-500'
+                              : 'text-blue-500'
+                        }/>
+                        <div className="text-center">
+                          <p className="text-[8px] font-black text-gray-500 uppercase">ТО</p>
+                          <p className={`text-[9px] font-bold ${
+                            new Date(nextPlannedTO.date + 'T00:00:00') < today
+                              ? 'text-red-600'
+                              : new Date(nextPlannedTO.date + 'T00:00:00').getTime() === today.getTime()
+                                ? 'text-emerald-600'
+                                : 'text-blue-600'
+                          }`}>
+                            {nextPlannedTO.date.split('-').reverse().join('.')}
+                          </p>
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center gap-1">
+                        <Calendar size={14} className="text-gray-400"/>
+                        <div className="text-center">
+                          <p className="text-[8px] font-black text-gray-400 uppercase">ТО</p>
+                          <p className="text-[9px] font-bold text-gray-400">—</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Последняя заправка или ОСАГО */}
+                    {isInsuranceOverdue ? (
+                      <div
+                        className="p-2.5 rounded-lg border border-red-500/30 bg-red-500/10 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-red-500/20 transition-all"
+                        onClick={() => setSelectedMaintenanceEquipId(e.id)}
+                      >
+                        <AlertTriangle size={14} className="text-red-500"/>
+                        <div className="text-center">
+                          <p className="text-[8px] font-black text-gray-500 uppercase">ОСАГО</p>
+                          <p className="text-[9px] font-bold text-red-600">
+                            {daysUntilInsuranceOverdue !== null && daysUntilInsuranceOverdue < 0
+                              ? `Просрочено ${Math.abs(daysUntilInsuranceOverdue)} дн.`
+                              : `Истекает ${e.insurance_end?.split('-').reverse().join('.')}`}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      lastFuelRecord ? (
+                        <div
+                          className="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-emerald-500/20 transition-all"
+                          onClick={() => setSelectedMaintenanceEquipId(e.id)}
+                        >
+                          <Fuel size={14} className="text-emerald-500"/>
+                          <div className="text-center">
+                            <p className="text-[8px] font-black text-gray-500 uppercase">Заправка</p>
+                            <p className="text-[9px] font-bold text-emerald-600">
+                              {lastFuelRecord.date.split('-').reverse().join('.')}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center gap-1">
+                          <Fuel size={14} className="text-gray-400"/>
+                          <div className="text-center">
+                            <p className="text-[8px] font-black text-gray-400 uppercase">Заправка</p>
+                            <p className="text-[9px] font-bold text-gray-400">—</p>
+                          </div>
+                        </div>
+                      )
+                    )}
                   </div>
                   {/* Прогресс-бары по заявкам */}
                   {relatedRequests.length > 0 && (
