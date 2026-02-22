@@ -154,6 +154,10 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
     insuranceStart: new Date().toISOString().split('T')[0],
     insuranceEnd: ''
   });
+  
+  // Модальное окно добавления работы в чек-лист ТО
+  const [isAddWorkModalOpen, setIsAddWorkModalOpen] = useState(false);
+  const [newWorkText, setNewWorkText] = useState('');
 
   const selectedEquip = equipment.find(e => e.id === selectedMaintenanceEquipId);
 
@@ -1799,10 +1803,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      const newText = prompt('Введите название работы:');
-                      if (newText && newText.trim()) {
-                        setToChecklist([...toChecklist, { text: newText.trim(), done: false, note: '' }]);
-                      }
+                      setNewWorkText('');
+                      setIsAddWorkModalOpen(true);
                     }}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all text-[9px] font-black uppercase"
                   >
@@ -2455,6 +2457,85 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           </div>
         </div>
       )}
+
+      {/* Модальное окно добавления работы */}
+      <AddWorkModal
+        isOpen={isAddWorkModalOpen}
+        onClose={() => setIsAddWorkModalOpen(false)}
+        onAdd={(text) => setToChecklist([...toChecklist, { text, done: false, note: '' }])}
+        workText={newWorkText}
+        setWorkText={setNewWorkText}
+      />
+    </div>
+  );
+};
+
+// Модальное окно добавления работы в чек-лист
+const AddWorkModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onAdd: (text: string) => void;
+  workText: string;
+  setWorkText: (text: string) => void;
+}> = ({ isOpen, onClose, onAdd, workText, setWorkText }) => {
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    if (workText && workText.trim()) {
+      onAdd(workText.trim());
+      setWorkText('');
+      onClose();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    } else if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div className="bg-neo-bg w-full max-w-md rounded-[2.5rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Добавить работу</h3>
+          <button onClick={onClose} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-[9px] font-bold text-gray-400 uppercase ml-2 tracking-widest">Название работы</label>
+            <input
+              type="text"
+              autoFocus
+              onKeyDown={handleKeyDown}
+              className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold text-gray-800 dark:text-gray-100 placeholder-gray-500"
+              placeholder="Например: Доливка антифриза"
+              value={workText}
+              onChange={e => setWorkText(e.target.value)}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs hover:shadow-neo-inset transition-all"
+            >
+              Отмена
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="flex-1 py-3 rounded-2xl bg-emerald-500 text-white font-black uppercase text-xs hover:bg-emerald-600 transition-all shadow-lg"
+            >
+              Добавить
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
