@@ -50,6 +50,7 @@ export interface Equipment {
   insuranceCompany?: string;
   insuranceNumber?: string;
   insuranceStart?: string;
+  insuranceHistory?: { insuranceCompany: string; insuranceNumber: string; insuranceStart: string; insuranceEnd: string }[];
   supplier?: string;
   supplierPhone?: string;
   supplierEmail?: string;

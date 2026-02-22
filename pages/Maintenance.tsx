@@ -145,6 +145,15 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
   
   // Модальное окно просмотра заправки
   const [selectedFuelDetail, setSelectedFuelDetail] = useState<any>(null);
+  
+  // Модальное окно добавления полиса ОСАГО
+  const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
+  const [newInsurance, setNewInsurance] = useState({
+    insuranceCompany: '',
+    insuranceNumber: '',
+    insuranceStart: new Date().toISOString().split('T')[0],
+    insuranceEnd: ''
+  });
 
   const selectedEquip = equipment.find(e => e.id === selectedMaintenanceEquipId);
 
@@ -277,6 +286,30 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
     setQrDataUrl('');
     setLastRecordedValues(null);
     setPlannedTOForService(null);
+  };
+
+  // Сохранение полиса ОСАГО
+  const handleSaveInsurance = () => {
+    if (!selectedMaintenanceEquipId || !newInsurance.insuranceEnd) return;
+
+    const equip = equipment.find(e => e.id === selectedMaintenanceEquipId);
+    if (!equip) return;
+
+    // Обновляем данные техники
+    useFleetStore.getState().updateEquipment(selectedMaintenanceEquipId, {
+      insuranceCompany: newInsurance.insuranceCompany,
+      insuranceNumber: newInsurance.insuranceNumber,
+      insuranceStart: newInsurance.insuranceStart,
+      insurance_end: newInsurance.insuranceEnd
+    });
+
+    setIsInsuranceModalOpen(false);
+    setNewInsurance({
+      insuranceCompany: '',
+      insuranceNumber: '',
+      insuranceStart: new Date().toISOString().split('T')[0],
+      insuranceEnd: ''
+    });
   };
 
   const openTOForEquip = (e: any, plannedTO?: any) => {
@@ -944,7 +977,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   {(() => {
                     const insuranceEnd = selectedEquip.insurance_end ? new Date(selectedEquip.insurance_end + 'T00:00:00') : null;
                     if (!insuranceEnd) return null;
-                    
+
                     const daysUntilOverdue = Math.ceil((insuranceEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                     const isOverdue = daysUntilOverdue < 0;
                     const isExpiringSoon = !isOverdue && daysUntilOverdue <= 30;
@@ -954,7 +987,15 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     return (
                       <div
                         className="w-full flex items-center justify-between p-3 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-left group border border-orange-500/30 cursor-pointer"
-                        onClick={() => setSelectedMaintenanceEquipId(selectedEquip.id)}
+                        onClick={() => {
+                          setNewInsurance({
+                            insuranceCompany: '',
+                            insuranceNumber: '',
+                            insuranceStart: selectedEquip.insurance_end,
+                            insuranceEnd: ''
+                          });
+                          setIsInsuranceModalOpen(true);
+                        }}
                       >
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-orange-500 text-white">
@@ -2287,6 +2328,103 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
                   {equipment.find(e => e.id === selectedFuelDetail.equipmentId)?.name || '—'}
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно добавления полиса ОСАГО */}
+      {isInsuranceModalOpen && selectedEquip && (
+        <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-orange-500">
+                  <AlertTriangle size={24}/>
+                </div>
+                <div>
+                  <h2 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Добавить полис ОСАГО</h2>
+                  <p className="text-[8px] font-black text-orange-400 uppercase tracking-widest">{selectedEquip.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setIsInsuranceModalOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Текущий полис */}
+              {selectedEquip.insurance_end && (
+                <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-orange-500/20">
+                  <p className="text-[8px] font-black text-orange-400 uppercase mb-2">Текущий полис</p>
+                  <div className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                    <p>Действует до: <span className="text-orange-600">{new Date(selectedEquip.insurance_end + 'T00:00:00').toLocaleDateString('ru-RU')}</span></p>
+                  </div>
+                </div>
+              )}
+
+              {/* Страховая компания */}
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Страховая компания</label>
+                <input
+                  type="text"
+                  className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                  placeholder="АльфаСтрахование, Росгосстрах..."
+                  value={newInsurance.insuranceCompany}
+                  onChange={e => setNewInsurance({...newInsurance, insuranceCompany: e.target.value})}
+                />
+              </div>
+
+              {/* Номер полиса */}
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Номер полиса</label>
+                <input
+                  type="text"
+                  className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                  placeholder="XXX-1234567890"
+                  value={newInsurance.insuranceNumber}
+                  onChange={e => setNewInsurance({...newInsurance, insuranceNumber: e.target.value})}
+                />
+              </div>
+
+              {/* Даты */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Дата начала</label>
+                  <input
+                    type="date"
+                    className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                    value={newInsurance.insuranceStart}
+                    onChange={e => setNewInsurance({...newInsurance, insuranceStart: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Дата окончания</label>
+                  <input
+                    type="date"
+                    className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                    value={newInsurance.insuranceEnd}
+                    onChange={e => setNewInsurance({...newInsurance, insuranceEnd: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Кнопки */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsInsuranceModalOpen(false)}
+                  className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs"
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveInsurance}
+                  className="flex-1 py-3 rounded-2xl bg-orange-500 text-white font-black uppercase text-xs hover:bg-orange-600 transition-all"
+                >
+                  Сохранить
+                </button>
               </div>
             </div>
           </div>

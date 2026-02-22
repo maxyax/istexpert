@@ -178,7 +178,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [isEditing, setIsEditing] = useState(false);
   const [qrBase64, setQrBase64] = useState('');
-  const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history' | 'regulations'>('main')
+  const [activeTab, setActiveTab] = useState<'main' | 'docs' | 'history' | 'regulations' | 'insurance'>('main')
   const [isNewEquipment, setIsNewEquipment] = useState(false);
   const [selectedHistoryRecord, setSelectedHistoryRecord] = useState<any>(null);
 
@@ -503,6 +503,7 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                   <h2 className="text-base md:text-2xl font-black uppercase leading-none text-gray-800 dark:text-gray-200 tracking-tight truncate">{selectedItem.name}</h2>
                   <div className="flex gap-2 md:gap-8 mt-3 md:mt-5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                      <button onClick={() => setActiveTab('main')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'main' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Основное</button>
+                     <button onClick={() => setActiveTab('insurance')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'insurance' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Страхование</button>
                      <button onClick={() => setActiveTab('docs')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'docs' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Документы</button>
                      <button onClick={() => setActiveTab('regulations')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'regulations' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>Регламент ТО</button>
                      <button onClick={() => setActiveTab('history')} className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all whitespace-nowrap flex-shrink-0 ${activeTab === 'history' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-blue-400'}`}>История</button>
@@ -596,6 +597,119 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+
+              {activeTab === 'insurance' && (
+                <div className="space-y-8">
+                  {/* Текущий полис */}
+                  <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg border border-blue-500/20">
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Текущий полис ОСАГО</h3>
+                    {editForm.insurance_end ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Страховая компания</p>
+                          <p className="text-base font-black text-gray-800 dark:text-gray-100">{editForm.insuranceCompany || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Номер полиса</p>
+                          <p className="text-base font-black text-gray-800 dark:text-gray-100">{editForm.insuranceNumber || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Период действия</p>
+                          <p className="text-base font-black text-gray-800 dark:text-gray-100">
+                            {editForm.insuranceStart ? formatToDDMMYYYY(editForm.insuranceStart) : '—'} — {formatToDDMMYYYY(editForm.insurance_end)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Статус</p>
+                          {(() => {
+                            const status = getInsuranceStatus(editForm.insurance_end);
+                            return (
+                              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-black ${
+                                status.status === 'expired' ? 'bg-red-500/10 text-red-600' :
+                                status.status === 'critical' ? 'bg-orange-500/10 text-orange-600' :
+                                status.status === 'warning' ? 'bg-yellow-500/10 text-yellow-600' :
+                                'bg-emerald-500/10 text-emerald-600'
+                              }`}>
+                                {status.status === 'expired' && <AlertTriangle size={14}/>}
+                                {status.status === 'critical' && <AlertTriangle size={14}/>}
+                                {status.status === 'warning' && <AlertTriangle size={14}/>}
+                                {status.status === 'ok' && <CheckCircle2 size={14}/>}
+                                {status.message}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-10">
+                        <p className="text-sm font-bold text-gray-400">Полис не оформлен</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* История полисов */}
+                  <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">История полисов</h3>
+                    {editForm.insuranceHistory && editForm.insuranceHistory.length > 0 ? (
+                      <div className="space-y-3">
+                        {[...editForm.insuranceHistory].reverse().map((policy: any, idx: number) => (
+                          <div key={idx} className="p-4 rounded-xl shadow-neo-inset bg-neo-bg border border-white/5">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{policy.insuranceCompany || 'Не указано'}</p>
+                                <p className="text-[9px] text-gray-500">Полис: {policy.insuranceNumber || '—'}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                                  {formatToDDMMYYYY(policy.insuranceStart)} — {formatToDDMMYYYY(policy.insuranceEnd)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-10">
+                        <p className="text-sm font-bold text-gray-400">История пуста</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Кнопка добавления нового полиса */}
+                  {isEditing && (
+                    <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center">
+                      <button
+                        onClick={() => {
+                          // Добавляем текущий полис в историю
+                          if (editForm.insurance_end) {
+                            const currentPolicy = {
+                              insuranceCompany: editForm.insuranceCompany || '',
+                              insuranceNumber: editForm.insuranceNumber || '',
+                              insuranceStart: editForm.insuranceStart || '',
+                              insuranceEnd: editForm.insurance_end
+                            };
+                            setEditForm({
+                              ...editForm,
+                              insuranceHistory: [...(editForm.insuranceHistory || []), currentPolicy]
+                            });
+                          }
+                          // Очищаем поля для нового полиса
+                          setEditForm({
+                            ...editForm,
+                            insuranceCompany: '',
+                            insuranceNumber: '',
+                            insuranceStart: new Date().toISOString().split('T')[0],
+                            insurance_end: ''
+                          });
+                        }}
+                        className="px-8 py-4 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2 mx-auto"
+                      >
+                        <Plus size={16}/> Добавить новый полис
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
