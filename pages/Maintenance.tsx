@@ -135,14 +135,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
   const [selectedBreakdownDetail, setSelectedBreakdownDetail] = useState<any>(null);
   const [breakdownStatusForm, setBreakdownStatusForm] = useState({ status: 'Новая' as any, fixedDate: new Date().toISOString().slice(0, 10), hoursAtFix: undefined as number | undefined, mileageAtFix: undefined as number | undefined, fixNotes: '' as string });
   
-  // Модальное окно для исправления поломки
-  const [isFixModalOpen, setIsFixModalOpen] = useState(false);
-  const [fixForm, setFixForm] = useState({
-    fixedDate: new Date().toISOString().slice(0, 10),
-    hoursAtFix: undefined as number | undefined,
-    mileageAtFix: undefined as number | undefined,
-    fixNotes: '' as string
-  });
+  // Состояние для открытия формы обновления статуса
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
   const selectedEquip = equipment.find(e => e.id === selectedMaintenanceEquipId);
 
@@ -1494,13 +1488,14 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      setFixForm({
+                      setBreakdownStatusForm({
+                        status: 'Исправлено',
                         fixedDate: new Date().toISOString().slice(0, 10),
                         hoursAtFix: selectedBreakdownDetail.hoursAtBreakdown,
                         mileageAtFix: undefined,
                         fixNotes: ''
                       });
-                      setIsFixModalOpen(true);
+                      setIsStatusModalOpen(true);
                     }}
                     className="w-full py-4 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all hover:bg-emerald-700"
                   >
@@ -1512,6 +1507,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   type="button"
                   onClick={() => {
                     setBreakdownStatusForm({ status: selectedBreakdownDetail.status, fixedDate: selectedBreakdownDetail.fixedDate || new Date().toISOString().slice(0, 10), hoursAtFix: undefined, mileageAtFix: undefined, fixNotes: '' });
+                    setIsStatusModalOpen(true);
                   }}
                   className="w-full py-4 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all border border-blue-500/10 hover:shadow-neo-inset"
                 >
@@ -1525,12 +1521,12 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       })()}
 
       {/* Форма обновления статуса */}
-      {selectedBreakdownDetail && (
-        <div className="fixed inset-0 z-[215] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md pointer-events-none">
-          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-4 md:p-6 animate-in zoom-in border border-white/20 pointer-events-auto max-h-[85vh] overflow-y-auto custom-scrollbar">
+      {isStatusModalOpen && selectedBreakdownDetail && (
+        <div className="fixed inset-0 z-[215] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-4 md:p-6 animate-in zoom-in border border-white/20 max-h-[85vh] overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-4 sticky top-0 bg-neo-bg z-10 pb-2">
               <h2 className="text-base md:text-lg font-bold uppercase text-gray-800 dark:text-gray-100">Обновить статус</h2>
-              <button onClick={() => setSelectedBreakdownDetail(null)} className="p-2 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={18}/></button>
+              <button onClick={() => setIsStatusModalOpen(false)} className="p-2 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={18}/></button>
             </div>
             <form onSubmit={(e) => {
               e.preventDefault();
@@ -1543,6 +1539,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   (breakdownStatusForm as any).mileageAtFix,
                   (breakdownStatusForm as any).fixNotes
                 );
+                setIsStatusModalOpen(false);
                 setSelectedBreakdownDetail(null);
               }
             }} className="space-y-3 pb-4">
@@ -1685,148 +1682,6 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 </div>
               )}
               <button type="submit" className="w-full py-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold uppercase text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all">Сохранить</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Модальное окно для исправления поломки */}
-      {isFixModalOpen && selectedBreakdownDetail && (
-        <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg z-10">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-emerald-500">
-                  <CheckCircle2 size={24}/>
-                </div>
-                <div>
-                  <h2 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Исправление поломки</h2>
-                  <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Акт: {selectedBreakdownDetail.actNumber || 'АКТ-001'}</p>
-                </div>
-              </div>
-              <button onClick={() => setIsFixModalOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              
-              // Валидация обязательных полей
-              if (!fixForm.fixNotes.trim()) {
-                alert('Пожалуйста, заполните примечания к исправлению');
-                return;
-              }
-              
-              updateBreakdownStatus(
-                selectedBreakdownDetail.id,
-                'Исправлено',
-                fixForm.fixedDate,
-                fixForm.hoursAtFix,
-                fixForm.mileageAtFix,
-                fixForm.fixNotes
-              );
-              setIsFixModalOpen(false);
-              setSelectedBreakdownDetail(null);
-              setFixForm({
-                fixedDate: new Date().toISOString().slice(0, 10),
-                hoursAtFix: undefined,
-                mileageAtFix: undefined,
-                fixNotes: ''
-              });
-            }} className="space-y-4">
-              {/* Информация о поломке */}
-              <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-emerald-500/20 space-y-3">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle size={16} className="text-emerald-500"/>
-                  <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Детали поломки</p>
-                </div>
-                <div>
-                  <p className="text-[8px] font-black text-gray-400 uppercase">Наименование</p>
-                  <p className="text-base font-black text-gray-800 dark:text-gray-200">{selectedBreakdownDetail.partName}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-[8px] font-black text-gray-400 uppercase">Узел</p>
-                    <p className="text-sm font-bold text-gray-700">{selectedBreakdownDetail.node}</p>
-                  </div>
-                  <div>
-                    <p className="text-[8px] font-black text-gray-400 uppercase">Наработка при поломке</p>
-                    <p className="text-sm font-bold text-gray-700">{selectedBreakdownDetail.hoursAtBreakdown || '—'} м/ч</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Дата ввода в эксплуатацию */}
-              <div className="space-y-2">
-                <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Дата ввода в эксплуатацию *</label>
-                <input
-                  type="date"
-                  value={fixForm.fixedDate}
-                  onChange={e => setFixForm({...fixForm, fixedDate: e.target.value})}
-                  className="w-full p-3 rounded-xl shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] bg-neo-bg font-bold text-sm text-gray-900 dark:text-gray-200 outline-none"
-                  required
-                />
-              </div>
-
-              {/* Наработка и пробег */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Наработка (м/ч)</label>
-                  <input
-                    type="number"
-                    value={fixForm.hoursAtFix || ''}
-                    onChange={e => setFixForm({...fixForm, hoursAtFix: e.target.value ? parseInt(e.target.value) : undefined})}
-                    placeholder={selectedBreakdownDetail.hoursAtBreakdown?.toString() || '0'}
-                    className="w-full p-3 rounded-xl shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] bg-neo-bg font-bold text-sm text-gray-900 dark:text-gray-200 outline-none"
-                  />
-                  <p className="text-[8px] text-gray-500">На момент поломки: {selectedBreakdownDetail.hoursAtBreakdown || '—'} м/ч</p>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Пробег (км)</label>
-                  <input
-                    type="number"
-                    value={fixForm.mileageAtFix || ''}
-                    onChange={e => setFixForm({...fixForm, mileageAtFix: e.target.value ? parseInt(e.target.value) : undefined})}
-                    placeholder="0"
-                    className="w-full p-3 rounded-xl shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] bg-neo-bg font-bold text-sm text-gray-900 dark:text-gray-200 outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Примечания - обязательное поле */}
-              <div className="space-y-2">
-                <label className="text-[9px] font-bold text-gray-700 dark:text-gray-300 ml-2">Примечания к исправлению *</label>
-                <textarea
-                  value={fixForm.fixNotes}
-                  onChange={e => setFixForm({...fixForm, fixNotes: e.target.value})}
-                  placeholder="Опишите выполненные работы, замененные детали, рекомендации..."
-                  className="w-full p-3 rounded-xl shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] bg-neo-bg font-bold text-sm text-gray-900 dark:text-gray-200 outline-none h-24 resize-none"
-                  required
-                />
-                <p className="text-[8px] text-gray-500">Поле обязательно для заполнения</p>
-              </div>
-
-              {/* Предупреждение */}
-              <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                <p className="text-[9px] font-bold text-blue-400 uppercase">Важно</p>
-                <p className="text-xs text-gray-600 dark:text-gray-300">После подтверждения поломка будет перемещена в архив с указанием всех данных</p>
-              </div>
-
-              {/* Кнопки */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsFixModalOpen(false)}
-                  className="flex-1 py-3 rounded-2xl bg-neo-bg border border-white/10 font-black uppercase text-xs"
-                >
-                  Отмена
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-black uppercase text-xs tracking-[0.2em] active:scale-95 transition-all shadow-lg"
-                >
-                  ✓ Исправлено
-                </button>
-              </div>
             </form>
           </div>
         </div>
