@@ -352,11 +352,11 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     </div>
                     <div className="overflow-hidden flex-1">
                        <h3 className="font-bold uppercase text-sm text-gray-800 dark:text-gray-200 truncate">{e.name}</h3>
-                       <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">{e.make} {e.model}</p>
-                       <p className="text-[9px] font-bold text-gray-500 dark:text-gray-300 truncate">{e.vin}</p>
                     </div>
                   </div>
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-1">
+                    <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">{e.make} {e.model}</p>
+                    <p className="text-[9px] font-bold text-gray-500 dark:text-gray-300 truncate">{e.vin}</p>
                     <p className="text-xs font-black text-gray-700 dark:text-gray-300">{e.hours} м/ч</p>
                   </div>
                 </div>
