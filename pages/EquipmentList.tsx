@@ -563,30 +563,6 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
                       <EditableBlock label="Телефон контрагента" value={editForm.supplierPhone} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, supplierPhone: v})} />
                       <EditableBlock label="Email контрагента" value={editForm.supplierEmail} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, supplierEmail: v})} />
                     </div>
-                    <div className="p-10 rounded-[2.5rem] shadow-neo-inset bg-neo-bg border border-blue-500/10">
-                       <div className="flex items-center justify-between mb-6">
-                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Данные страхования</h3>
-                         {editForm.insurance_end && (() => {
-                           const status = getInsuranceStatus(editForm.insurance_end);
-                           return (
-                             <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase ${
-                               status.status === 'expired' ? 'bg-red-500 text-white' :
-                               status.status === 'critical' ? 'bg-orange-500 text-white' :
-                               status.status === 'warning' ? 'bg-yellow-500 text-white' :
-                               'bg-green-500 text-white'
-                             }`}>
-                               {status.message}
-                             </div>
-                           );
-                         })()}
-                       </div>
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <EditableBlock label="Страховая компания" value={editForm.insuranceCompany} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, insuranceCompany: v})} />
-                         <EditableBlock label="Номер страховки" value={editForm.insuranceNumber} isEditing={isEditing} onChange={(v:string) => setEditForm({...editForm, insuranceNumber: v})} />
-                         <EditableBlock label="Дата начала" value={editForm.insuranceStart} isEditing={isEditing} type="text" onChange={(v:string) => setEditForm({...editForm, insuranceStart: v})} />
-                         <EditableBlock label="Дата окончания" value={editForm.insurance_end} isEditing={isEditing} type="text" onChange={(v:string) => setEditForm({...editForm, insurance_end: v})} highlight />
-                       </div>
-                    </div>
                     {isEditing && (
                       <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
                         <button onClick={() => setShowDeleteConfirm(true)} className="px-10 py-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-neo text-[10px] font-black uppercase transition-all active:scale-95 flex items-center gap-2 mx-auto"><Trash2 size={16}/>Удалить технику</button>
