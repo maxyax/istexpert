@@ -1708,12 +1708,12 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       {/* Модалка ТО */}
       {isTOModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-neo-bg w-full max-w-2xl rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20">
-            <div className="flex justify-between items-center mb-6 md:mb-10">
+          <div className="bg-neo-bg w-full max-w-2xl rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-8 md:p-10 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-6 md:mb-10 sticky top-0 bg-neo-bg z-10 pb-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Проведение ТО</h2>
               <button onClick={()=>setIsTOModalOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={24}/></button>
             </div>
-            <div className="space-y-6 md:space-y-8">
+            <div className="space-y-6 md:space-y-8 pt-4">
               {/* Информация о запланированном ТО */}
               {plannedTOForService && (
                 <div className={`p-4 md:p-6 rounded-[1.5rem] shadow-neo-inset bg-neo-bg border-2 ${

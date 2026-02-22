@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Search, Plus, Truck, X, QrCode, Zap, Gauge, Edit3, Save, Camera, FileText, User, ChevronRight, History, Upload, LayoutGrid, List, Clock, Trash2, AlertTriangle, CheckCircle2, Package
+  Search, Plus, Truck, X, QrCode, Zap, Gauge, Edit3, Save, Camera, FileText, User, ChevronRight, ChevronLeft, History, Upload, LayoutGrid, List, Clock, Trash2, AlertTriangle, CheckCircle2, Package
 } from 'lucide-react';
 import { useFleetStore } from '../store/useFleetStore';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
@@ -243,14 +243,10 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
         const reader = new FileReader();
         reader.onload = (event) => {
           const fileUrl = event.target?.result as string;
-          // Сохраняем документ в массив documents
+          // Добавляем документ в массив (не заменяем, а добавляем новый)
           setEditForm(prev => {
             const docs = prev.documents || [];
-            const existingIndex = docs.findIndex(d => d.type === docType);
-            const newDocs = existingIndex >= 0 
-              ? docs.map((d, i) => i === existingIndex ? { name: file.name, url: fileUrl, type: docType } : d)
-              : [...docs, { name: file.name, url: fileUrl, type: docType }];
-            return { ...prev, documents: newDocs };
+            return { ...prev, documents: [...docs, { name: file.name, url: fileUrl, type: docType }] };
           });
         };
         reader.readAsDataURL(file);
@@ -716,12 +712,12 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
               {activeTab === 'docs' && (
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                     <DocCard label="СТС / ПТС" isEditing={isEditing} onUpload={() => handleUploadDocument('sts')} documentUrl={editForm.documents?.find(d => d.type === 'sts')?.url} />
-                     <DocCard label="Страховка ОСАГО" isEditing={isEditing} onUpload={() => handleUploadDocument('osago')} documentUrl={editForm.documents?.find(d => d.type === 'osago')?.url} />
-                     <DocCard label="Диагностическая карта" isEditing={isEditing} onUpload={() => handleUploadDocument('diagnostic')} documentUrl={editForm.documents?.find(d => d.type === 'diagnostic')?.url} />
-                     <DocCard label="Каталог" isEditing={isEditing} onUpload={() => handleUploadDocument('catalog')} documentUrl={editForm.documents?.find(d => d.type === 'catalog')?.url} />
-                     <DocCard label="Инструкция" isEditing={isEditing} onUpload={() => handleUploadDocument('manual')} documentUrl={editForm.documents?.find(d => d.type === 'manual')?.url} />
-                     <DocCard label="Другое" isEditing={isEditing} onUpload={() => handleUploadDocument('other')} documentUrl={editForm.documents?.find(d => d.type === 'other')?.url} />
+                     <DocCard label="СТС / ПТС" isEditing={isEditing} onUpload={() => handleUploadDocument('sts')} documents={editForm.documents?.filter(d => d.type === 'sts') || []} />
+                     <DocCard label="Страховка ОСАГО" isEditing={isEditing} onUpload={() => handleUploadDocument('osago')} documents={editForm.documents?.filter(d => d.type === 'osago') || []} />
+                     <DocCard label="Диагностическая карта" isEditing={isEditing} onUpload={() => handleUploadDocument('diagnostic')} documents={editForm.documents?.filter(d => d.type === 'diagnostic') || []} />
+                     <DocCard label="Каталог" isEditing={isEditing} onUpload={() => handleUploadDocument('catalog')} documents={editForm.documents?.filter(d => d.type === 'catalog') || []} />
+                     <DocCard label="Инструкция" isEditing={isEditing} onUpload={() => handleUploadDocument('manual')} documents={editForm.documents?.filter(d => d.type === 'manual') || []} />
+                     <DocCard label="Другое" isEditing={isEditing} onUpload={() => handleUploadDocument('other')} documents={editForm.documents?.filter(d => d.type === 'other') || []} />
                   </div>
                   {isEditing && (
                     <div className="p-8 rounded-[2.5rem] shadow-neo bg-neo-bg text-center border border-red-500/20">
@@ -1392,40 +1388,32 @@ const EditableBlock = ({ label, value, isEditing, onChange, type = "text", highl
   </div>
 );
 
-const DocCard = ({ label, isEditing, onUpload, documentUrl }: any) => {
+const DocCard = ({ label, isEditing, onUpload, documents = [] }: any) => {
+  const [selectedDocIndex, setSelectedDocIndex] = useState(0);
+  const currentDoc = documents[selectedDocIndex];
+
   const handleViewDocument = (e: React.MouseEvent) => {
-    if (!isEditing && documentUrl) {
+    if (!isEditing && currentDoc?.url) {
       e.stopPropagation();
-      // Если это base64 data URL, конвертируем в blob для просмотра
-      if (documentUrl.startsWith('data:')) {
+      if (currentDoc.url.startsWith('data:')) {
         try {
-          // Извлекаем base64 данные
-          const base64Data = documentUrl.split(',')[1];
-          const mimeType = documentUrl.split(':')[1].split(';')[0];
-          
-          // Конвертируем base64 в binary
+          const base64Data = currentDoc.url.split(',')[1];
+          const mimeType = currentDoc.url.split(':')[1].split(';')[0];
           const binaryString = window.atob(base64Data);
           const bytes = new Uint8Array(binaryString.length);
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
-          
-          // Создаем blob и URL для просмотра
           const blob = new Blob([bytes], { type: mimeType });
           const blobUrl = URL.createObjectURL(blob);
-          
-          // Открываем в новой вкладке для просмотра
           window.open(blobUrl, '_blank');
-          
-          // Освобождаем память через 1 минуту
           setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
         } catch (error) {
           console.error('Error opening document:', error);
           alert('Ошибка при открытии документа');
         }
       } else {
-        // Если это обычный URL, открываем напрямую
-        window.open(documentUrl, '_blank');
+        window.open(currentDoc.url, '_blank');
       }
     }
   };
@@ -1435,13 +1423,39 @@ const DocCard = ({ label, isEditing, onUpload, documentUrl }: any) => {
     onUpload();
   };
 
+  const hasMultipleDocs = documents.length > 1;
+
   return (
-    <div onClick={handleViewDocument} className={`p-10 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-8 group hover:shadow-neo-inset transition-all border border-white/5 ${documentUrl && !isEditing ? 'cursor-pointer' : ''}`}>
+    <div onClick={handleViewDocument} className={`p-6 md:p-10 rounded-[2.5rem] shadow-neo bg-neo-bg flex flex-col items-center gap-4 md:gap-8 group hover:shadow-neo-inset transition-all border border-white/5 ${currentDoc?.url && !isEditing ? 'cursor-pointer' : ''}`}>
        <div className="w-16 h-16 rounded-2xl shadow-neo bg-neo-bg flex items-center justify-center text-blue-600"><FileText size={32}/></div>
        <div className="text-center">
           <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-gray-700">{label}</h4>
-          <p className={`text-[8px] font-bold uppercase opacity-60 ${documentUrl ? 'text-green-600' : 'text-gray-400'}`}>{documentUrl ? 'Файл загружен' : 'Файл не загружен'}</p>
+          <p className={`text-[8px] font-bold uppercase opacity-60 ${currentDoc?.url ? 'text-green-600' : 'text-gray-400'}`}>
+            {currentDoc?.url ? `${documents.length} файл${documents.length > 1 ? 'а' : ''}` : 'Файл не загружен'}
+          </p>
+          {currentDoc?.name && (
+            <p className="text-[8px] font-bold text-gray-500 mt-1 truncate max-w-[150px]">{currentDoc.name}</p>
+          )}
        </div>
+       {hasMultipleDocs && !isEditing && (
+         <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+           <button
+             onClick={() => setSelectedDocIndex(Math.max(0, selectedDocIndex - 1))}
+             className="p-2 rounded-lg bg-neo-bg shadow-neo text-gray-400 hover:text-blue-500 transition-all"
+             disabled={selectedDocIndex === 0}
+           >
+             <ChevronLeft size={16}/>
+           </button>
+           <span className="text-[9px] font-bold text-gray-500">{selectedDocIndex + 1} / {documents.length}</span>
+           <button
+             onClick={() => setSelectedDocIndex(Math.min(documents.length - 1, selectedDocIndex + 1))}
+             className="p-2 rounded-lg bg-neo-bg shadow-neo text-gray-400 hover:text-blue-500 transition-all"
+             disabled={selectedDocIndex === documents.length - 1}
+           >
+             <ChevronRight size={16}/>
+           </button>
+         </div>
+       )}
        {isEditing && <button onClick={handleUploadClick} className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all"><Upload size={18}/></button>}
     </div>
   );
