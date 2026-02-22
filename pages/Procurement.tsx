@@ -148,9 +148,39 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
     }
   };
 
+  // Управление контрагентами
+  const [isContractorsPanelOpen, setIsContractorsPanelOpen] = useState(false);
+  const [newContractor, setNewContractor] = useState({ name: '', category: 'Поставщики запчастей' });
+  const [newCarrier, setNewCarrier] = useState({ name: '', category: 'Транспортные компании' });
+  
+  const contractorCategories = ['Поставщики запчастей', 'Поставщики ГСМ', 'Сервисные центры', 'Арендодатели', 'Другие'];
+  const carrierCategories = ['Транспортные компании', 'Курьерские службы', 'Грузоперевозки', 'Другие'];
+
+  const addContractor = () => {
+    if (newContractor.name && !contractors.includes(newContractor.name)) {
+      setContractors([...contractors, newContractor.name].sort());
+      setNewContractor({ name: '', category: 'Поставщики запчастей' });
+    }
+  };
+
+  const addCarrier = () => {
+    if (newCarrier.name && !carriers.includes(newCarrier.name)) {
+      setCarriers([...carriers, newCarrier.name].sort());
+      setNewCarrier({ name: '', category: 'Транспортные компании' });
+    }
+  };
+
+  const removeContractor = (name: string) => {
+    setContractors(contractors.filter(c => c !== name));
+  };
+
+  const removeCarrier = (name: string) => {
+    setCarriers(carriers.filter(c => c !== name));
+  };
+
   return (
     <div className="h-full flex flex-col space-y-6 overflow-hidden animate-in fade-in duration-700 px-2 md:px-0">
-      {/* Шапка с переключателем видов */}
+      {/* Шапка с переключателем видов и панелью контрагентов */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4 md:gap-6">
            <h2 className="text-2xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Снабжение</h2>
@@ -159,15 +189,16 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               <button onClick={() => setViewMode('list')} title="Простой список" className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-neo-bg shadow-neo text-blue-600' : 'text-gray-400 hover:text-blue-500'}`}><List size={18}/></button>
               <button onClick={() => setViewMode('table')} title="Реестр (Гант)" className={`p-2.5 rounded-xl transition-all ${viewMode === 'table' ? 'bg-neo-bg shadow-neo text-blue-600' : 'text-gray-400 hover:text-blue-500'}`}><Layers size={18}/></button>
            </div>
+           <button
+             onClick={() => setIsContractorsPanelOpen(true)}
+             className="px-4 py-2.5 rounded-2xl bg-neo-bg border border-white/10 text-gray-700 dark:text-gray-300 font-bold text-xs uppercase hover:shadow-neo-inset transition-all flex items-center gap-2"
+           >
+             <Wallet size={16}/> Контрагенты
+           </button>
         </div>
         <button
           onClick={() => {
             if (onNavigate) onNavigate('maintenance');
-            // Небольшая задержка чтобы открылась вкладка
-            setTimeout(() => {
-              // Здесь можно было бы установить isBreakdownSelectOpen=true
-              // но для этого нужен доступ к состоянию Maintenance
-            }, 100);
           }}
           className="px-6 py-3 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs shadow-neo hover:bg-emerald-700 transition-all flex items-center gap-2"
         >
@@ -175,6 +206,118 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
           Создать заявку
         </button>
       </div>
+
+      {/* Панель управления контрагентами */}
+      {isContractorsPanelOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-4xl rounded-[3rem] shadow-neo p-8 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-blue-500">
+                  <Wallet size={24}/>
+                </div>
+                <div>
+                  <h2 className="text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Контрагенты и перевозчики</h2>
+                  <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Управление справочниками</p>
+                </div>
+              </div>
+              <button onClick={() => setIsContractorsPanelOpen(false)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Контрагенты */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-black uppercase text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500"/> Контрагенты ({contractors.length})
+                </h3>
+                
+                {/* Добавление контрагента */}
+                <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg space-y-3">
+                  <input
+                    className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                    placeholder="Название организации"
+                    value={newContractor.name}
+                    onChange={e => setNewContractor({...newContractor, name: e.target.value})}
+                  />
+                  <select
+                    className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                    value={newContractor.category}
+                    onChange={e => setNewContractor({...newContractor, category: e.target.value})}
+                  >
+                    {contractorCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <button
+                    onClick={addContractor}
+                    className="w-full py-3 rounded-xl bg-blue-500 text-white font-black uppercase text-xs hover:bg-blue-600 transition-all"
+                  >
+                    + Добавить контрагента
+                  </button>
+                </div>
+
+                {/* Список контрагентов */}
+                <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {contractors.map(c => (
+                    <div key={c} className="flex items-center justify-between p-3 rounded-xl bg-neo-bg border border-white/5 group hover:border-blue-500/30">
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{c}</span>
+                      <button
+                        onClick={() => removeContractor(c)}
+                        className="p-2 rounded-lg bg-red-500/20 text-red-600 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <X size={14}/>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Перевозчики */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-black uppercase text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500"/> Перевозчики ({carriers.length})
+                </h3>
+                
+                {/* Добавление перевозчика */}
+                <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg space-y-3">
+                  <input
+                    className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                    placeholder="Название компании"
+                    value={newCarrier.name}
+                    onChange={e => setNewCarrier({...newCarrier, name: e.target.value})}
+                  />
+                  <select
+                    className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-sm font-bold"
+                    value={newCarrier.category}
+                    onChange={e => setNewCarrier({...newCarrier, category: e.target.value})}
+                  >
+                    {carrierCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <button
+                    onClick={addCarrier}
+                    className="w-full py-3 rounded-xl bg-emerald-500 text-white font-black uppercase text-xs hover:bg-emerald-600 transition-all"
+                  >
+                    + Добавить перевозчика
+                  </button>
+                </div>
+
+                {/* Список перевозчиков */}
+                <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {carriers.map(c => (
+                    <div key={c} className="flex items-center justify-between p-3 rounded-xl bg-neo-bg border border-white/5 group hover:border-emerald-500/30">
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{c}</span>
+                      <button
+                        onClick={() => removeCarrier(c)}
+                        className="p-2 rounded-lg bg-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <X size={14}/>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Отображение: КАНБАН */}
       {viewMode === 'kanban' && (
@@ -658,11 +801,16 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         key={b.id}
                         onClick={() => {
                           setSelectedBreakdown(b);
+                          // Передаем все позиции из акта если они есть
+                          const items = b.items && b.items.length > 0 
+                            ? b.items.map(item => ({ ...item, unitPriceWithVAT: 0 }))
+                            : [{ sku: '', name: b.partName, quantity: '1', unitPriceWithVAT: 0 }];
+                          
                           setNewRequestForm({
-                            title: `Запрос по акту ${b.actNumber || 'АКТ-001'}: ${b.partName}`,
+                            title: `Заявка по акту ${b.actNumber || 'АКТ-001'} от ${new Date(b.date).toLocaleDateString('ru-RU')} (${b.partName})`,
                             contractorName: '',
                             carrierName: '',
-                            items: [{ sku: '', name: b.partName, quantity: '1', unitPriceWithVAT: 0 }]
+                            items: items
                           });
                           setIsBreakdownSelectOpen(false);
                           setIsCreateRequestOpen(true);

@@ -109,6 +109,7 @@ export interface BreakdownRecord {
   hoursAtFix?: number;
   mileageAtFix?: number;
   fixNotes?: string;
+  items?: { sku: string; name: string; quantity: string; unitPriceWithVAT?: number }[];
 }
 
 export type ProcurementStatus = 'Новая' | 'Поиск' | 'Оплачено' | 'В пути' | 'На складе';
