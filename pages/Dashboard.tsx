@@ -139,7 +139,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             onClick={() => onNavigate(s.id)}
             className={`p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg cursor-pointer hover:shadow-neo-inset transition-all group border border-white/5 ${s.highlight ? 'ring-2 ring-offset-2 ' + (s.color.replace('text-', 'ring-')) + ' animate-pulse' : ''}`}
           >
-            <div className="p-3 rounded-xl shadow-neo bg-neo-bg w-fit mb-4 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            <div className="p-3 rounded-xl bg-neo-bg w-fit mb-4 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" style={{boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.8), inset -2px -2px 4px rgba(0,0,0,0.1)'}}>
               <div className={s.color}>{s.icon}</div>
             </div>
             <h4 className="text-gray-800 dark:text-gray-100 text-xs font-bold uppercase mb-2">{s.title}</h4>
@@ -154,7 +154,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Топливо */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            <div className="p-3 rounded-xl bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" style={{boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.8), inset -2px -2px 4px rgba(0,0,0,0.1)'}}>
               <Fuel size={24} className="text-emerald-500"/>
             </div>
             <div>
@@ -178,7 +178,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Оплачено */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            <div className="p-3 rounded-xl bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" style={{boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.8), inset -2px -2px 4px rgba(0,0,0,0.1)'}}>
               <span className="text-2xl font-bold text-blue-500">₽</span>
             </div>
             <div>
@@ -198,7 +198,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* На складе */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            <div className="p-3 rounded-xl bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" style={{boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.8), inset -2px -2px 4px rgba(0,0,0,0.1)'}}>
               <Package size={24} className="text-indigo-500"/>
             </div>
             <div>
@@ -221,7 +221,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <div className="p-3 rounded-xl bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" style={{boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.8), inset -2px -2px 4px rgba(0,0,0,0.1)'}}>
                 <AlertTriangle size={24} className="text-red-500"/>
               </div>
               <div>
@@ -250,7 +250,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
         {/* Самая ломающаяся техника */}
         <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            <div className="p-3 rounded-xl bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" style={{boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.8), inset -2px -2px 4px rgba(0,0,0,0.1)'}}>
               <TrendingUp size={24} className="text-orange-500"/>
             </div>
             <div>
@@ -292,7 +292,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            <div className="p-3 rounded-xl bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" style={{boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.8), inset -2px -2px 4px rgba(0,0,0,0.1)'}}>
               <History size={24} className="text-orange-500"/>
             </div>
             <div>
