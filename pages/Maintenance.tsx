@@ -142,6 +142,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
   // Последние зафиксированные значения для автозаполнения
   const [lastRecordedValues, setLastRecordedValues] = useState<{ hours?: number; mileage?: number } | null>(null);
   const [plannedTOForService, setPlannedTOForService] = useState<any>(null);
+  
+  // Модальное окно просмотра заправки
+  const [selectedFuelDetail, setSelectedFuelDetail] = useState<any>(null);
 
   const selectedEquip = equipment.find(e => e.id === selectedMaintenanceEquipId);
 
@@ -642,7 +645,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     {lastFuelRecord && (
                       <div
                         className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 transition-all cursor-pointer shrink-0"
-                        onClick={() => setSelectedMaintenanceEquipId(e.id)}
+                        onClick={() => setSelectedFuelDetail(lastFuelRecord)}
                       >
                         <Fuel size={12} className="text-emerald-600"/>
                         <div className="text-left">
@@ -1041,7 +1044,24 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
           </div>
 
           <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg border border-white/5">
-            <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-10 flex items-center gap-2"><History size={16} className="text-blue-600"/> История обслуживания</h3>
+            <div className="flex justify-between items-center mb-6 md:mb-10">
+              <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2"><History size={16} className="text-blue-600"/> История обслуживания</h3>
+              <button
+                onClick={() => {
+                  const fuelHistory = useMaintenanceStore.getState().fuelRecords.filter(f => f.equipmentId === selectedEquip.id);
+                  if (fuelHistory.length > 0) {
+                    // Открываем последнюю заправку
+                    setSelectedFuelDetail(fuelHistory[0]);
+                  } else {
+                    alert('История заправок пуста');
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-all text-emerald-600 text-[9px] font-black uppercase"
+              >
+                <Fuel size={12}/>
+                Заправки
+              </button>
+            </div>
             <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
               {records.filter(r => r.equipmentId === selectedEquip.id).map(r => {
                 const isBreakdown = r.type.toLowerCase().includes('поломк') || r.type.toLowerCase().includes('неисправност') || r.type.toLowerCase().includes('акт');
@@ -2099,6 +2119,113 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
               )}
               <button type="submit" className="w-full py-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold uppercase text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all">Сохранить</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно просмотра заправки */}
+      {selectedFuelDetail && (
+        <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-neo p-6 md:p-8 animate-in zoom-in border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-neo-bg z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl shadow-neo bg-neo-bg text-emerald-500">
+                  <Fuel size={24}/>
+                </div>
+                <div>
+                  <h2 className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-100">Заправка</h2>
+                  <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">
+                    {selectedFuelDetail.date?.split('-').reverse().join('.')}
+                  </p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedFuelDetail(null)} className="p-3 rounded-xl shadow-neo text-gray-400 hover:text-red-500 transition-all"><X size={20}/></button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Основная информация */}
+              <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-emerald-500/20 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Дата</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                      {selectedFuelDetail.date?.split('-').reverse().join('.')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Время</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                      {selectedFuelDetail.time || '—'}
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Объём</p>
+                    <p className="text-lg font-black text-emerald-600">{selectedFuelDetail.quantity} л</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Сумма</p>
+                    <p className="text-lg font-black text-emerald-600">{formatMoney(selectedFuelDetail.totalCost)}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Цена/л</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{formatMoney(selectedFuelDetail.pricePerLiter)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Вид топлива</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{selectedFuelDetail.fuelType || '—'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Пробег и моточасы */}
+              <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Пробег</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{selectedFuelDetail.currentMileage || '—'} км</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Моточасы</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{selectedFuelDetail.currentHours || '—'} м/ч</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* АЗС и оплата */}
+              <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5 space-y-3">
+                <div>
+                  <p className="text-[8px] font-black text-gray-400 uppercase">АЗС</p>
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{selectedFuelDetail.station || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-[8px] font-black text-gray-400 uppercase">Способ оплаты</p>
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{selectedFuelDetail.paymentMethod || '—'}</p>
+                </div>
+              </div>
+
+              {/* Кто заправлял */}
+              {selectedFuelDetail.performedBy && (
+                <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-blue-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Truck size={16} className="text-blue-500"/>
+                    <p className="text-[8px] font-black text-blue-400 uppercase">Заправлял</p>
+                  </div>
+                  <p className="text-base font-black text-gray-800 dark:text-gray-100">{selectedFuelDetail.performedBy}</p>
+                </div>
+              )}
+
+              {/* Техника */}
+              <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/5">
+                <p className="text-[8px] font-black text-gray-400 uppercase mb-2">Техника</p>
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                  {equipment.find(e => e.id === selectedFuelDetail.equipmentId)?.name || '—'}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
