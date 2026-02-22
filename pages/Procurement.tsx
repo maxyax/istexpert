@@ -485,23 +485,20 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Контрагент</label>
-                         <div className="relative">
-                           <input
-                             list="contractors-list-edit"
-                             disabled={readOnlyMode}
-                             className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed"
-                             value={editReq.contractorName || ''}
-                             onChange={e=>{
-                               setEditReq({...editReq, contractorName: e.target.value});
-                               if (e.target.value && !contractors.includes(e.target.value)) {
-                                 setContractors([...contractors, e.target.value].sort());
-                               }
-                             }}
-                           />
-                           <datalist id="contractors-list-edit">
-                             {contractors.map((c, i) => <option key={i} value={c} />)}
-                           </datalist>
-                         </div>
+                         <select
+                           disabled={readOnlyMode}
+                           className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none app-input disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
+                           value={editReq.contractorName || ''}
+                           onChange={e=>{
+                             setEditReq({...editReq, contractorName: e.target.value});
+                             if (e.target.value && !contractors.includes(e.target.value)) {
+                               setContractors([...contractors, e.target.value].sort());
+                             }
+                           }}
+                         >
+                           <option value="">-- Выбрать из списка --</option>
+                           {contractors.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                         </select>
                        </div>
                        <div className="space-y-2">
                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Номер счета / спецификации</label>
@@ -612,7 +609,19 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                    <div className="grid grid-cols-2 gap-6">
                      <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/10">
                        <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Перевозчик</label>
-                       <input className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.carrierName || ''} onChange={e=>setEditReq({...editReq, carrierName: e.target.value})} />
+                       <select
+                         className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input text-sm font-bold"
+                         value={editReq.carrierName || ''}
+                         onChange={e=>{
+                           setEditReq({...editReq, carrierName: e.target.value});
+                           if (e.target.value && !carriers.includes(e.target.value)) {
+                             setCarriers([...carriers, e.target.value].sort());
+                           }
+                         }}
+                       >
+                         <option value="">-- Выбрать из списка --</option>
+                         {carriers.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                       </select>
                        <label className="text-xs font-bold text-gray-600 dark:text-gray-300 mt-3">Трек/накладная</label>
                        <input className="w-full p-3 rounded-xl shadow-neo-inset bg-neo-bg border border-white/10 outline-none app-input" value={editReq.trackingNumber || ''} onChange={e=>setEditReq({...editReq, trackingNumber: e.target.value})} />
                      </div>
@@ -924,45 +933,35 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-600 dark:text-gray-300 ml-2">Контрагент</label>
-                  <div className="relative">
-                    <input
-                      list="contractors-list"
-                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700"
-                      placeholder="Выбрать или ввести"
-                      value={newRequestForm.contractorName}
-                      onChange={e => {
-                        setNewRequestForm({...newRequestForm, contractorName: e.target.value});
-                        // Добавляем в список если нет
-                        if (e.target.value && !contractors.includes(e.target.value)) {
-                          setContractors([...contractors, e.target.value].sort());
-                        }
-                      }}
-                    />
-                    <datalist id="contractors-list">
-                      {contractors.map((c, i) => <option key={i} value={c} />)}
-                    </datalist>
-                  </div>
+                  <select
+                    className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700 text-sm font-bold"
+                    value={newRequestForm.contractorName}
+                    onChange={e => {
+                      setNewRequestForm({...newRequestForm, contractorName: e.target.value});
+                      if (e.target.value && !contractors.includes(e.target.value)) {
+                        setContractors([...contractors, e.target.value].sort());
+                      }
+                    }}
+                  >
+                    <option value="">-- Выбрать из списка --</option>
+                    {contractors.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-600 dark:text-gray-300 ml-2">Перевозчик</label>
-                  <div className="relative">
-                    <input
-                      list="carriers-list"
-                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700"
-                      placeholder="Выбрать или ввести"
-                      value={newRequestForm.carrierName}
-                      onChange={e => {
-                        setNewRequestForm({...newRequestForm, carrierName: e.target.value});
-                        // Добавляем в список если нет
-                        if (e.target.value && !carriers.includes(e.target.value)) {
-                          setCarriers([...carriers, e.target.value].sort());
-                        }
-                      }}
-                    />
-                    <datalist id="carriers-list">
-                      {carriers.map((c, i) => <option key={i} value={c} />)}
-                    </datalist>
-                  </div>
+                  <select
+                    className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg border border-white/20 outline-none text-gray-700 text-sm font-bold"
+                    value={newRequestForm.carrierName}
+                    onChange={e => {
+                      setNewRequestForm({...newRequestForm, carrierName: e.target.value});
+                      if (e.target.value && !carriers.includes(e.target.value)) {
+                        setCarriers([...carriers, e.target.value].sort());
+                      }
+                    }}
+                  >
+                    <option value="">-- Выбрать из списка --</option>
+                    {carriers.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                  </select>
                 </div>
               </div>
 
