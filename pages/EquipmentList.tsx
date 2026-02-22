@@ -1426,28 +1426,18 @@ const DocCard = ({ label, isEditing, onUpload, documents = [], onDelete, onRepla
 
   const handleUploadClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (documents.length > 0 && isEditing) {
-      // Если есть документы, спрашиваем - заменить или добавить
-      const action = window.confirm('Заменить текущий документ?\nOK - заменить\nОтмена - добавить новый');
-      if (action && onDelete) {
-        onDelete(selectedDocIndex);
-      }
-    }
-    setTimeout(() => onUpload(), 100);
+    onUpload();
   };
 
   const handleDeleteClick = (e: React.MouseEvent, index: number) => {
     e.stopPropagation();
     if (window.confirm('Удалить этот документ?')) {
       if (onDelete) onDelete(index);
-      setSelectedDocIndex(Math.max(0, selectedDocIndex - 1));
+      // После удаления переключаемся на предыдущий или первый
+      if (documents.length > 1) {
+        setSelectedDocIndex(Math.min(index, documents.length - 2));
+      }
     }
-  };
-
-  const handleReplaceClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onDelete) onDelete(selectedDocIndex);
-    setTimeout(() => onUpload(), 100);
   };
 
   const hasMultipleDocs = documents.length > 1;
@@ -1487,11 +1477,11 @@ const DocCard = ({ label, isEditing, onUpload, documents = [], onDelete, onRepla
        {isEditing && hasDocs && (
          <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
            <button
-             onClick={handleReplaceClick}
-             className="p-2 rounded-lg bg-neo-bg shadow-neo text-orange-600 hover:bg-orange-500 hover:text-white transition-all"
-             title="Заменить документ"
+             onClick={handleUploadClick}
+             className="p-2 rounded-lg bg-neo-bg shadow-neo text-blue-600 hover:bg-blue-500 hover:text-white transition-all"
+             title="Добавить ещё документ"
            >
-             <Upload size={16}/>
+             <Plus size={16}/>
            </button>
            <button
              onClick={(e) => handleDeleteClick(e, selectedDocIndex)}
@@ -1503,13 +1493,18 @@ const DocCard = ({ label, isEditing, onUpload, documents = [], onDelete, onRepla
          </div>
        )}
        {isEditing && !hasDocs && (
-         <button onClick={handleUploadClick} className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all">
+         <button onClick={handleUploadClick} className="p-4 rounded-xl shadow-neo text-blue-600 hover:shadow-neo-inset transition-all" title="Загрузить документ">
            <Upload size={18}/>
          </button>
        )}
        {hasDocs && !isEditing && (
          <div className="flex items-center gap-2 text-[8px] font-bold text-gray-400">
            <span>Нажмите для просмотра</span>
+         </div>
+       )}
+       {hasDocs && isEditing && (
+         <div className="text-[8px] font-bold text-gray-400">
+           <span>Выбран: {selectedDocIndex + 1} из {documents.length}</span>
          </div>
        )}
     </div>
