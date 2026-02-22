@@ -206,7 +206,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
           {sortedRequests.map(req => (
             <div key={req.id} onClick={() => setSelectedRequestId(req.id)} className="p-4 md:p-6 rounded-[2rem] bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.1),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,1)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(60,75,95,0.25)] transition-all flex flex-col gap-3 group cursor-pointer min-w-0">
               <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                <div className="p-3 md:p-4 rounded-2xl text-blue-500 shrink-0"><Package size={20} className="md:w-6 md:h-6"/></div>
+                <div className="p-3 md:p-4 rounded-2xl shadow-neo bg-neo-bg text-blue-500 shrink-0"><Package size={20} className="md:w-6 md:h-6"/></div>
                 <div className="overflow-hidden flex-1 min-w-0">
                   <h4 className="text-xs md:text-sm font-black uppercase text-gray-800 dark:text-gray-100 truncate line-clamp-2">{req.title}</h4>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -244,7 +244,7 @@ export const Procurement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 <tr key={req.id} onClick={() => setSelectedRequestId(req.id)} className={`border-l-4 ${borderColor} hover:bg-white/5 transition-colors cursor-pointer group`}>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
-                      <div className="p-2.5 rounded-xl text-blue-500 group-hover:scale-110 transition-transform"><Package size={18}/></div>
+                      <div className="p-2.5 rounded-xl shadow-neo bg-neo-bg text-blue-500 group-hover:scale-110 transition-transform"><Package size={18}/></div>
                       <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200 group-hover:text-blue-600 transition-colors">{req.title}</span>
                     </div>
                   </td>
