@@ -422,20 +422,20 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                               {/* Название детали слева */}
                               <p className="text-[11px] md:text-[12px] font-bold text-gray-700 dark:text-gray-200 mb-2">{breakdown.partName}</p>
                               {/* Разделенная шкала статусов */}
-                              <div className="flex gap-1 mb-2">
-                                <div className={`flex-1 h-2 rounded-full ${
+                              <div className="flex gap-0.5 mb-2">
+                                <div className={`flex-1 h-1.5 rounded-full ${
                                   currentIndex >= 0 ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
-                                <div className={`flex-1 h-2 rounded-full ${
+                                <div className={`flex-1 h-1.5 rounded-full ${
                                   currentIndex >= 1 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
-                                <div className={`flex-1 h-2 rounded-full ${
+                                <div className={`flex-1 h-1.5 rounded-full ${
                                   currentIndex >= 2 ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
-                                <div className={`flex-1 h-2 rounded-full ${
+                                <div className={`flex-1 h-1.5 rounded-full ${
                                   currentIndex >= 3 ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
-                                <div className={`flex-1 h-2 rounded-full ${
+                                <div className={`flex-1 h-1.5 rounded-full ${
                                   currentIndex >= 4 ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'
                                 }`}/>
                               </div>

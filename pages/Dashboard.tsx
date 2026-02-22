@@ -289,13 +289,13 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
       </div>
 
       {/* Живая лента событий */}
-      <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5 flex flex-col items-center text-center">
-        <div className="flex justify-between items-center mb-6 w-full">
+      <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg border border-white/5">
+        <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl shadow-neo bg-neo-bg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <History size={27} className="text-orange-500"/>
             </div>
-            <div className="text-left">
+            <div>
               <h3 className="text-sm font-semibold uppercase text-gray-800 dark:text-gray-200">Живая лента</h3>
               <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase">Последние события</p>
             </div>
@@ -304,12 +304,12 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
             Весь журнал <ChevronRight size={14}/>
           </button>
         </div>
-        <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
           {(() => {
             const allEvents = [
               ...breakdowns.map(b => ({ type: 'breakdown' as const, data: b, date: new Date(b.date).getTime() })),
               ...records.map(r => ({ type: 'record' as const, data: r, date: new Date(r.date).getTime() }))
-            ].sort((a, b) => b.date - a.date).slice(0, 8);
+            ].sort((a, b) => b.date - a.date).slice(0, 12);
 
             if (allEvents.length === 0) {
               return <p className="text-center py-10 text-[9px] font-black text-gray-400 uppercase">Событий нет</p>;
@@ -323,19 +323,19 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                 return (
                   <div
                     key={`b-${b.id}`}
-                    className="p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 border-red-500 flex flex-col gap-2"
+                    className="p-3 rounded-xl shadow-neo-sm bg-neo-bg border-l-4 border-red-500 flex flex-col gap-1.5"
                   >
                     <div className="flex justify-between items-start">
                       <div className="overflow-hidden flex-1">
-                        <p className="text-[10px] font-black uppercase text-gray-700 truncate">{b.partName || 'Поломка'}</p>
-                        <p className="text-[8px] font-bold text-gray-400 truncate">{equip?.name || 'Техника'}</p>
+                        <p className="text-[9px] font-black uppercase text-gray-700 truncate">{b.partName || 'Поломка'}</p>
+                        <p className="text-[7px] font-bold text-gray-400 truncate">{equip?.name || 'Техника'}</p>
                       </div>
-                      <span className="text-[7px] text-gray-400">{formatDate(b.date)}</span>
+                      <span className="text-[6px] text-gray-400">{formatDate(b.date)}</span>
                     </div>
                     {req && (
-                      <div className="flex items-center gap-2">
-                        <Package size={10} className="text-blue-500"/>
-                        <span className="text-[7px] font-black text-blue-400 uppercase">{req.status}</span>
+                      <div className="flex items-center gap-1.5">
+                        <Package size={8} className="text-blue-500"/>
+                        <span className="text-[6px] font-black text-blue-400 uppercase">{req.status}</span>
                       </div>
                     )}
                   </div>
@@ -348,14 +348,14 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
                 return (
                   <div
                     key={`r-${r.id}`}
-                    className="p-4 rounded-2xl shadow-neo-sm bg-neo-bg border-l-4 border-emerald-500 flex flex-col gap-2"
+                    className="p-3 rounded-xl shadow-neo-sm bg-neo-bg border-l-4 border-emerald-500 flex flex-col gap-1.5"
                   >
                     <div className="flex justify-between items-start">
                       <div className="overflow-hidden flex-1">
-                        <p className="text-[10px] font-black uppercase text-gray-700 truncate">{recordType}</p>
-                        <p className="text-[8px] font-bold text-gray-400 truncate">{equip?.name || 'Техника'}</p>
+                        <p className="text-[9px] font-black uppercase text-gray-700 truncate">{recordType}</p>
+                        <p className="text-[7px] font-bold text-gray-400 truncate">{equip?.name || 'Техника'}</p>
                       </div>
-                      <span className="text-[7px] text-gray-400">{formatDate(r.date)}</span>
+                      <span className="text-[6px] text-gray-400">{formatDate(r.date)}</span>
                     </div>
                   </div>
                 );
