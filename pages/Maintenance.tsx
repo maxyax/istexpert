@@ -108,7 +108,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
     hoursAtBreakdown: undefined as number | undefined,
     mechanic: '',
     driver: '',
-    photos: [] as string[]
+    photos: [] as string[],
+    items: [] as { sku: string; name: string; quantity: string }[]
   });
 
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
@@ -358,7 +359,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       hoursAtBreakdown: e.hours,
       photos: [] as string[],
       mechanic: user?.full_name || '',
-      driver: ''
+      driver: '',
+      items: []
     });
     setIsBreakdownModalOpen(true);
   };
@@ -388,7 +390,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
     });
     setIsBreakdownModalOpen(false);
     setSelectedMaintenanceEquipId(null);
-    setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: undefined, mechanic: '', driver: '', photos: [] });
+    setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: undefined, mechanic: '', driver: '', photos: [], items: [] });
   };
 
   const handleUploadBreakdownPhoto = () => {
@@ -738,7 +740,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                         <Wrench size={14}/>
                         <span className="hidden md:inline">ТО</span>
                       </button>
-                      <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '' }); setIsBreakdownModalOpen(true); }} className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-xs text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                      <button onClick={() => { setSelectedMaintenanceEquipId(e.id); setBreakdownForm({ node: 'Двигатель', partName: '', severity: 'Средняя', description: '', date: new Date().toISOString().slice(0, 10), hoursAtBreakdown: e.hours, photos: [], mechanic: user?.full_name || '', driver: '', items: [] }); setIsBreakdownModalOpen(true); }} className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-xs text-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
                         <AlertTriangle size={14}/>
                         <span className="hidden md:inline">Акт</span>
                       </button>
@@ -1303,6 +1305,68 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                     <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Примечания</label>
                     <textarea value={breakdownForm.description} onChange={e=>setBreakdownForm({...breakdownForm, description: e.target.value})} placeholder="Описание и примечания" className="w-full p-4 rounded-2xl shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] dark:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.3),inset_-4px_-4px_8px_rgba(60,75,95,0.2)] bg-neo-bg text-gray-900 dark:text-gray-200 outline-none app-input font-semibold placeholder-gray-500 h-24 resize-none" />
                  </div>
+                 
+                 {/* Позиции запчастей */}
+                 <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Позиции запчастей</label>
+                      <button
+                        type="button"
+                        onClick={() => setBreakdownForm({...breakdownForm, items: [...breakdownForm.items, { sku: '', name: '', quantity: '1' }]})}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all text-[9px] font-black uppercase"
+                      >
+                        <Plus size={12}/> Добавить позицию
+                      </button>
+                    </div>
+                    {breakdownForm.items.length === 0 && (
+                      <p className="text-sm text-gray-400 ml-2">Нет позиций — добавьте запчасти, которые требуются</p>
+                    )}
+                    {breakdownForm.items.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-2 rounded-xl bg-neo-bg border border-white/5">
+                        <input
+                          type="text"
+                          placeholder="Артикул"
+                          value={item.sku}
+                          onChange={e => {
+                            const arr = [...breakdownForm.items];
+                            arr[idx].sku = e.target.value;
+                            setBreakdownForm({...breakdownForm, items: arr});
+                          }}
+                          className="flex-1 min-w-[80px] p-2 rounded-lg bg-neo-bg shadow-neo-inset text-xs font-bold outline-none"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Наименование"
+                          value={item.name}
+                          onChange={e => {
+                            const arr = [...breakdownForm.items];
+                            arr[idx].name = e.target.value;
+                            setBreakdownForm({...breakdownForm, items: arr});
+                          }}
+                          className="flex-2 min-w-[120px] p-2 rounded-lg bg-neo-bg shadow-neo-inset text-xs font-bold outline-none"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Кол-во"
+                          value={item.quantity}
+                          onChange={e => {
+                            const arr = [...breakdownForm.items];
+                            arr[idx].quantity = e.target.value;
+                            setBreakdownForm({...breakdownForm, items: arr});
+                          }}
+                          className="w-20 p-2 rounded-lg bg-neo-bg shadow-neo-inset text-xs font-bold text-center outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setBreakdownForm({...breakdownForm, items: breakdownForm.items.filter((_, i) => i !== idx)})}
+                          className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                        >
+                          <X size={16}/>
+                        </button>
+                      </div>
+                    ))}
+                 </div>
+                 
                  <div className="space-y-2">
                     <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-2">Фотографии (узел/шильдик/маркировка)</label>
                     <div className="flex gap-3 items-center">
