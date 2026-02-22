@@ -381,6 +381,8 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
     if (!selectedMaintenanceEquipId) return;
     const equipToUpdate = equipment.find(eq => eq.id === selectedMaintenanceEquipId);
     if (!equipToUpdate) return;
+
+    console.log('Saving breakdown with items:', breakdownForm.items);
     
     const payload: any = {
       equipmentId: selectedMaintenanceEquipId,
@@ -388,6 +390,9 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
       status: 'Новая',
       ...breakdownForm
     };
+    
+    console.log('Payload:', payload);
+    
     addBreakdown(payload);
     // also add to records as an entry in archive
     addMaintenance({
@@ -2112,7 +2117,21 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                 {!relatedRequest ? (
                   <button
                     type="button"
-                    onClick={() => setIsBreakdownSelectOpen(true)}
+                    onClick={() => {
+                      // Сразу открываем форму заявки с данными из акта
+                      const breakdown = selectedBreakdownDetail;
+                      
+                      // Передаем все позиции из акта если они есть
+                      const items = breakdown.items && breakdown.items.length > 0
+                        ? breakdown.items.map(item => ({ sku: item.sku, name: item.name, quantity: item.quantity }))
+                        : [{ sku: '', name: breakdown.partName, quantity: '1' }];
+                      
+                      // Открываем форму заявки
+                      setRequestEquipmentId(breakdown.equipmentId);
+                      setSelectedBreakdownDetail(breakdown);
+                      setRequestItems(items);
+                      setIsCreateRequestOpen(true);
+                    }}
                     className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs leading-tight shadow-neo hover:shadow-neo-inset transition-all"
                   >
                     Создать заявку снабжения
