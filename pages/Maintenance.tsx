@@ -677,7 +677,7 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
                       setIsBreakdownEquipSelectOpen(false);
                       setIsBreakdownModalOpen(true);
                     }}
-                    className="w-full p-4 rounded-2xl bg-neo-bg shadow-[4px_4px_12px_rgba(0,0,0,0.05),-4px_-4px_12px_rgba(255,255,255,0.9)] dark:shadow-[4px_4px_12px_rgba(0,0,0,0.3),-4px_-4px_12px_rgba(60,75,95,0.15)] hover:shadow-[6px_6px_16px_rgba(0,0,0,0.08),-6px_-6px_16px_rgba(255,255,255,1)] dark:hover:shadow-[6px_6px_16px_rgba(0,0,0,0.4),-6px_-6px_16px_rgba(60,75,95,0.2)] transition-all flex justify-between items-center group"
+                    className="w-full p-4 rounded-2xl bg-neo-bg shadow-[inset_3px_3px_6px_rgba(0,0,0,0.1),inset_-3px_-3px_6px_rgba(255,255,255,0.9)] dark:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.3),inset_-3px_-3px_6px_rgba(60,75,95,0.2)] hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,1)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(60,75,95,0.25)] transition-all flex justify-between items-center group"
                   >
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
