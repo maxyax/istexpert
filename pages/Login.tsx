@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Truck, Mail, Lock, Building, ArrowLeft, ChevronRight, PlayCircle } from 'lucide-react';
+import { Truck, Mail, Lock, Building, ArrowLeft, ChevronRight, PlayCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { supabase } from '../lib/supabase';
 
@@ -8,10 +8,14 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [inn, setInn] = useState('');
+  const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login, register, demoLogin } = useAuthStore();
 
@@ -22,9 +26,21 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
 
     if (isRegister) {
       if (!companyName || !inn || !email || !pass) { 
-        setError('Заполните все поля'); 
+        setError('Заполните все обязательные поля'); 
         setLoading(false);
         return; 
+      }
+
+      if (pass !== confirmPass) {
+        setError('Пароли не совпадают');
+        setLoading(false);
+        return;
+      }
+
+      if (pass.length < 6) {
+        setError('Пароль должен быть не менее 6 символов');
+        setLoading(false);
+        return;
       }
       
       try {
@@ -35,7 +51,9 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
           options: {
             data: {
               company_name: companyName,
-              inn: inn
+              inn: inn,
+              full_name: fullName,
+              phone: phone
             },
             emailRedirectTo: window.location.origin
           }
@@ -50,6 +68,7 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
             name: companyName,
             inn: inn,
             email: email,
+            phone: phone,
             subscription_status: 'trial',
             subscription_plan: 'free',
             subscription_start: new Date().toISOString(),
@@ -66,7 +85,7 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
           .insert([{
             id: data.user.id,
             email: email,
-            full_name: companyName,
+            full_name: fullName || companyName,
             role: 'company_admin',
             company_id: companyData.id
           }]);
@@ -110,62 +129,136 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
              {isRegister && (
                <>
                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Название организации</label>
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Название организации *</label>
                     <div className="relative">
                        <Building size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                       <input type="text" className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" value={companyName} onChange={e => setCompanyName(e.target.value)} />
+                       <input 
+                         type="text" 
+                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
+                         value={companyName} 
+                         onChange={e => setCompanyName(e.target.value)}
+                         required
+                         placeholder="ООО «Ромашка»"
+                       />
                     </div>
                  </div>
                  <div className="space-y-1.5">
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2">ИНН</label>
-                    <input type="text" className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" value={inn} onChange={e => setInn(e.target.value)} />
+                    <input 
+                      type="text" 
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
+                      value={inn} 
+                      onChange={e => setInn(e.target.value)}
+                      placeholder="1234567890"
+                    />
+                 </div>
+                 <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2">ФИО контактного лица</label>
+                    <div className="relative">
+                       <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
+                       <input 
+                         type="text" 
+                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
+                         value={fullName} 
+                         onChange={e => setFullName(e.target.value)}
+                         placeholder="Иванов Иван Иванович"
+                       />
+                    </div>
+                 </div>
+                 <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Телефон</label>
+                    <input 
+                      type="tel" 
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
+                      value={phone} 
+                      onChange={e => setPhone(e.target.value)}
+                      placeholder="+7 (999) 000-00-00"
+                    />
                  </div>
                </>
              )}
-             
+
              <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Email адрес</label>
+                <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Email адрес *</label>
                 <div className="relative">
                    <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                   <input type="email" placeholder="demo@istexpert.ru" className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" value={email} onChange={e => setEmail(e.target.value)} />
+                   <input 
+                     type="email" 
+                     placeholder="demo@istexpert.ru" 
+                     className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
+                     value={email} 
+                     onChange={e => setEmail(e.target.value)}
+                     required
+                   />
                 </div>
              </div>
 
              {!isRegister && (
-               <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Пароль</label>
-                  <div className="relative">
-                     <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                     <input type="password" placeholder="••••••••" className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" value={pass} onChange={e => setPass(e.target.value)} />
-                  </div>
-               </div>
-             )}
-
-             {isRegister && (
                <div className="space-y-1.5">
                   <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Пароль *</label>
                   <div className="relative">
                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
                      <input 
                        type="password" 
-                       placeholder="Минимум 6 символов"
+                       placeholder="••••••••" 
                        className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
                        value={pass} 
-                       onChange={e => setPass(e.target.value)} 
+                       onChange={e => setPass(e.target.value)}
                        required
-                       minLength={6}
                      />
                   </div>
-                  <p className="text-[9px] text-gray-500 ml-2">
-                    Придет письмо с подтверждением на email
-                  </p>
                </div>
+             )}
+
+             {isRegister && (
+               <>
+                 <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Пароль *</label>
+                    <div className="relative">
+                       <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
+                       <input 
+                         type={showPassword ? 'text' : 'password'}
+                         placeholder="Минимум 6 символов"
+                         className="w-full pl-12 pr-12 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
+                         value={pass} 
+                         onChange={e => setPass(e.target.value)}
+                         required
+                         minLength={6}
+                       />
+                       <button
+                         type="button"
+                         onClick={() => setShowPassword(!showPassword)}
+                         className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                       >
+                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                       </button>
+                    </div>
+                 </div>
+                 <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Подтверждение пароля *</label>
+                    <div className="relative">
+                       <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
+                       <input 
+                         type={showPassword ? 'text' : 'password'}
+                         placeholder="Повторите пароль"
+                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
+                         value={confirmPass} 
+                         onChange={e => setConfirmPass(e.target.value)}
+                         required
+                         minLength={6}
+                       />
+                    </div>
+                 </div>
+                 <p className="text-[9px] text-gray-500 ml-2">
+                   📧 На почту придет письмо с подтверждением и логином для входа
+                 </p>
+               </>
              )}
 
              {error && <p className="text-[10px] text-red-500 font-black uppercase text-center">{error}</p>}
 
-             <button 
-               type="submit" 
+             <button
+               type="submit"
                disabled={loading}
                className="w-full py-5 rounded-[2rem] bg-blue-500 text-white font-black uppercase text-xs shadow-lg hover:shadow-neo transition-all tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
              >
