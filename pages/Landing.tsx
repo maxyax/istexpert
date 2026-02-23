@@ -150,51 +150,45 @@ export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> 
   };
 
   return (
-    <div className="min-h-screen bg-neo-bg text-gray-800 font-sans">
+    <div className="min-h-screen bg-neo-bg text-gray-800 font-sans overflow-x-hidden">
       {/* Навигация */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled ? 'bg-neo-bg/95 backdrop-blur-sm' : ''
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-12 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-neo-bg shadow-neo flex items-center justify-center text-blue-600">
-                <Truck size={24} />
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-neo-bg shadow-neo flex items-center justify-center text-blue-600 shrink-0">
+                <Truck size={20} />
               </div>
-              <div>
-                <span className="text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-200">
+              <div className="min-w-0">
+                <span className="text-base md:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-200 block truncate">
                   ISTExpert
                 </span>
-                <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest -mt-1">
+                <p className="text-[8px] md:text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest -mt-0.5 md:-mt-1 truncate">
                   Система управления автопарком
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button
                 onClick={toggleTheme}
-                className="p-3 rounded-xl shadow-neo cursor-pointer hover:shadow-neo-inset transition-all text-gray-600 dark:text-gray-300"
+                className="p-2 md:p-3 rounded-xl shadow-neo cursor-pointer hover:shadow-neo-inset transition-all text-gray-600 dark:text-gray-300 shrink-0"
               >
-                <Moon size={20} className="dark:hidden" />
-                <Sun size={20} className="hidden dark:block" />
+                <Moon size={18} className="dark:hidden" />
+                <Sun size={18} className="hidden dark:block" />
               </button>
               <button
                 onClick={onRegister}
-                className="px-6 py-3 rounded-2xl bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all"
+                className="hidden xs:block px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-blue-500 text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest hover:scale-105 transition-all shrink-0"
               >
                 Регистрация
               </button>
               <button
-                onClick={handleDemoLogin}
-                className="hidden sm:flex px-6 py-3 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black text-[10px] uppercase tracking-widest hover:shadow-neo-inset transition-all items-center gap-2"
-              >
-                <PlayCircle size={16} /> Демо
-              </button>
-              <button
                 onClick={onStart}
-                className="px-8 py-3 rounded-2xl bg-neo-bg shadow-neo text-gray-600 font-black text-[10px] uppercase tracking-widest hover:shadow-neo-inset transition-all"
+                className="px-3 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-neo-bg shadow-neo text-gray-600 font-black text-[9px] md:text-[10px] uppercase tracking-widest hover:shadow-neo-inset transition-all shrink-0"
               >
                 Вход
               </button>
@@ -204,54 +198,54 @@ export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> 
       </nav>
 
       {/* Герой-секция */}
-      <section className="pt-48 pb-20 px-6 relative overflow-hidden">
+      <section className="pt-40 md:pt-48 pb-20 px-4 md:px-6 relative overflow-x-hidden">
         {/* Фоновые анимированные элементы */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-20 right-0 w-64 md:w-96 h-64 md:h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-60 md:w-80 h-60 md:h-80 bg-indigo-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
         </div>
-        
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
-          <div className="space-y-10 animate-in slide-in-from-left duration-1000">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full shadow-neo-sm bg-neo-bg dark:bg-gray-800 text-blue-500 animate-in zoom-in duration-700">
-              <Zap size={14} className="fill-current animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest">
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center relative z-10">
+          <div className="space-y-6 md:space-y-10 animate-in slide-in-from-left duration-1000">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-neo-sm bg-neo-bg dark:bg-gray-800 text-blue-500 animate-in zoom-in duration-700">
+              <Zap size={12} className="fill-current animate-pulse" />
+              <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest">
                 Цифровизация автопарка 2.0
               </span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-black uppercase leading-[1.1] tracking-tighter text-gray-800 dark:text-gray-200">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black uppercase leading-[1.1] tracking-tighter text-gray-800 dark:text-gray-200">
               <span className="block animate-in slide-in-from-bottom duration-700">Система</span>
-              <span className="block text-blue-500 animate-in slide-in-from-bottom duration-700 delay-100">управления</span>
-              <span className="block animate-in slide-in-from-bottom duration-700 delay-200">автопарком</span>
+              <span className="block text-blue-500 animate-in slide-in-from-bottom duration-700 delay-100 break-words">управления</span>
+              <span className="block animate-in slide-in-from-bottom duration-700 delay-200 break-words">автопарком</span>
             </h1>
 
-            <p className="text-xl text-gray-500 dark:text-gray-400 font-medium max-w-lg leading-relaxed animate-in slide-in-from-bottom duration-700 delay-300">
+            <p className="text-base md:text-xl text-gray-500 dark:text-gray-400 font-medium max-w-lg leading-relaxed animate-in slide-in-from-bottom duration-700 delay-300">
               Автоматизируйте ТО, ремонты, снабжение и документооборот.
               Полный контроль над каждой единицей техники в режиме реального времени.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6 animate-in slide-in-from-bottom duration-700 delay-400">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 animate-in slide-in-from-bottom duration-700 delay-400">
               <button
                 onClick={onStart}
-                className="group px-12 py-6 rounded-[2.5rem] bg-blue-500 text-white font-black uppercase text-sm shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-4"
+                className="group px-6 md:px-12 py-4 md:py-6 rounded-[2rem] md:rounded-[2.5rem] bg-blue-500 text-white font-black uppercase text-xs md:text-sm shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-2 md:gap-4"
               >
                 Начать работу
                 <ArrowRight
-                  size={20}
+                  size={16}
                   className="group-hover:translate-x-2 transition-transform"
                 />
               </button>
               <button
                 onClick={handleDemoLogin}
-                className="px-10 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg dark:bg-gray-800 text-blue-500 dark:text-blue-400 font-black uppercase text-sm hover:shadow-neo-inset transition-all duration-300 hover:scale-105"
+                className="px-6 md:px-10 py-4 md:py-6 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg dark:bg-gray-800 text-blue-500 dark:text-blue-400 font-black uppercase text-xs md:text-sm hover:shadow-neo-inset transition-all duration-300 hover:scale-105"
               >
                 Демо-доступ
               </button>
             </div>
 
             {/* Быстрые преимущества */}
-            <div className="flex flex-wrap gap-3 pt-4 animate-in slide-in-from-bottom duration-700 delay-500">
+            <div className="flex flex-wrap gap-2 md:gap-3 pt-2 md:pt-4 animate-in slide-in-from-bottom duration-700 delay-500">
               {[
                 'Без установки',
                 'Работает в браузере',
@@ -259,11 +253,11 @@ export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> 
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full shadow-neo-sm bg-neo-bg dark:bg-gray-800 animate-in zoom-in duration-500"
+                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-neo-sm bg-neo-bg dark:bg-gray-800 animate-in zoom-in duration-500"
                   style={{ animationDelay: `${i * 100}ms` }}
                 >
-                  <CheckCircle2 size={14} className="text-emerald-500" />
-                  <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase">
+                  <CheckCircle2 size={12} className="text-emerald-500" />
+                  <span className="text-[8px] md:text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase">
                     {item}
                   </span>
                 </div>
@@ -464,29 +458,29 @@ export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> 
       )}
 
       {/* CTA секция */}
-      <section className="py-32 px-6">
+      <section className="py-20 px-4 md:py-32 md:px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="relative p-12 md:p-20 rounded-[3rem] shadow-neo bg-neo-bg dark:bg-gray-800 overflow-hidden">
-            <div className="relative z-10 text-center space-y-8">
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-gray-800 dark:text-gray-200">
+          <div className="relative p-6 md:p-12 lg:p-20 rounded-[2rem] md:rounded-[3rem] shadow-neo bg-neo-bg dark:bg-gray-800 overflow-hidden">
+            <div className="relative z-10 text-center space-y-6 md:space-y-8">
+              <h2 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-tighter text-gray-800 dark:text-gray-200 leading-tight">
                 Готовы оптимизировать
                 <br />
-                <span className="text-blue-500">ваш автопарк?</span>
+                <span className="text-blue-500 break-words">ваш автопарк?</span>
               </h2>
-              <p className="text-xl text-gray-500 dark:text-gray-400 font-medium max-w-2xl mx-auto">
+              <p className="text-base md:text-xl text-gray-500 dark:text-gray-400 font-medium max-w-2xl mx-auto px-2">
                 Начните использовать ISTExpert прямо сейчас и получите полный контроль над вашей техникой
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-4">
                 <button
                   onClick={onStart}
-                  className="px-12 py-6 rounded-[2.5rem] bg-blue-500 text-white font-black uppercase text-sm shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-3"
+                  className="px-6 md:px-12 py-4 md:py-6 rounded-[2rem] md:rounded-[2.5rem] bg-blue-500 text-white font-black uppercase text-xs md:text-sm shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2 md:gap-3"
                 >
                   Начать бесплатно
-                  <ArrowRight size={20} />
+                  <ArrowRight size={16} className="md:size-20" />
                 </button>
                 <button
                   onClick={handleDemoLogin}
-                  className="px-12 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg dark:bg-gray-700 text-blue-500 dark:text-blue-400 font-black uppercase text-sm hover:shadow-neo-inset transition-all"
+                  className="px-6 md:px-12 py-4 md:py-6 rounded-[2rem] md:rounded-[2.5rem] shadow-neo bg-neo-bg dark:bg-gray-700 text-blue-500 dark:text-blue-400 font-black uppercase text-xs md:text-sm hover:shadow-neo-inset transition-all"
                 >
                   Демо-режим
                 </button>
