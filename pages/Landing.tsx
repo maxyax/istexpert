@@ -354,7 +354,8 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             {FEATURES.map((feature, i) => (
               <div
                 key={i}
-                className="group p-10 rounded-[3rem] shadow-neo bg-neo-bg dark:bg-gray-800 space-y-6 hover:shadow-neo-inset transition-all duration-500 animate-in slide-in-from-bottom"
+                onClick={() => setSelectedFeature(feature)}
+                className="group p-10 rounded-[3rem] shadow-neo bg-neo-bg dark:bg-gray-800 space-y-6 hover:shadow-neo-inset transition-all duration-500 animate-in slide-in-from-bottom cursor-pointer"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
                 <div className="p-4 rounded-2xl shadow-neo w-fit text-blue-500 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -368,13 +369,10 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                     {feature.desc}
                   </p>
                 </div>
-                <button
-                  onClick={() => setSelectedFeature(feature)}
-                  className="text-[10px] font-black text-blue-500 uppercase flex items-center gap-2 pt-2 group-hover:translate-x-2 transition-all duration-300"
-                >
+                <div className="text-[10px] font-black text-blue-500 uppercase flex items-center gap-2 pt-2 group-hover:translate-x-2 transition-all duration-300">
                   <span>Подробнее</span>
                   <ChevronRight size={12} />
-                </button>
+                </div>
               </div>
             ))}
           </div>
