@@ -27,34 +27,35 @@ export const usePermissions = (): Permissions => {
   const isMechanic = role === UserRole.MECHANIC;
   const isDriver = role === UserRole.DRIVER;
   const isProcurement = role === UserRole.PROCUREMENT;
+  const isAccountant = role === UserRole.ACCOUNTANT;
 
   return {
     // Дашборд - все видят
     canViewDashboard: true,
-    
-    // Автопарк - все видят, редактируют админ, менеджер, механик
+
+    // Автопарк - все видят, редактируют админ, менеджер, механик, бухгалтер
     canViewEquipment: true,
-    canEditEquipment: isSuperAdmin || isCompanyAdmin || isManager || isMechanic,
-    
-    // ТО и Ремонт - видят и редактируют админ, менеджер, механик
-    canViewMaintenance: isSuperAdmin || isCompanyAdmin || isManager || isMechanic,
-    canEditMaintenance: isSuperAdmin || isCompanyAdmin || isManager || isMechanic,
-    
+    canEditEquipment: isSuperAdmin || isCompanyAdmin || isManager || isMechanic || isAccountant,
+
+    // ТО и Ремонт - видят и редактируют админ, менеджер, механик, бухгалтер
+    canViewMaintenance: isSuperAdmin || isCompanyAdmin || isManager || isMechanic || isAccountant,
+    canEditMaintenance: isSuperAdmin || isCompanyAdmin || isManager || isMechanic || isAccountant,
+
     // Календарь ТО - все видят
     canViewCalendar: true,
-    
-    // Снабжение - видят все, редактируют админ, менеджер, снабженец, механик
+
+    // Снабжение - видят все, редактируют админ, менеджер, снабженец, механик, бухгалтер
     canViewProcurement: true,
-    canEditProcurement: isSuperAdmin || isCompanyAdmin || isManager || isProcurement || isMechanic,
-    
-    // Топливо - видят все, редактируют админ, менеджер, водитель, механик
+    canEditProcurement: isSuperAdmin || isCompanyAdmin || isManager || isProcurement || isMechanic || isAccountant,
+
+    // Топливо - видят все, редактируют админ, менеджер, водитель, механик, бухгалтер
     canViewFuel: true,
-    canEditFuel: isSuperAdmin || isCompanyAdmin || isManager || isDriver || isMechanic,
-    
+    canEditFuel: isSuperAdmin || isCompanyAdmin || isManager || isDriver || isMechanic || isAccountant,
+
     // Настройки - только админ компании и супер-админ
     canViewSettings: isSuperAdmin || isCompanyAdmin,
     canEditSettings: isSuperAdmin || isCompanyAdmin,
-    
+
     // Управление пользователями - только админ компании и супер-админ
     canManageUsers: isSuperAdmin || isCompanyAdmin,
   };

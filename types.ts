@@ -2,16 +2,17 @@
 export enum UserRole {
   // Супер-админ (владелец платформы)
   SUPER_ADMIN = 'super_admin',
-  
+
   // Админ компании (владелец компании)
   OWNER = 'owner',
   COMPANY_ADMIN = 'company_admin',
-  
+
   // Пользователи компании с разными правами
   USER = 'user',           // Полный доступ (кроме настроек компании)
   MECHANIC = 'mechanic',   // Механик: ТО, ремонты, заявки
   DRIVER = 'driver',       // Водитель: заправки, акты поломок
-  PROCUREMENT = 'procurement' // Снабженец: заявки, закупки
+  PROCUREMENT = 'procurement', // Снабженец: заявки, закупки
+  ACCOUNTANT = 'accountant' // Бухгалтер: документы, отчеты
 }
 
 export interface User {
