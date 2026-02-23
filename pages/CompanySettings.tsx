@@ -50,6 +50,17 @@ export const CompanySettings: React.FC = () => {
   const [newMember, setNewMember] = useState({ full_name: '', email: '', role: UserRole.USER });
   const [showPlanConfirm, setShowPlanConfirm] = useState(false);
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [editingMemberRole, setEditingMemberRole] = useState<string | null>(null);
+
+  const ROLE_DESCRIPTIONS: Record<string, string> = {
+    [UserRole.DRIVER]: 'Заполняет путевые листы, акты, заправки. Доступ к топливу и документам.',
+    [UserRole.MECHANIC]: 'Проводит ТО и ремонты, создаёт заявки на снабжение. Полный доступ к разделу ТО.',
+    [UserRole.PROCUREMENT]: 'Обрабатывает заявки на закупку, работает с поставщиками. Доступ к снабжению.',
+    [UserRole.ACCOUNTANT]: 'Работает с документами, отчётами, актами. Полный доступ ко всем разделам.',
+    [UserRole.USER]: 'Полный доступ ко всем разделам кроме настроек компании.',
+    [UserRole.COMPANY_ADMIN]: 'Полный доступ включая настройки компании и управление сотрудниками.'
+  };
 
   const isAdmin = user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.COMPANY_ADMIN || user?.role === UserRole.OWNER;
 
@@ -144,6 +155,28 @@ export const CompanySettings: React.FC = () => {
     
     setShowPlanConfirm(false);
     setPendingPlan(null);
+  };
+
+  const handleEditRole = (memberId: string, currentRole: string) => {
+    setEditingMemberId(memberId);
+    setEditingMemberRole(currentRole);
+  };
+
+  const handleSaveRole = (memberId: string) => {
+    if (!editingMemberRole) return;
+    // Обновляем роль сотрудника
+    const updatedStaff = staff.map(m => 
+      m.id === memberId ? { ...m, role: editingMemberRole as UserRole } : m
+    );
+    // В реальном приложении здесь будет вызов API для сохранения
+    // useAuthStore.getState().updateStaffRole(memberId, editingMemberRole);
+    setEditingMemberId(null);
+    setEditingMemberRole(null);
+  };
+
+  const handleCancelEditRole = () => {
+    setEditingMemberId(null);
+    setEditingMemberRole(null);
   };
 
   if (!companyData) {
@@ -406,19 +439,50 @@ export const CompanySettings: React.FC = () => {
                 <div className="w-10 h-10 rounded-xl shadow-neo bg-neo-bg flex items-center justify-center text-gray-400 font-black text-sm uppercase">
                   {member.full_name[0]}
                 </div>
-                <div>
+                <div className="flex-1">
                   <h4 className="text-sm font-black text-gray-800 dark:text-gray-100 uppercase">{member.full_name}</h4>
-                  <div className="flex items-center gap-1.5 mt-1">
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                     <Shield size={10} className="text-blue-500" />
-                    <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">
-                      {member.role === 'user' ? 'Пользователь' : 
-                       member.role === 'company_admin' ? 'Администратор' :
-                       member.role === 'driver' ? 'Водитель' :
-                       member.role === 'mechanic' ? 'Механик' :
-                       member.role === 'procurement' ? 'Снабженец' :
-                       member.role === 'accountant' ? 'Бухгалтер' :
-                       member.role.replace('_', ' ')}
-                    </span>
+                    {editingMemberId === member.id ? (
+                      <select
+                        value={editingMemberRole || member.role}
+                        onChange={e => setEditingMemberRole(e.target.value)}
+                        className="text-[8px] font-black text-blue-500 uppercase tracking-widest bg-transparent outline-none cursor-pointer"
+                      >
+                        <option value={UserRole.DRIVER}>Водитель</option>
+                        <option value={UserRole.MECHANIC}>Механик</option>
+                        <option value={UserRole.PROCUREMENT}>Снабженец</option>
+                        <option value={UserRole.ACCOUNTANT}>Бухгалтер</option>
+                        <option value={UserRole.USER}>Пользователь</option>
+                        <option value={UserRole.COMPANY_ADMIN}>Администратор</option>
+                      </select>
+                    ) : (
+                      <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">
+                        {member.role === 'user' ? 'Пользователь' : 
+                         member.role === 'company_admin' ? 'Администратор' :
+                         member.role === 'driver' ? 'Водитель' :
+                         member.role === 'mechanic' ? 'Механик' :
+                         member.role === 'procurement' ? 'Снабженец' :
+                         member.role === 'accountant' ? 'Бухгалтер' :
+                         member.role.replace('_', ' ')}
+                      </span>
+                    )}
+                    {isAdmin && (
+                      <button
+                        onClick={() => editingMemberId === member.id ? handleSaveRole(member.id) : handleEditRole(member.id, member.role)}
+                        className="ml-2 p-1 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"
+                      >
+                        {editingMemberId === member.id ? <Save size={10} /> : <Edit3 size={10} />}
+                      </button>
+                    )}
+                    {editingMemberId === member.id && (
+                      <button
+                        onClick={handleCancelEditRole}
+                        className="ml-1 p-1 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                      >
+                        <X size={10} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -474,6 +538,13 @@ export const CompanySettings: React.FC = () => {
                   <option value={UserRole.USER}>Пользователь</option>
                   <option value={UserRole.COMPANY_ADMIN}>Администратор</option>
                 </select>
+                {newMember.role && (
+                  <div className="mt-2 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                    <p className="text-[10px] text-gray-700 dark:text-gray-300 font-bold leading-relaxed">
+                      💡 {ROLE_DESCRIPTIONS[newMember.role]}
+                    </p>
+                  </div>
+                )}
               </div>
               <button
                 type="submit"
