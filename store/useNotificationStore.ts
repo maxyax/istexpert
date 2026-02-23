@@ -12,16 +12,7 @@ interface NotificationState {
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
-  notifications: [
-    {
-      id: 'n1',
-      title: 'Добро пожаловать',
-      message: 'Система ISTExpert готова к работе. Проверьте актуальность наработки техники.',
-      type: 'info',
-      createdAt: new Date().toISOString(),
-      read: false
-    }
-  ],
+  notifications: [],
   addNotification: (title, message, type = 'info') => set((state) => ({
     notifications: [
       {

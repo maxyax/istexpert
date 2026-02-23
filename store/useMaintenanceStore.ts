@@ -24,29 +24,9 @@ interface MaintenanceState {
 
 export const useMaintenanceStore = create<MaintenanceState>((set) => ({
   records: [],
-  breakdowns: [
-    // Fixed status and severity to match types.ts Russian strings
-    { id: 'b-demo', equipmentId: 'id-1', date: new Date().toISOString(), node: 'Двигатель', partName: 'ТНВД', status: 'Новая', severity: 'Критическая', hoursAtBreakdown: 1400, description: 'Утечка топлива под высоким давлением', reportedBy: 'Иванов А.А.' }
-  ],
-  plannedTOs: [
-    { id: 'p1', equipmentId: 'id-1', type: 'ТО-1', date: '2025-06-15', status: 'planned' }
-  ],
-  fuelRecords: [
-    {
-      id: 'f1',
-      equipmentId: 'id-1',
-      date: new Date(Date.now() - 86400000).toISOString(),
-      station: 'Лукойл',
-      fuelType: 'ДТ (Зимнее)' as any,
-      quantity: 120,
-      pricePerLiter: 65,
-      totalCost: 7800,
-      currentHours: 1410,
-      currentMileage: 12000,
-      paymentMethod: 'Топливная карта' as any,
-      performedBy: 'Петров А.В.'
-    }
-  ],
+  breakdowns: [],
+  plannedTOs: [],
+  fuelRecords: [],
   selectedMaintenanceEquipId: null,
   setSelectedMaintenanceEquipId: (id) => set({ selectedMaintenanceEquipId: id }),
   addMaintenance: (record) => set((state) => ({
