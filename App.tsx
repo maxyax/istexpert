@@ -26,6 +26,14 @@ const App: React.FC = () => {
   // Проверка на админа
   const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL;
 
+  // Проверяем URL при загрузке
+  React.useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/admin' && isAdmin) {
+      setCurrentPage('admin');
+    }
+  }, [isAdmin]);
+
   // Админ-панель
   if (currentPage === 'admin' && isAdmin) {
     return <AdminDashboard onLogout={() => { setCurrentPage('dashboard'); }} />;

@@ -1,6 +1,7 @@
 
 import { create } from 'zustand';
 import { User, UserRole } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface CompanyInfo {
   name: string;
@@ -23,14 +24,14 @@ interface AuthState {
   updateCompany: (updates: Partial<CompanyInfo>) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isRegistered: false,
   user: null,
-  company: { 
-    name: 'ООО ТехноПарк', 
-    inn: '7700123456', 
-    address: 'г. Москва, ул. Промышленная, 12' 
+  company: {
+    name: 'ООО ТехноПарк',
+    inn: '7700123456',
+    address: 'г. Москва, ул. Промышленная, 12'
   },
   staff: [
     { id: 'u1', email: 'mechanic@ist.ru', full_name: 'Петров А.В.', role: UserRole.MECHANIC, company_id: 'c1' },
@@ -39,16 +40,60 @@ export const useAuthStore = create<AuthState>((set) => ({
     { id: 'demo', email: 'demo@istexpert.ru', full_name: 'Демо Пользователь', role: UserRole.ADMIN, company_id: 'c1' },
   ],
   login: async (email, pass) => {
-    if (email === 'demo@istexpert.ru') {
-      set({ isAuthenticated: true, user: useAuthStore.getState().staff.find(s => s.id === 'demo') || null });
+    // Проверяем через Supabase
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: pass
+      });
+
+      if (error) {
+        console.error('Supabase login error:', error);
+        return false;
+      }
+
+      // Получаем информацию о пользователе из нашей БД
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*, company:companies(name, inn)')
+        .eq('id', data.user.id)
+        .single();
+
+      if (userData) {
+        set({
+          isAuthenticated: true,
+          user: {
+            id: userData.id,
+            email: userData.email,
+            full_name: userData.full_name,
+            role: userData.role as UserRole,
+            company_id: userData.company_id
+          },
+          company: userData.company ? {
+            name: userData.company.name,
+            inn: userData.company.inn,
+            address: ''
+          } : get().company
+        });
+        return true;
+      }
+
+      // Если пользователя нет в БД, используем данные из auth
+      set({
+        isAuthenticated: true,
+        user: {
+          id: data.user.id,
+          email: data.user.email || email,
+          full_name: data.user.user_metadata?.full_name || 'Пользователь',
+          role: UserRole.ADMIN,
+          company_id: 'default'
+        }
+      });
       return true;
+    } catch (err) {
+      console.error('Login error:', err);
+      return false;
     }
-    const found = useAuthStore.getState().staff.find(s => s.email === email);
-    if (found) {
-      set({ isAuthenticated: true, user: found });
-      return true;
-    }
-    return false;
   },
   demoLogin: () => {
     set({ 
