@@ -48,6 +48,8 @@ export const CompanySettings: React.FC = () => {
   const [usage, setUsage] = useState({ users: 0, equipment: 0 });
   const [daysRemaining, setDaysRemaining] = useState(0);
   const [newMember, setNewMember] = useState({ full_name: '', email: '', role: UserRole.USER });
+  const [showPlanConfirm, setShowPlanConfirm] = useState(false);
+  const [pendingPlan, setPendingPlan] = useState<string | null>(null);
 
   const isAdmin = user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.COMPANY_ADMIN || user?.role === UserRole.OWNER;
 
@@ -119,17 +121,17 @@ export const CompanySettings: React.FC = () => {
   const handlePlanChange = async (newPlan: string) => {
     if (!user?.company_id || !companyData) return;
 
-    const confirmChange = window.confirm(
-      `Вы уверены, что хотите сменить тариф на "${PLAN_NAMES[newPlan]}"?\n\n` +
-      `Стоимость: ${PLAN_LIMITS[newPlan].price}₽/месяц`
-    );
+    setPendingPlan(newPlan);
+    setShowPlanConfirm(true);
+  };
 
-    if (!confirmChange) return;
+  const confirmPlanChange = async () => {
+    if (!pendingPlan || !user?.company_id || !companyData) return;
 
     const { error } = await supabase
       .from('companies')
       .update({
-        subscription_plan: newPlan,
+        subscription_plan: pendingPlan,
         subscription_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       })
       .eq('id', user.company_id);
@@ -137,9 +139,11 @@ export const CompanySettings: React.FC = () => {
     if (error) {
       alert('Ошибка смены тарифа: ' + error.message);
     } else {
-      alert('Тариф успешно изменён!');
-      setCompanyData({ ...companyData, subscription_plan: newPlan });
+      setCompanyData({ ...companyData, subscription_plan: pendingPlan });
     }
+    
+    setShowPlanConfirm(false);
+    setPendingPlan(null);
   };
 
   if (!companyData) {
@@ -471,13 +475,59 @@ export const CompanySettings: React.FC = () => {
                   <option value={UserRole.COMPANY_ADMIN}>Администратор</option>
                 </select>
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="w-full py-5 rounded-2xl bg-blue-500 text-white font-black uppercase text-[10px] shadow-lg tracking-widest"
               >
                 Добавить в штат
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===== МОДАЛКА ПОДТВЕРЖДЕНИЯ СМЕНЫ ТАРИФА ===== */}
+      {showPlanConfirm && pendingPlan && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-neo-bg w-full max-w-md rounded-[2.5rem] shadow-neo p-8 md:p-10 animate-in zoom-in duration-300">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-2xl shadow-neo bg-blue-500 flex items-center justify-center text-white">
+                <CreditCard size={28} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black uppercase">Смена тарифа</h3>
+                <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Подтверждение</p>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg mb-6">
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-bold mb-4 text-center">
+                Вы уверены, что хотите сменить тариф на
+                <span className="text-blue-500 font-black"> "{PLAN_NAMES[pendingPlan]}"</span>?
+              </p>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Стоимость:</span>
+                <span className="text-2xl font-black text-blue-500">{PLAN_LIMITS[pendingPlan].price}₽</span>
+                <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest">/месяц</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => { setShowPlanConfirm(false); setPendingPlan(null); }}
+                className="py-4 rounded-2xl shadow-neo bg-neo-bg text-gray-500 font-black uppercase text-[10px] tracking-widest hover:shadow-neo-inset transition-all"
+              >
+                Отменить
+              </button>
+              <button
+                type="button"
+                onClick={confirmPlanChange}
+                className="py-4 rounded-2xl bg-blue-500 text-white font-black uppercase text-[10px] shadow-lg tracking-widest hover:scale-105 transition-all"
+              >
+                Подтвердить
+              </button>
+            </div>
           </div>
         </div>
       )}
