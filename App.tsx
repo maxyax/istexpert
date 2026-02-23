@@ -20,12 +20,18 @@ import { FuelManagement } from './pages/FuelManagement';
 import { CompanySettings } from './pages/CompanySettings';
 
 const App: React.FC = () => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, loadUserFromSupabase } = useAuthStore();
   const [showLogin, setShowLogin] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [showPricing, setShowPricing] = useState(false);
   const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
   const [hasRedirectedAdmin, setHasRedirectedAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Загружаем пользователя из Supabase при старте
+  React.useEffect(() => {
+    loadUserFromSupabase().finally(() => setIsLoading(false));
+  }, []);
 
   // Проверка на админа
   const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL;
@@ -105,6 +111,18 @@ const App: React.FC = () => {
   // Страница успеха регистрации
   if (showRegisterSuccess) {
     return <RegisterSuccess />;
+  }
+
+  // Показываем загрузку пока загружаем пользователя
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-neo-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500 font-bold">Загрузка...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

@@ -22,23 +22,15 @@ interface AuthState {
   addStaff: (member: Omit<User, 'id' | 'company_id'>) => void;
   removeStaff: (id: string) => void;
   updateCompany: (updates: Partial<CompanyInfo>) => void;
+  loadUserFromSupabase: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isRegistered: false,
   user: null,
-  company: {
-    name: 'ООО ТехноПарк',
-    inn: '7700123456',
-    address: 'г. Москва, ул. Промышленная, 12'
-  },
-  staff: [
-    { id: 'u1', email: 'mechanic@ist.ru', full_name: 'Петров А.В.', role: UserRole.USER, company_id: 'c1' },
-    { id: 'u2', email: 'supply@ist.ru', full_name: 'Сидоров К.М.', role: UserRole.USER, company_id: 'c1' },
-    { id: 'u3', email: 'chief@ist.ru', full_name: 'Иванов И.И.', role: UserRole.COMPANY_ADMIN, company_id: 'c1' },
-    { id: 'demo', email: 'demo@istexpert.ru', full_name: 'Демо Пользователь', role: UserRole.COMPANY_ADMIN, company_id: 'c1' },
-  ],
+  company: null,
+  staff: [],
   login: async (email, pass) => {
     // Проверяем через Supabase
     try {
@@ -110,14 +102,51 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   register: (name, inn, email) => {
-    set({ 
+    set({
       isRegistered: true,
       isAuthenticated: true,
       company: { name, inn, address: '' },
       user: { id: 'admin-new', email, full_name: 'Владелец бизнеса', role: UserRole.COMPANY_ADMIN, company_id: 'new-c' }
     });
   },
-  logout: () => set({ isAuthenticated: false, user: null }),
+  loadUserFromSupabase: async () => {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) {
+      set({ isAuthenticated: false, user: null, company: null });
+      return;
+    }
+
+    const { data: userData } = await supabase
+      .from('users')
+      .select('*, company:companies(name, inn)')
+      .eq('id', authUser.id)
+      .single();
+
+    if (userData) {
+      const isAdmin = authUser.email === import.meta.env.VITE_ADMIN_EMAIL;
+      set({
+        isAuthenticated: true,
+        user: {
+          id: userData.id,
+          email: userData.email,
+          full_name: userData.full_name,
+          role: isAdmin ? UserRole.SUPER_ADMIN : (userData.role as UserRole),
+          company_id: userData.company_id
+        },
+        company: userData.company ? {
+          name: userData.company.name,
+          inn: userData.company.inn,
+          address: ''
+        } : null
+      });
+    } else {
+      set({ isAuthenticated: false, user: null, company: null });
+    }
+  },
+  logout: async () => {
+    await supabase.auth.signOut();
+    set({ isAuthenticated: false, user: null, company: null, staff: [] });
+  },
   addStaff: (member) => set((state) => ({
     staff: [...state.staff, { ...member, id: Math.random().toString(36).substr(2, 9), company_id: state.user?.company_id || 'c1' }]
   })),
