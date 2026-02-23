@@ -13,15 +13,16 @@ export const CompanySettings: React.FC = () => {
     inn: company?.inn || '', 
     address: company?.address || '' 
   });
-  const [newMember, setNewMember] = useState({ full_name: '', email: '', role: UserRole.MECHANIC });
+  const [newMember, setNewMember] = useState({ full_name: '', email: '', role: UserRole.USER });
 
-  const isAdmin = user?.role === UserRole.ADMIN;
+  // Только админ компании может редактировать настройки и добавлять пользователей
+  const isAdmin = user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.COMPANY_ADMIN || user?.role === UserRole.OWNER;
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     addStaff(newMember);
     setIsModalOpen(false);
-    setNewMember({ full_name: '', email: '', role: UserRole.MECHANIC });
+    setNewMember({ full_name: '', email: '', role: UserRole.USER });
   };
 
   const handleCompanySave = () => {
@@ -140,10 +141,11 @@ export const CompanySettings: React.FC = () => {
                   <div className="space-y-1.5">
                      <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Доступ / Роль</label>
                      <select className="w-full p-4 rounded-xl shadow-neo-inset bg-neo-bg outline-none text-xs font-black uppercase border-none" value={newMember.role} onChange={e => setNewMember({...newMember, role: e.target.value as any})}>
+                        <option value={UserRole.DRIVER}>Водитель</option>
                         <option value={UserRole.MECHANIC}>Механик</option>
-                        <option value={UserRole.CHIEF_MECHANIC}>Главный механик</option>
                         <option value={UserRole.PROCUREMENT}>Снабженец</option>
-                        <option value={UserRole.DIRECTOR}>Директор</option>
+                        <option value={UserRole.USER}>Менеджер</option>
+                        <option value={UserRole.COMPANY_ADMIN}>Администратор</option>
                      </select>
                   </div>
                   <button type="submit" className="w-full py-5 rounded-2xl bg-blue-500 text-white font-black uppercase text-[10px] shadow-lg tracking-widest">Добавить в штат</button>

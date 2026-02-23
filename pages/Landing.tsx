@@ -120,6 +120,10 @@ export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> 
   const [isDark, setIsDark] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<FeatureCard | null>(null);
 
+  const handleDemoLogin = async () => {
+    await demoLogin();
+  };
+
   useEffect(() => {
     // Проверяем сохраненную тему
     const savedTheme = localStorage.getItem('theme');
@@ -183,7 +187,7 @@ export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> 
                 Регистрация
               </button>
               <button
-                onClick={demoLogin}
+                onClick={handleDemoLogin}
                 className="hidden sm:flex px-6 py-3 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black text-[10px] uppercase tracking-widest hover:shadow-neo-inset transition-all items-center gap-2"
               >
                 <PlayCircle size={16} /> Демо
@@ -239,7 +243,7 @@ export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> 
                 />
               </button>
               <button
-                onClick={demoLogin}
+                onClick={handleDemoLogin}
                 className="px-10 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg dark:bg-gray-800 text-blue-500 dark:text-blue-400 font-black uppercase text-sm hover:shadow-neo-inset transition-all duration-300 hover:scale-105"
               >
                 Демо-доступ
@@ -481,7 +485,7 @@ export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> 
                   <ArrowRight size={20} />
                 </button>
                 <button
-                  onClick={demoLogin}
+                  onClick={handleDemoLogin}
                   className="px-12 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg dark:bg-gray-700 text-blue-500 dark:text-blue-400 font-black uppercase text-sm hover:shadow-neo-inset transition-all"
                 >
                   Демо-режим

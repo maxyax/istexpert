@@ -22,21 +22,32 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [showPricing, setShowPricing] = useState(false);
   const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
+  const [hasRedirectedAdmin, setHasRedirectedAdmin] = useState(false);
 
   // Проверка на админа
   const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL;
 
-  // Проверяем URL при загрузке
+  // Проверяем URL при загрузке и при изменении статуса авторизации
   React.useEffect(() => {
     const path = window.location.pathname;
     if (path === '/admin' && isAdmin) {
       setCurrentPage('admin');
     }
-  }, [isAdmin]);
+    // Если админ только что залогинился, перенаправляем на /admin
+    if (isAuthenticated && isAdmin && !hasRedirectedAdmin) {
+      setCurrentPage('admin');
+      window.history.pushState({}, '', '/admin');
+      setHasRedirectedAdmin(true);
+    }
+  }, [isAdmin, isAuthenticated, hasRedirectedAdmin]);
 
   // Админ-панель
   if (currentPage === 'admin' && isAdmin) {
-    return <AdminDashboard onLogout={() => { setCurrentPage('dashboard'); }} />;
+    return <AdminDashboard onLogout={() => { 
+      setCurrentPage('dashboard');
+      setHasRedirectedAdmin(false);
+      window.history.pushState({}, '', '/');
+    }} />;
   }
 
   // Страница успеха регистрации

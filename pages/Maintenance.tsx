@@ -927,41 +927,6 @@ export const Maintenance: React.FC<{ onNavigate?: (page: string) => void }> = ({
 
               return (
                 <div className="space-y-3">
-                  {/* Просроченная страховка */}
-                  {showInsuranceTask && (
-                    <div
-                      className="w-full flex items-center justify-between p-3 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-left group border border-orange-500/30 cursor-pointer"
-                      onClick={() => {
-                        setSelectedMaintenanceEquipId(selectedEquip.id);
-                        setNewInsurance({
-                          insuranceCompany: selectedEquip.insuranceCompany || '',
-                          insuranceNumber: selectedEquip.insuranceNumber || '',
-                          insuranceStart: selectedEquip.insurance_end || new Date().toISOString().split('T')[0],
-                          insuranceEnd: ''
-                        });
-                        setIsInsuranceModalOpen(true);
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-orange-500 text-white">
-                          <AlertTriangle size={16}/>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-orange-700 dark:text-orange-400">Продлить ОСАГО</p>
-                          <p className="text-[9px] text-orange-600">
-                            {isInsuranceOverdue
-                              ? `Просрочено ${Math.abs(daysUntilInsuranceOverdue!)} дн.`
-                              : `Истекает через ${daysUntilInsuranceOverdue} дн.`}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs font-bold text-orange-700">{selectedEquip.insurance_end?.split('-').reverse().join('.')}</p>
-                        <ChevronRight size={16} className="text-orange-500 ml-auto"/>
-                      </div>
-                    </div>
-                  )}
-                  
                   {/* Просроченные ТО */}
                   {overdueTOs.map(to => {
                     const daysOverdue = Math.ceil((today.getTime() - new Date(to.date + 'T00:00:00').getTime()) / (1000 * 60 * 60 * 24));

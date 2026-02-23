@@ -34,10 +34,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     address: 'г. Москва, ул. Промышленная, 12'
   },
   staff: [
-    { id: 'u1', email: 'mechanic@ist.ru', full_name: 'Петров А.В.', role: UserRole.MECHANIC, company_id: 'c1' },
-    { id: 'u2', email: 'supply@ist.ru', full_name: 'Сидоров К.М.', role: UserRole.PROCUREMENT, company_id: 'c1' },
-    { id: 'u3', email: 'chief@ist.ru', full_name: 'Иванов И.И.', role: UserRole.CHIEF_MECHANIC, company_id: 'c1' },
-    { id: 'demo', email: 'demo@istexpert.ru', full_name: 'Демо Пользователь', role: UserRole.ADMIN, company_id: 'c1' },
+    { id: 'u1', email: 'mechanic@ist.ru', full_name: 'Петров А.В.', role: UserRole.USER, company_id: 'c1' },
+    { id: 'u2', email: 'supply@ist.ru', full_name: 'Сидоров К.М.', role: UserRole.USER, company_id: 'c1' },
+    { id: 'u3', email: 'chief@ist.ru', full_name: 'Иванов И.И.', role: UserRole.COMPANY_ADMIN, company_id: 'c1' },
+    { id: 'demo', email: 'demo@istexpert.ru', full_name: 'Демо Пользователь', role: UserRole.COMPANY_ADMIN, company_id: 'c1' },
   ],
   login: async (email, pass) => {
     // Проверяем через Supabase
@@ -60,13 +60,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .single();
 
       if (userData) {
+        // Проверяем на супер-админа
+        const isAdmin = email === import.meta.env.VITE_ADMIN_EMAIL;
         set({
           isAuthenticated: true,
           user: {
             id: userData.id,
             email: userData.email,
             full_name: userData.full_name,
-            role: userData.role as UserRole,
+            role: isAdmin ? UserRole.SUPER_ADMIN : (userData.role as UserRole),
             company_id: userData.company_id
           },
           company: userData.company ? {
@@ -79,13 +81,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       // Если пользователя нет в БД, используем данные из auth
+      const isAdmin = email === import.meta.env.VITE_ADMIN_EMAIL;
       set({
         isAuthenticated: true,
         user: {
           id: data.user.id,
           email: data.user.email || email,
           full_name: data.user.user_metadata?.full_name || 'Пользователь',
-          role: UserRole.ADMIN,
+          role: isAdmin ? UserRole.SUPER_ADMIN : UserRole.USER,
           company_id: 'default'
         }
       });
@@ -95,18 +98,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
   },
-  demoLogin: () => {
-    set({ 
-      isAuthenticated: true, 
-      user: { id: 'demo', email: 'demo@istexpert.ru', full_name: 'Демо Пользователь', role: UserRole.ADMIN, company_id: 'c1' } 
-    });
+  demoLogin: async () => {
+    const { user } = get();
+    if (user) {
+      set({ isAuthenticated: true });
+    } else {
+      set({
+        isAuthenticated: true,
+        user: { id: 'demo', email: 'demo@istexpert.ru', full_name: 'Демо Пользователь', role: UserRole.COMPANY_ADMIN, company_id: 'c1' }
+      });
+    }
   },
   register: (name, inn, email) => {
     set({ 
-      isRegistered: true, 
+      isRegistered: true,
       isAuthenticated: true,
       company: { name, inn, address: '' },
-      user: { id: 'admin-new', email, full_name: 'Владелец бизнеса', role: UserRole.ADMIN, company_id: 'new-c' }
+      user: { id: 'admin-new', email, full_name: 'Владелец бизнеса', role: UserRole.COMPANY_ADMIN, company_id: 'new-c' }
     });
   },
   logout: () => set({ isAuthenticated: false, user: null }),

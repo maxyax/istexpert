@@ -132,10 +132,10 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Название организации *</label>
                     <div className="relative">
                        <Building size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                       <input 
-                         type="text" 
-                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
-                         value={companyName} 
+                       <input
+                         type="text"
+                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg dark:bg-gray-700 dark:text-gray-200 outline-none text-xs font-bold border-none"
+                         value={companyName}
                          onChange={e => setCompanyName(e.target.value)}
                          required
                          placeholder="ООО «Ромашка»"
@@ -144,10 +144,10 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
                  </div>
                  <div className="space-y-1.5">
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2">ИНН</label>
-                    <input 
-                      type="text" 
-                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
-                      value={inn} 
+                    <input
+                      type="text"
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg dark:bg-gray-700 dark:text-gray-200 outline-none text-xs font-bold border-none"
+                      value={inn}
                       onChange={e => setInn(e.target.value)}
                       placeholder="1234567890"
                     />
@@ -156,10 +156,10 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2">ФИО контактного лица</label>
                     <div className="relative">
                        <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                       <input 
-                         type="text" 
-                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
-                         value={fullName} 
+                       <input
+                         type="text"
+                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg dark:bg-gray-700 dark:text-gray-200 outline-none text-xs font-bold border-none"
+                         value={fullName}
                          onChange={e => setFullName(e.target.value)}
                          placeholder="Иванов Иван Иванович"
                        />
@@ -167,10 +167,10 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
                  </div>
                  <div className="space-y-1.5">
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Телефон</label>
-                    <input 
-                      type="tel" 
-                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
-                      value={phone} 
+                    <input
+                      type="tel"
+                      className="w-full p-4 rounded-2xl shadow-neo-inset bg-neo-bg dark:bg-gray-700 dark:text-gray-200 outline-none text-xs font-bold border-none"
+                      value={phone}
                       onChange={e => setPhone(e.target.value)}
                       placeholder="+7 (999) 000-00-00"
                     />
@@ -182,11 +182,11 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
                 <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Email адрес *</label>
                 <div className="relative">
                    <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                   <input 
-                     type="email" 
-                     placeholder="demo@istexpert.ru" 
-                     className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
-                     value={email} 
+                   <input
+                     type="email"
+                     placeholder="demo@istexpert.ru"
+                     className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg dark:bg-gray-700 dark:text-gray-200 outline-none text-xs font-bold border-none"
+                     value={email}
                      onChange={e => setEmail(e.target.value)}
                      required
                    />
@@ -198,11 +198,11 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
                   <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Пароль *</label>
                   <div className="relative">
                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                     <input 
-                       type="password" 
-                       placeholder="••••••••" 
-                       className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
-                       value={pass} 
+                     <input
+                       type="password"
+                       placeholder="••••••••"
+                       className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg dark:bg-gray-700 dark:text-gray-200 outline-none text-xs font-bold border-none"
+                       value={pass}
                        onChange={e => setPass(e.target.value)}
                        required
                      />
@@ -216,11 +216,11 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Пароль *</label>
                     <div className="relative">
                        <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                       <input 
+                       <input
                          type={showPassword ? 'text' : 'password'}
                          placeholder="Минимум 6 символов"
-                         className="w-full pl-12 pr-12 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
-                         value={pass} 
+                         className="w-full pl-12 pr-12 py-4 rounded-2xl shadow-neo-inset bg-neo-bg dark:bg-gray-700 dark:text-gray-200 outline-none text-xs font-bold border-none"
+                         value={pass}
                          onChange={e => setPass(e.target.value)}
                          required
                          minLength={6}
@@ -238,18 +238,18 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
                     <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Подтверждение пароля *</label>
                     <div className="relative">
                        <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-                       <input 
+                       <input
                          type={showPassword ? 'text' : 'password'}
                          placeholder="Повторите пароль"
-                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
-                         value={confirmPass} 
+                         className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg dark:bg-gray-700 dark:text-gray-200 outline-none text-xs font-bold border-none"
+                         value={confirmPass}
                          onChange={e => setConfirmPass(e.target.value)}
                          required
                          minLength={6}
                        />
                     </div>
                  </div>
-                 <p className="text-[9px] text-gray-500 ml-2">
+                 <p className="text-[9px] text-gray-500 dark:text-gray-400 ml-2">
                    📧 На почту придет письмо с подтверждением и логином для входа
                  </p>
                </>
