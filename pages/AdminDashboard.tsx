@@ -153,9 +153,22 @@ export const AdminDashboard: React.FC<{ onLogout: () => void; onNavigate?: (page
   }
 
   return (
-    <div className="min-h-screen bg-neo-bg flex">
-      {/* Сайдбар */}
-      <aside className="w-64 bg-neo-bg border-r border-white/30 dark:border-gray-800 p-6 space-y-6">
+    <div className="min-h-screen bg-neo-bg flex flex-col md:flex-row">
+      {/* Мобильная шапка */}
+      <header className="md:hidden bg-neo-bg border-b border-white/30 dark:border-gray-800 p-4 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-2">
+          <Truck className="text-blue-500" size={24} />
+          <span className="text-base font-black tracking-tight text-gray-800 dark:text-gray-200">
+            ISTExpert Admin
+          </span>
+        </div>
+        <button onClick={onLogout} className="p-2 rounded-xl shadow-neo text-red-500">
+          <LogOut size={20} />
+        </button>
+      </header>
+
+      {/* Сайдбар - скрыт на мобильных, виден на десктопе */}
+      <aside className="hidden md:flex flex-col w-64 bg-neo-bg border-r border-white/30 dark:border-gray-800 p-6 space-y-6 min-h-screen">
         <div className="flex items-center gap-3 px-2">
           <Truck className="text-blue-500" size={28} />
           <span className="text-xl font-black tracking-tight text-gray-800 dark:text-gray-200">
@@ -163,7 +176,7 @@ export const AdminDashboard: React.FC<{ onLogout: () => void; onNavigate?: (page
           </span>
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-2 flex-1">
           {[
             { id: 'dashboard', label: 'Дашборд', icon: BarChart3 },
             { id: 'companies', label: 'Компании', icon: Users },
@@ -192,29 +205,49 @@ export const AdminDashboard: React.FC<{ onLogout: () => void; onNavigate?: (page
         </div>
       </aside>
 
+      {/* Мобильная навигация (табы внизу) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-neo-bg border-t border-white/30 dark:border-gray-800 p-2 z-40 flex justify-around">
+        {[
+          { id: 'dashboard', label: 'Дашборд', icon: BarChart3 },
+          { id: 'companies', label: 'Компании', icon: Users },
+          { id: 'subscriptions', label: 'Подписки', icon: Calendar },
+          { id: 'settings', label: 'Настройки', icon: Shield }
+        ].map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onNavigate && onNavigate(item.id)}
+            className="flex flex-col items-center gap-1 p-2 rounded-xl text-gray-600 dark:text-gray-300 font-bold text-[10px]"
+          >
+            <item.icon size={18} />
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
       {/* Основной контент */}
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
         {/* Заголовок */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-black uppercase text-gray-800 dark:text-gray-200">
+            <h1 className="text-2xl md:text-3xl font-black uppercase text-gray-800 dark:text-gray-200">
               Панель администратора
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
               Управление сервисом и пользователями
             </p>
           </div>
           <button
             onClick={() => { loadStats(); loadCompanies(); }}
-            className="p-3 rounded-xl shadow-neo text-blue-500 hover:shadow-neo-inset transition-all"
+            className="p-2 md:p-3 rounded-xl shadow-neo text-blue-500 hover:shadow-neo-inset transition-all"
           >
-            <RefreshCw size={20} />
+            <RefreshCw className="hidden md:block" size={20} />
+            <RefreshCw className="md:hidden" size={18} />
           </button>
         </div>
 
-        {/* Статистика */}
+        {/* Статистика - адаптивная сеттка */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
             {[
               { label: 'Компаний', value: stats.totalCompanies, icon: Users, color: 'text-blue-500' },
               { label: 'Пользователей', value: stats.totalUsers, icon: Users, color: 'text-emerald-500' },
@@ -222,20 +255,21 @@ export const AdminDashboard: React.FC<{ onLogout: () => void; onNavigate?: (page
               { label: 'Активных', value: stats.activeSubscriptions, icon: TrendingUp, color: 'text-emerald-500' },
               { label: 'Истекло', value: stats.expiredSubscriptions, icon: Calendar, color: 'text-orange-500' },
               { label: 'Заблокировано', value: stats.suspendedSubscriptions, icon: Lock, color: 'text-red-500' },
-              { label: 'За месяц', value: `${formatMoney(stats.monthlyRevenue)}`, icon: DollarSign, color: 'text-emerald-500' },
-              { label: 'За год', value: `${formatMoney(stats.yearlyRevenue)}`, icon: DollarSign, color: 'text-blue-500' }
+              { label: 'За месяц', value: formatMoney(stats.monthlyRevenue), icon: DollarSign, color: 'text-emerald-500' },
+              { label: 'За год', value: formatMoney(stats.yearlyRevenue), icon: DollarSign, color: 'text-blue-500' }
             ].map((stat, i) => (
               <div
                 key={i}
-                className="p-6 rounded-[2rem] shadow-neo bg-neo-bg dark:bg-gray-800 hover:shadow-neo-inset transition-all"
+                className="p-4 md:p-6 rounded-2xl md:rounded-[2rem] shadow-neo bg-neo-bg dark:bg-gray-800 hover:shadow-neo-inset transition-all"
               >
-                <div className={`mb-3 ${stat.color}`}>
-                  <stat.icon size={20} />
+                <div className={`mb-2 md:mb-3 ${stat.color}`}>
+                  <stat.icon className="hidden md:block" size={20} />
+                  <stat.icon className="md:hidden" size={16} />
                 </div>
-                <div className="text-2xl font-black text-gray-800 dark:text-gray-200">
+                <div className="text-xl md:text-2xl font-black text-gray-800 dark:text-gray-200">
                   {stat.value}
                 </div>
-                <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
+                <div className="text-[8px] md:text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
                   {stat.label}
                 </div>
               </div>
@@ -243,22 +277,22 @@ export const AdminDashboard: React.FC<{ onLogout: () => void; onNavigate?: (page
           </div>
         )}
 
-        {/* Фильтры */}
-        <div className="flex gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
+        {/* Фильтры - адаптивные */}
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-6">
+          <div className="relative flex-1">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Поиск компании..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-neo-bg dark:bg-gray-800 shadow-neo-inset outline-none text-sm text-gray-800 dark:text-gray-200"
+              className="w-full pl-12 pr-4 py-3 md:py-4 rounded-xl md:rounded-2xl bg-neo-bg dark:bg-gray-800 shadow-neo-inset outline-none text-sm text-gray-800 dark:text-gray-200"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-6 py-4 rounded-2xl bg-neo-bg dark:bg-gray-800 shadow-neo-inset outline-none text-sm text-gray-800 dark:text-gray-200 font-medium"
+            className="px-4 py-3 md:py-4 rounded-xl md:rounded-2xl bg-neo-bg dark:bg-gray-800 shadow-neo-inset outline-none text-sm text-gray-800 dark:text-gray-200 font-medium"
           >
             <option value="all">Все статусы</option>
             <option value="active">Активные</option>
@@ -268,10 +302,10 @@ export const AdminDashboard: React.FC<{ onLogout: () => void; onNavigate?: (page
           </select>
         </div>
 
-        {/* Таблица компаний */}
-        <div className="bg-neo-bg dark:bg-gray-800 rounded-[2.5rem] shadow-neo overflow-hidden">
+        {/* Таблица компаний - скролл на мобильных */}
+        <div className="bg-neo-bg dark:bg-gray-800 rounded-2xl md:rounded-[2.5rem] shadow-neo overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1000px]">
+            <table className="w-full min-w-[800px]">
               <thead className="bg-white/5 dark:bg-gray-900/50">
                 <tr>
                   <th className="text-left py-4 px-6 text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-widest">
