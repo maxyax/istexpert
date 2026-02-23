@@ -1409,11 +1409,19 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
           console.log('=== onSave called ===');
           console.log('Insurance data:', insurance);
           console.log('Is editing:', isEditingInsurance);
-          
+
+          // Создаем копию insurance с правильными полями
+          const insuranceData = {
+            insuranceCompany: insurance.insuranceCompany || '',
+            insuranceNumber: insurance.insuranceNumber || '',
+            insuranceStart: insurance.insuranceStart || '',
+            insurance_end: insurance.insuranceEnd || '' // Важно: используем insurance_end для совместимости
+          };
+
           if (isEditingInsurance) {
             // Режим редактирования - просто обновляем текущий полис
             console.log('Editing mode - updating current policy');
-            setEditForm({...editForm, ...insurance});
+            setEditForm({...editForm, ...insuranceData});
           } else {
             // Режим добавления - старый полис в историю, новый текущий
             console.log('Adding mode - moving old to history');
@@ -1428,11 +1436,11 @@ export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
               setEditForm({
                 ...editForm,
                 insuranceHistory: [...(editForm.insuranceHistory || []), currentPolicy],
-                ...insurance
+                ...insuranceData
               });
             } else {
               console.log('No old policy - just setting new one');
-              setEditForm({...editForm, ...insurance});
+              setEditForm({...editForm, ...insuranceData});
             }
           }
           console.log('Edit form updated');
@@ -1630,17 +1638,29 @@ const AddInsuranceModal: React.FC<{
   const handleSubmit = () => {
     console.log('=== Submitting insurance ===');
     console.log('New insurance:', newInsurance);
-    
-    if (newInsurance.insuranceCompany && newInsurance.insuranceEnd) {
-      console.log('Calling onSave with:', newInsurance);
-      onSave(newInsurance);
+
+    // Проверяем и используем оба возможных имени поля
+    const endDate = newInsurance.insuranceEnd || newInsurance.insurance_end;
+
+    if (newInsurance.insuranceCompany && endDate) {
+      // Создаем объект с правильными именами полей
+      const insuranceData = {
+        insuranceCompany: newInsurance.insuranceCompany,
+        insuranceNumber: newInsurance.insuranceNumber,
+        insuranceStart: newInsurance.insuranceStart,
+        insuranceEnd: newInsurance.insuranceEnd || newInsurance.insurance_end,
+        insurance_end: newInsurance.insuranceEnd || newInsurance.insurance_end
+      };
+      console.log('Calling onSave with:', insuranceData);
+      onSave(insuranceData);
       console.log('onSave called, now closing modal');
       onClose(); // Закрываем модальное окно после сохранения
       setNewInsurance({
         insuranceCompany: '',
         insuranceNumber: '',
         insuranceStart: '',
-        insuranceEnd: ''
+        insuranceEnd: '',
+        insurance_end: ''
       });
     } else {
       alert('Пожалуйста, заполните страховую компанию и дату окончания полиса');
