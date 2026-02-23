@@ -114,7 +114,7 @@ const STATS = [
   { value: '+30%', label: 'Эффективность парка', icon: <TrendingUp size={24} /> }
 ];
 
-export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
+export const Landing: React.FC<{ onStart: () => void; onRegister: () => void }> = ({ onStart, onRegister }) => {
   const { demoLogin } = useAuthStore();
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(false);
@@ -175,6 +175,12 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
               >
                 <Moon size={20} className="dark:hidden" />
                 <Sun size={20} className="hidden dark:block" />
+              </button>
+              <button
+                onClick={onRegister}
+                className="px-6 py-3 rounded-2xl bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all"
+              >
+                Регистрация
               </button>
               <button
                 onClick={demoLogin}

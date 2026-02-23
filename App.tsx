@@ -4,6 +4,9 @@ import { useAuthStore } from './store/useAuthStore';
 import { Layout } from './Layout';
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
+import { Register } from './pages/Register';
+import { Pricing } from './pages/Pricing';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { Dashboard } from './pages/Dashboard';
 import { EquipmentList } from './pages/EquipmentList';
 import { Maintenance } from './pages/Maintenance';
@@ -13,12 +16,24 @@ import { FuelManagement } from './pages/FuelManagement';
 import { CompanySettings } from './pages/CompanySettings';
 
 const App: React.FC = () => {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [showLogin, setShowLogin] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [showPricing, setShowPricing] = useState(false);
+
+  // Проверка на админа
+  const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL;
+
+  // Админ-панель
+  if (currentPage === 'admin' && isAdmin) {
+    return <AdminDashboard onLogout={() => { setCurrentPage('dashboard'); }} />;
+  }
 
   if (!isAuthenticated) {
-    return showLogin ? <Login onBack={() => setShowLogin(false)} /> : <Landing onStart={() => setShowLogin(true)} />;
+    if (showPricing) {
+      return <Pricing onComplete={() => setShowPricing(false)} />;
+    }
+    return showLogin ? <Login onBack={() => setShowLogin(false)} /> : <Landing onStart={() => setShowLogin(true)} onRegister={() => setShowPricing(true)} />;
   }
 
   const renderPage = () => {
