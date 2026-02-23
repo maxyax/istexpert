@@ -114,8 +114,14 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       if (userError) throw userError;
 
-      // Переход на страницу с инструкцией
-      setStep(2);
+      // Автоматический вход после регистрации
+      await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
+      });
+
+      // Перенаправляем на главную
+      window.location.href = '/';
     } catch (err: any) {
       console.error('Registration error:', err);
       setError(err.message || 'Ошибка регистрации. Попробуйте позже.');
