@@ -163,9 +163,19 @@ export const AdminCompanies: React.FC<AdminCompaniesProps> = ({ onBack, onNaviga
   }
 
   return (
-    <div className="min-h-screen bg-neo-bg flex">
-      {/* Сайдбар */}
-      <aside className="w-64 bg-neo-bg border-r border-white/30 dark:border-gray-800 p-6 space-y-6">
+    <div className="min-h-screen bg-neo-bg flex flex-col md:flex-row">
+      {/* Мобильная шапка */}
+      <header className="md:hidden bg-neo-bg border-b border-white/30 dark:border-gray-800 p-4 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-2">
+          <button onClick={onBack} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800">
+            <RefreshCw size={20} className="text-gray-500" />
+          </button>
+          <span className="text-base font-black text-gray-800 dark:text-gray-200">Компании</span>
+        </div>
+      </header>
+
+      {/* Сайдбар - скрыт на мобильных */}
+      <aside className="hidden md:flex flex-col w-64 bg-neo-bg border-r border-white/30 dark:border-gray-800 p-6 space-y-6 min-h-screen">
         <div className="flex items-center gap-3 px-2">
           <button onClick={onBack} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800">
             <RefreshCw size={20} className="text-gray-500" />
@@ -173,7 +183,7 @@ export const AdminCompanies: React.FC<AdminCompaniesProps> = ({ onBack, onNaviga
           <span className="text-lg font-black text-gray-800 dark:text-gray-200">Админ-панель</span>
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-2 flex-1">
           {[
             { id: 'dashboard', label: 'Дашборд' },
             { id: 'companies', label: 'Компании', active: true },
@@ -195,8 +205,28 @@ export const AdminCompanies: React.FC<AdminCompaniesProps> = ({ onBack, onNaviga
         </nav>
       </aside>
 
+      {/* Нижняя навигация для мобильных */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-neo-bg border-t border-white/30 dark:border-gray-800 p-2 z-40 flex justify-around">
+        {[
+          { id: 'dashboard', label: 'Дашборд' },
+          { id: 'companies', label: 'Компании', active: true },
+          { id: 'subscriptions', label: 'Подписки' },
+          { id: 'settings', label: 'Настройки' }
+        ].map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onNavigate && onNavigate(item.id)}
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl font-bold text-[10px] ${
+              item.active ? 'text-purple-500' : 'text-gray-600 dark:text-gray-300'
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
       {/* Основной контент */}
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
         {/* Заголовок */}
         <div className="flex justify-between items-center mb-8">
           <div>
