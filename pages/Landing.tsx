@@ -14,7 +14,9 @@ import {
   Clock,
   Users,
   Package,
-  ChevronRight
+  ChevronRight,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -67,12 +69,32 @@ const STATS = [
 export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
   const { demoLogin } = useAuthStore();
   const [scrolled, setScrolled] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Проверяем сохраненную тему
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const shouldUseDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    
+    setIsDark(shouldUseDark);
+    if (shouldUseDark) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const toggleTheme = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    localStorage.setItem('theme', newDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark');
+  };
 
   return (
     <div className="min-h-screen bg-neo-bg text-gray-800 font-sans">
@@ -89,15 +111,22 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                 <Truck size={24} />
               </div>
               <div>
-                <span className="text-xl font-black uppercase tracking-tight text-gray-800">
+                <span className="text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-200">
                   ISTExpert
                 </span>
-                <p className="text-[9px] font-semibold text-gray-500 uppercase tracking-widest -mt-1">
+                <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest -mt-1">
                   Система управления автопарком
                 </p>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleTheme}
+                className="p-3 rounded-xl shadow-neo cursor-pointer hover:shadow-neo-inset transition-all text-gray-600 dark:text-gray-300"
+              >
+                <Moon size={20} className="dark:hidden" />
+                <Sun size={20} className="hidden dark:block" />
+              </button>
               <button
                 onClick={demoLogin}
                 className="hidden sm:flex px-6 py-3 rounded-2xl bg-neo-bg shadow-neo text-blue-600 font-black text-[10px] uppercase tracking-widest hover:shadow-neo-inset transition-all items-center gap-2"
@@ -126,13 +155,13 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
               </span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-black uppercase leading-[1.1] tracking-tighter text-gray-800">
+            <h1 className="text-5xl md:text-7xl font-black uppercase leading-[1.1] tracking-tighter text-gray-800 dark:text-gray-200">
               Система <br />
               <span className="text-blue-500">управления</span> <br />
               автопарком
             </h1>
 
-            <p className="text-xl text-gray-500 font-medium max-w-lg leading-relaxed">
+            <p className="text-xl text-gray-500 dark:text-gray-400 font-medium max-w-lg leading-relaxed">
               Автоматизируйте ТО, ремонты, снабжение и документооборот.
               Полный контроль над каждой единицей техники в режиме реального времени.
             </p>
@@ -150,7 +179,7 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
               </button>
               <button
                 onClick={demoLogin}
-                className="px-10 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg text-blue-500 font-black uppercase text-sm hover:shadow-neo-inset transition-all"
+                className="px-10 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg text-blue-500 font-black uppercase text-sm hover:shadow-neo-inset transition-all dark:text-blue-400"
               >
                 Демо-доступ
               </button>
@@ -168,7 +197,7 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                   className="flex items-center gap-2 px-4 py-2 rounded-full shadow-neo-sm bg-neo-bg"
                 >
                   <CheckCircle2 size={14} className="text-emerald-500" />
-                  <span className="text-[10px] font-bold text-gray-600 uppercase">
+                  <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase">
                     {item}
                   </span>
                 </div>
@@ -178,27 +207,27 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
 
           {/* Правая часть - визуализация */}
           <div className="relative animate-in zoom-in duration-1000 hidden lg:block">
-            <div className="w-full aspect-square rounded-[4rem] shadow-neo bg-neo-bg flex items-center justify-center p-12 border-8 border-white/50">
+            <div className="w-full aspect-square rounded-[4rem] shadow-neo bg-neo-bg dark:bg-gray-800 flex items-center justify-center p-12 border-8 border-white/50 dark:border-gray-700/50">
               <div className="text-center space-y-6">
-                <div className="w-32 h-32 mx-auto rounded-3xl bg-neo-bg shadow-neo flex items-center justify-center text-blue-600">
+                <div className="w-32 h-32 mx-auto rounded-3xl bg-neo-bg shadow-neo dark:bg-gray-700 flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <Truck size={64} />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black uppercase text-gray-800">
+                  <h3 className="text-3xl font-black uppercase text-gray-800 dark:text-gray-200">
                     ISTExpert
                   </h3>
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mt-2">
+                  <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-2">
                     Fleet Management
                   </p>
                 </div>
                 <div className="flex gap-3 justify-center">
-                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg text-[10px] font-black uppercase text-blue-600">
+                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-blue-600 dark:text-blue-400">
                     ТО
                   </div>
-                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg text-[10px] font-black uppercase text-orange-600">
+                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-orange-600 dark:text-orange-400">
                     Ремонт
                   </div>
-                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg text-[10px] font-black uppercase text-purple-600">
+                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-purple-600 dark:text-purple-400">
                     Снабжение
                   </div>
                 </div>
@@ -215,12 +244,12 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             {STATS.map((stat, i) => (
               <div
                 key={i}
-                className="p-6 md:p-8 rounded-[2rem] shadow-neo bg-neo-bg text-center space-y-3 hover:shadow-neo-inset transition-all"
+                className="p-6 md:p-8 rounded-[2rem] shadow-neo bg-neo-bg dark:bg-gray-800 text-center space-y-3 hover:shadow-neo-inset transition-all"
               >
                 <div className="text-3xl md:text-5xl font-black text-blue-500">
                   {stat.value}
                 </div>
-                <div className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest">
+                <div className="text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                   {stat.label}
                 </div>
               </div>
@@ -230,15 +259,15 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
       </section>
 
       {/* Преимущества */}
-      <section className="py-32 px-6 bg-white/5">
+      <section className="py-32 px-6 bg-white/5 dark:bg-gray-900/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-gray-800 mb-4">
+            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-gray-800 dark:text-gray-200 mb-4">
               Всё что нужно
               <br />
               <span className="text-blue-500">для управления автопарком</span>
             </h2>
-            <p className="text-lg text-gray-500 font-medium max-w-2xl mx-auto">
+            <p className="text-lg text-gray-500 dark:text-gray-400 font-medium max-w-2xl mx-auto">
               Полный набор инструментов для эффективной работы автопарка
             </p>
           </div>
@@ -247,16 +276,16 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             {FEATURES.map((feature, i) => (
               <div
                 key={i}
-                className="group p-10 rounded-[3rem] shadow-neo bg-neo-bg space-y-6 hover:shadow-neo-inset transition-all"
+                className="group p-10 rounded-[3rem] shadow-neo bg-neo-bg dark:bg-gray-800 space-y-6 hover:shadow-neo-inset transition-all"
               >
                 <div className="p-4 rounded-2xl shadow-neo w-fit text-blue-500 group-hover:scale-110 transition-transform">
                   {feature.icon}
                 </div>
                 <div>
-                  <h3 className="text-xl font-black uppercase tracking-tight text-gray-800">
+                  <h3 className="text-xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-200">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-gray-500 font-semibold uppercase mt-2 leading-relaxed">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase mt-2 leading-relaxed">
                     {feature.desc}
                   </p>
                 </div>
@@ -273,14 +302,14 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
       {/* CTA секция */}
       <section className="py-32 px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="relative p-12 md:p-20 rounded-[3rem] shadow-neo bg-neo-bg overflow-hidden">
+          <div className="relative p-12 md:p-20 rounded-[3rem] shadow-neo bg-neo-bg dark:bg-gray-800 overflow-hidden">
             <div className="relative z-10 text-center space-y-8">
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-gray-800">
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-gray-800 dark:text-gray-200">
                 Готовы оптимизировать
                 <br />
                 <span className="text-blue-500">ваш автопарк?</span>
               </h2>
-              <p className="text-xl text-gray-500 font-medium max-w-2xl mx-auto">
+              <p className="text-xl text-gray-500 dark:text-gray-400 font-medium max-w-2xl mx-auto">
                 Начните использовать ISTExpert прямо сейчас и получите полный контроль над вашей техникой
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -293,7 +322,7 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                 </button>
                 <button
                   onClick={demoLogin}
-                  className="px-12 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg text-blue-500 font-black uppercase text-sm hover:shadow-neo-inset transition-all"
+                  className="px-12 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg dark:bg-gray-700 text-blue-500 dark:text-blue-400 font-black uppercase text-sm hover:shadow-neo-inset transition-all"
                 >
                   Демо-режим
                 </button>
@@ -304,17 +333,17 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
       </section>
 
       {/* Футер */}
-      <footer className="py-12 px-6 border-t border-gray-200">
+      <footer className="py-12 px-6 border-t border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-neo-bg shadow-neo flex items-center justify-center text-blue-600">
+            <div className="w-10 h-10 rounded-xl bg-neo-bg shadow-neo dark:bg-gray-800 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <Truck size={20} />
             </div>
             <div>
-              <span className="text-lg font-black uppercase tracking-tight text-gray-800">
+              <span className="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-gray-200">
                 ISTExpert
               </span>
-              <p className="text-[9px] font-semibold text-gray-500 uppercase tracking-widest">
+              <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                 Система управления автопарком
               </p>
             </div>
@@ -322,24 +351,24 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
           <div className="flex items-center gap-8">
             <a
               href="#"
-              className="text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors"
+              className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               Документация
             </a>
             <a
               href="#"
-              className="text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors"
+              className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               Поддержка
             </a>
             <a
               href="#"
-              className="text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors"
+              className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               Контакты
             </a>
           </div>
-          <p className="text-xs text-gray-400 font-medium">
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
             © 2026 ISTExpert. Все права защищены.
           </p>
         </div>
