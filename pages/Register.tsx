@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Truck, CheckCircle2, ArrowRight, Mail, Phone, Building2, User, Lock, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { initializeCompanyDemoData } from '../lib/subscription';
 
 interface FormData {
   companyName: string;
@@ -89,6 +90,9 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }]);
 
       if (userError) throw userError;
+
+      // Шаг 4: Инициализация демо-данных
+      await initializeCompanyDemoData(companyData.id);
 
       // Переход на страницу тарифов
       setStep(2);
