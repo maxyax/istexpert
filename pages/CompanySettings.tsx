@@ -172,14 +172,14 @@ export const CompanySettings: React.FC = () => {
             <CreditCard size={28} />
           </div>
           <div>
-            <h2 className="text-xl font-black uppercase tracking-tight">Ваш тарифный план</h2>
-            <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">
+            <h2 className="text-xl font-black uppercase tracking-tight text-gray-900 dark:text-gray-100">Ваш тарифный план</h2>
+            <p className="text-xs text-gray-700 dark:text-gray-400 font-bold uppercase tracking-widest">
               {PLAN_NAMES[currentPlan]} • {limits.price}₽/месяц
             </p>
           </div>
           <div className="ml-auto text-right">
             <div className="text-3xl font-black text-blue-500">{daysRemaining}</div>
-            <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">дней до оплаты</div>
+            <div className="text-[9px] text-gray-700 dark:text-gray-300 font-black uppercase tracking-widest">дней до оплаты</div>
           </div>
         </div>
 
@@ -188,7 +188,7 @@ export const CompanySettings: React.FC = () => {
           <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg">
             <div className="flex items-center gap-2 mb-2">
               <Users size={16} className="text-blue-500" />
-              <span className="text-[9px] font-black text-gray-400 uppercase">Пользователи</span>
+              <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase">Пользователи</span>
             </div>
             <div className="text-2xl font-black">
               {usage.users} <span className="text-sm text-gray-500">/ {limits.users}</span>
@@ -205,7 +205,7 @@ export const CompanySettings: React.FC = () => {
           <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg">
             <div className="flex items-center gap-2 mb-2">
               <Truck size={16} className="text-green-500" />
-              <span className="text-[9px] font-black text-gray-400 uppercase">Техника</span>
+              <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase">Техника</span>
             </div>
             <div className="text-2xl font-black">
               {usage.equipment} <span className="text-sm text-gray-500">/ {limits.equipment}</span>
@@ -222,7 +222,7 @@ export const CompanySettings: React.FC = () => {
           <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg">
             <div className="flex items-center gap-2 mb-2">
               <Shield size={16} className="text-purple-500" />
-              <span className="text-[9px] font-black text-gray-400 uppercase">Документы</span>
+              <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase">Документы</span>
             </div>
             <div className="text-2xl font-black">
               {limits.documents >= 9999 ? '∞' : limits.documents}
@@ -234,7 +234,7 @@ export const CompanySettings: React.FC = () => {
           <div className="p-4 rounded-2xl shadow-neo-inset bg-neo-bg">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp size={16} className="text-orange-500" />
-              <span className="text-[9px] font-black text-gray-400 uppercase">Снабжение</span>
+              <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase">Снабжение</span>
             </div>
             <div className="text-2xl font-black">
               {limits.procurement >= 999 ? '∞' : limits.procurement}
@@ -288,11 +288,11 @@ export const CompanySettings: React.FC = () => {
                 onChange={e => setCompanyData({ ...companyData, name: e.target.value })}
               />
             ) : (
-              <h2 className="text-2xl font-black uppercase tracking-tight">{companyData.name}</h2>
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-gray-100">{companyData.name}</h2>
             )}
             <div className="flex items-center gap-4 mt-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">ИНН:</span>
+                <span className="text-[10px] text-gray-700 dark:text-gray-300 font-black uppercase tracking-widest">ИНН:</span>
                 {isEditingCompany ? (
                   <input
                     className="bg-neo-bg shadow-neo-inset p-1 px-3 rounded-lg font-black text-[10px] outline-none text-blue-500 border-none"
@@ -300,16 +300,16 @@ export const CompanySettings: React.FC = () => {
                     onChange={e => setCompanyData({ ...companyData, inn: e.target.value })}
                   />
                 ) : (
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{companyData.inn || '—'}</span>
+                  <span className="text-[10px] text-gray-700 dark:text-gray-300 font-black uppercase tracking-widest">{companyData.inn || '—'}</span>
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Email:</span>
+                <span className="text-[10px] text-gray-700 dark:text-gray-300 font-black uppercase tracking-widest">Email:</span>
                 <span className="text-[10px] text-gray-700 dark:text-gray-300 font-bold">{companyData.email}</span>
               </div>
               {companyData.phone && (
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Телефон:</span>
+                  <span className="text-[10px] text-gray-700 dark:text-gray-300 font-black uppercase tracking-widest">Телефон:</span>
                   <span className="text-[10px] text-gray-700 dark:text-gray-300 font-bold">{companyData.phone}</span>
                 </div>
               )}
@@ -319,7 +319,7 @@ export const CompanySettings: React.FC = () => {
 
         <div className="grid grid-cols-1 gap-6">
           <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg">
-            <p className="text-[9px] font-black text-gray-400 uppercase mb-2">Юридический адрес</p>
+            <p className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase mb-2">Юридический адрес</p>
             {isEditingCompany ? (
               <textarea
                 className="bg-transparent w-full font-bold text-xs outline-none text-blue-500 border-none resize-none"
@@ -340,11 +340,11 @@ export const CompanySettings: React.FC = () => {
         <div className="mt-8 p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20">
           <div className="flex items-center gap-3 mb-4">
             <Calendar size={20} className="text-blue-500" />
-            <h3 className="text-sm font-black uppercase tracking-widest">Информация о подписке</h3>
+            <h3 className="text-sm font-black uppercase tracking-widest text-gray-700 dark:text-gray-300">Информация о подписке</h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <p className="text-[9px] text-gray-500 font-black uppercase mb-1">Дата начала</p>
+              <p className="text-[9px] text-gray-700 dark:text-gray-300 font-black uppercase mb-1">Дата начала</p>
               <p className="text-sm font-bold">
                 {new Date(companyData.subscription_start).toLocaleDateString('ru-RU', { 
                   day: 'numeric', month: 'long', year: 'numeric' 
@@ -352,7 +352,7 @@ export const CompanySettings: React.FC = () => {
               </p>
             </div>
             <div>
-              <p className="text-[9px] text-gray-500 font-black uppercase mb-1">Дата окончания</p>
+              <p className="text-[9px] text-gray-700 dark:text-gray-300 font-black uppercase mb-1">Дата окончания</p>
               <p className="text-sm font-bold">
                 {new Date(companyData.subscription_end).toLocaleDateString('ru-RU', { 
                   day: 'numeric', month: 'long', year: 'numeric' 
@@ -360,7 +360,7 @@ export const CompanySettings: React.FC = () => {
               </p>
             </div>
             <div>
-              <p className="text-[9px] text-gray-500 font-black uppercase mb-1">Статус</p>
+              <p className="text-[9px] text-gray-700 dark:text-gray-300 font-black uppercase mb-1">Статус</p>
               <p className={`text-sm font-bold uppercase ${
                 companyData.subscription_status === 'active' ? 'text-green-500' :
                 companyData.subscription_status === 'trial' ? 'text-blue-500' :
@@ -378,7 +378,7 @@ export const CompanySettings: React.FC = () => {
       {/* ===== ШТАТ СОТРУДНИКОВ ===== */}
       <section className="space-y-6">
         <div className="flex justify-between items-center px-4">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+          <h3 className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest flex items-center gap-2">
             <User size={16} className="text-blue-500" /> Штат сотрудников
           </h3>
           {isAdmin && (
@@ -442,7 +442,7 @@ export const CompanySettings: React.FC = () => {
             </div>
             <form onSubmit={handleAdd} className="space-y-6">
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-gray-400 uppercase ml-2">ФИО</label>
+                <label className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase ml-2">ФИО</label>
                 <input 
                   className="w-full p-4 rounded-xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
                   value={newMember.full_name} 
@@ -451,7 +451,7 @@ export const CompanySettings: React.FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Email</label>
+                <label className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase ml-2">Email</label>
                 <input 
                   type="email" 
                   className="w-full p-4 rounded-xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
@@ -461,7 +461,7 @@ export const CompanySettings: React.FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Должность</label>
+                <label className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase ml-2">Должность</label>
                 <select 
                   className="w-full p-4 rounded-xl shadow-neo-inset bg-neo-bg outline-none text-xs font-black uppercase border-none" 
                   value={newMember.role} 
@@ -495,20 +495,20 @@ export const CompanySettings: React.FC = () => {
                 <CreditCard size={28} />
               </div>
               <div>
-                <h3 className="text-lg font-black uppercase">Смена тарифа</h3>
-                <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Подтверждение</p>
+                <h3 className="text-lg font-black uppercase text-gray-900 dark:text-gray-100">Смена тарифа</h3>
+                <p className="text-[9px] text-gray-700 dark:text-gray-300 font-black uppercase tracking-widest">Подтверждение</p>
               </div>
             </div>
 
             <div className="p-6 rounded-2xl shadow-neo-inset bg-neo-bg mb-6">
-              <p className="text-sm text-gray-600 dark:text-gray-300 font-bold mb-4 text-center">
+              <p className="text-sm text-gray-700 dark:text-gray-300 font-bold mb-4 text-center">
                 Вы уверены, что хотите сменить тариф на
                 <span className="text-blue-500 font-black"> "{PLAN_NAMES[pendingPlan]}"</span>?
               </p>
               <div className="flex items-center justify-center gap-2">
-                <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Стоимость:</span>
+                <span className="text-[9px] text-gray-700 dark:text-gray-300 font-black uppercase tracking-widest">Стоимость:</span>
                 <span className="text-2xl font-black text-blue-500">{PLAN_LIMITS[pendingPlan].price}₽</span>
-                <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest">/месяц</span>
+                <span className="text-[9px] text-gray-700 dark:text-gray-300 font-black uppercase tracking-widest">/месяц</span>
               </div>
             </div>
 
@@ -516,7 +516,7 @@ export const CompanySettings: React.FC = () => {
               <button
                 type="button"
                 onClick={() => { setShowPlanConfirm(false); setPendingPlan(null); }}
-                className="py-4 rounded-2xl shadow-neo bg-neo-bg text-gray-500 font-black uppercase text-[10px] tracking-widest hover:shadow-neo-inset transition-all"
+                className="py-4 rounded-2xl shadow-neo bg-neo-bg text-gray-700 dark:text-gray-300 font-black uppercase text-[10px] tracking-widest hover:shadow-neo-inset transition-all"
               >
                 Отменить
               </button>
