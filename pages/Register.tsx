@@ -41,6 +41,12 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       return;
     }
 
+    // Валидация ИНН (10 или 12 цифр)
+    if (formData.inn && !/^\d{10}$|^\d{12}$/.test(formData.inn)) {
+      setError('ИНН должен содержать 10 или 12 цифр');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -52,11 +58,19 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           data: {
             full_name: formData.fullName,
             company_name: formData.companyName
-          }
+          },
+          emailRedirectTo: window.location.origin
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        // Обработка ошибок rate limiting
+        if (authError.message.includes('rate limit') || authError.message.includes('50 SECONDS')) {
+          throw new Error('Слишком много запросов. Подождите 1 минуту и попробуйте снова.');
+        }
+        throw authError;
+      }
+      
       if (!authData.user) throw new Error('Ошибка регистрации');
 
       // Шаг 2: Создание компании
@@ -70,12 +84,18 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           subscription_status: 'trial',
           subscription_plan: 'free',
           subscription_start: new Date().toISOString(),
-          subscription_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() // 14 дней триала
+          subscription_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
         }])
         .select()
         .single();
 
-      if (companyError) throw companyError;
+      if (companyError) {
+        // Если компания уже существует (дубликат email)
+        if (companyError.code === '23505') {
+          throw new Error('Компания с таким email уже существует');
+        }
+        throw companyError;
+      }
 
       // Шаг 3: Создание пользователя компании
       const { error: userError } = await supabase
@@ -93,7 +113,8 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       // Переход на страницу с инструкцией
       setStep(2);
     } catch (err: any) {
-      setError(err.message || 'Ошибка регистрации');
+      console.error('Registration error:', err);
+      setError(err.message || 'Ошибка регистрации. Попробуйте позже.');
     } finally {
       setLoading(false);
     }
