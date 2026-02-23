@@ -19,9 +19,10 @@ interface SubscriptionStats {
 
 interface AdminSubscriptionsProps {
   onBack: () => void;
+  onNavigate?: (page: string) => void;
 }
 
-export const AdminSubscriptions: React.FC<AdminSubscriptionsProps> = ({ onBack }) => {
+export const AdminSubscriptions: React.FC<AdminSubscriptionsProps> = ({ onBack, onNavigate }) => {
   const [stats, setStats] = useState<SubscriptionStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
@@ -147,17 +148,17 @@ export const AdminSubscriptions: React.FC<AdminSubscriptionsProps> = ({ onBack }
 
         <nav className="space-y-2">
           {[
-            { id: 'dashboard', label: 'Дашборд', path: '/admin' },
-            { id: 'companies', label: 'Компании', path: '/admin/companies' },
-            { id: 'subscriptions', label: 'Подписки', path: '/admin/subscriptions', active: true },
-            { id: 'settings', label: 'Настройки', path: '/admin/settings' }
+            { id: 'dashboard', label: 'Дашборд', icon: '📊' },
+            { id: 'companies', label: 'Компании', icon: '🏢' },
+            { id: 'subscriptions', label: 'Подписки', icon: '💳', active: true },
+            { id: 'settings', label: 'Настройки', icon: '⚙️' }
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => window.location.href = item.path}
+              onClick={() => onNavigate ? onNavigate(item.id) : window.location.href = `/admin/${item.id === 'dashboard' ? '' : item.id}`}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm transition-all ${
-                item.active 
-                  ? 'bg-purple-500 text-white shadow-neo' 
+                item.active
+                  ? 'bg-purple-500 text-white shadow-neo'
                   : 'text-gray-600 dark:text-gray-300 hover:shadow-neo-inset'
               }`}
             >

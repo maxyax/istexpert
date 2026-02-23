@@ -56,6 +56,22 @@ const App: React.FC = () => {
     }
   }, [isAdmin, isAuthenticated, hasRedirectedAdmin]);
 
+  // Обновляем URL при смене adminPage
+  React.useEffect(() => {
+    if (currentPage === 'admin' && isAdmin) {
+      const paths: Record<string, string> = {
+        dashboard: '/admin',
+        companies: '/admin/companies',
+        subscriptions: '/admin/subscriptions',
+        settings: '/admin/settings'
+      };
+      const newPath = paths[adminPage] || '/admin';
+      if (window.location.pathname !== newPath) {
+        window.history.pushState({}, '', newPath);
+      }
+    }
+  }, [adminPage, currentPage, isAdmin]);
+
   // Админ-панель
   if (currentPage === 'admin' && isAdmin) {
     const handleLogout = () => {
@@ -65,15 +81,19 @@ const App: React.FC = () => {
       window.history.pushState({}, '', '/');
     };
 
+    const handleNavigate = (page: string) => {
+      setAdminPage(page);
+    };
+
     switch (adminPage) {
       case 'companies':
-        return <AdminCompanies onBack={() => setAdminPage('dashboard')} />;
+        return <AdminCompanies onBack={() => setAdminPage('dashboard')} onNavigate={handleNavigate} />;
       case 'subscriptions':
-        return <AdminSubscriptions onBack={() => setAdminPage('dashboard')} />;
+        return <AdminSubscriptions onBack={() => setAdminPage('dashboard')} onNavigate={handleNavigate} />;
       case 'settings':
-        return <AdminSettings onBack={() => setAdminPage('dashboard')} />;
+        return <AdminSettings onBack={() => setAdminPage('dashboard')} onNavigate={handleNavigate} />;
       default:
-        return <AdminDashboard onLogout={handleLogout} onNavigate={setAdminPage} />;
+        return <AdminDashboard onLogout={handleLogout} onNavigate={handleNavigate} />;
     }
   }
 

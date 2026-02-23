@@ -18,9 +18,10 @@ interface User {
 
 interface AdminSettingsProps {
   onBack: () => void;
+  onNavigate?: (page: string) => void;
 }
 
-export const AdminSettings: React.FC<AdminSettingsProps> = ({ onBack }) => {
+export const AdminSettings: React.FC<AdminSettingsProps> = ({ onBack, onNavigate }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -131,17 +132,17 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ onBack }) => {
 
         <nav className="space-y-2">
           {[
-            { id: 'dashboard', label: 'Дашборд', path: '/admin' },
-            { id: 'companies', label: 'Компании', path: '/admin/companies' },
-            { id: 'subscriptions', label: 'Подписки', path: '/admin/subscriptions' },
-            { id: 'settings', label: 'Настройки', path: '/admin/settings', active: true }
+            { id: 'dashboard', label: 'Дашборд', icon: '📊' },
+            { id: 'companies', label: 'Компании', icon: '🏢' },
+            { id: 'subscriptions', label: 'Подписки', icon: '💳' },
+            { id: 'settings', label: 'Настройки', icon: '⚙️', active: true }
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => window.location.href = item.path}
+              onClick={() => onNavigate ? onNavigate(item.id) : window.location.href = `/admin/${item.id === 'dashboard' ? '' : item.id}`}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm transition-all ${
-                item.active 
-                  ? 'bg-purple-500 text-white shadow-neo' 
+                item.active
+                  ? 'bg-purple-500 text-white shadow-neo'
                   : 'text-gray-600 dark:text-gray-300 hover:shadow-neo-inset'
               }`}
             >
