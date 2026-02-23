@@ -2,27 +2,86 @@
 import React, { useState } from 'react';
 import { Truck, Mail, Lock, Building, ArrowLeft, ChevronRight, PlayCircle } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { supabase } from '../lib/supabase';
 
-export const Login: React.FC<{onBack: () => void}> = ({ onBack }) => {
+export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({ onBack, onRegister }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [inn, setInn] = useState('');
   const [error, setError] = useState('');
-  
+  const [loading, setLoading] = useState(false);
+
   const { login, register, demoLogin } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+    setLoading(true);
+
     if (isRegister) {
-      if (!companyName || !inn || !email) { setError('Заполните все поля'); return; }
-      register(companyName, inn, email);
+      if (!companyName || !inn || !email || !pass) { 
+        setError('Заполните все поля'); 
+        setLoading(false);
+        return; 
+      }
+      
+      try {
+        // Регистрация в Supabase Auth
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password: pass,
+          options: {
+            data: {
+              company_name: companyName,
+              inn: inn
+            },
+            emailRedirectTo: window.location.origin
+          }
+        });
+
+        if (error) throw error;
+
+        // Создание компании
+        const { data: companyData, error: companyError } = await supabase
+          .from('companies')
+          .insert([{
+            name: companyName,
+            inn: inn,
+            email: email,
+            subscription_status: 'trial',
+            subscription_plan: 'free',
+            subscription_start: new Date().toISOString(),
+            subscription_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+          }])
+          .select()
+          .single();
+
+        if (companyError) throw companyError;
+
+        // Создание пользователя
+        await supabase
+          .from('users')
+          .insert([{
+            id: data.user.id,
+            email: email,
+            full_name: companyName,
+            role: 'company_admin',
+            company_id: companyData.id
+          }]);
+
+        setLoading(false);
+        // Переход на страницу с инструкцией
+        window.location.href = '/register-success';
+      } catch (err: any) {
+        setError(err.message || 'Ошибка регистрации');
+        setLoading(false);
+      }
     } else {
       const ok = await login(email, pass);
       if (!ok) setError('Неверный логин или доступ ограничен');
+      setLoading(false);
     }
   };
 
@@ -82,10 +141,36 @@ export const Login: React.FC<{onBack: () => void}> = ({ onBack }) => {
                </div>
              )}
 
+             {isRegister && (
+               <div className="space-y-1.5">
+                  <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Пароль *</label>
+                  <div className="relative">
+                     <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
+                     <input 
+                       type="password" 
+                       placeholder="Минимум 6 символов"
+                       className="w-full pl-12 pr-4 py-4 rounded-2xl shadow-neo-inset bg-neo-bg outline-none text-xs font-bold border-none" 
+                       value={pass} 
+                       onChange={e => setPass(e.target.value)} 
+                       required
+                       minLength={6}
+                     />
+                  </div>
+                  <p className="text-[9px] text-gray-500 ml-2">
+                    Придет письмо с подтверждением на email
+                  </p>
+               </div>
+             )}
+
              {error && <p className="text-[10px] text-red-500 font-black uppercase text-center">{error}</p>}
 
-             <button type="submit" className="w-full py-5 rounded-[2rem] bg-blue-500 text-white font-black uppercase text-xs shadow-lg hover:shadow-neo transition-all tracking-widest flex items-center justify-center gap-2">
-                {isRegister ? 'Зарегистрироваться' : 'Войти в кабинет'} <ChevronRight size={18}/>
+             <button 
+               type="submit" 
+               disabled={loading}
+               className="w-full py-5 rounded-[2rem] bg-blue-500 text-white font-black uppercase text-xs shadow-lg hover:shadow-neo transition-all tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+             >
+                {loading ? 'Обработка...' : (isRegister ? 'Зарегистрироваться' : 'Войти в кабинет')}
+                {!loading && <ChevronRight size={18}/>}
              </button>
           </form>
 

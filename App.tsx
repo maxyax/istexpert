@@ -5,6 +5,7 @@ import { Layout } from './Layout';
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { RegisterSuccess } from './pages/RegisterSuccess';
 import { Pricing } from './pages/Pricing';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Dashboard } from './pages/Dashboard';
@@ -20,6 +21,7 @@ const App: React.FC = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [showPricing, setShowPricing] = useState(false);
+  const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
 
   // Проверка на админа
   const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL;
@@ -29,11 +31,16 @@ const App: React.FC = () => {
     return <AdminDashboard onLogout={() => { setCurrentPage('dashboard'); }} />;
   }
 
+  // Страница успеха регистрации
+  if (showRegisterSuccess) {
+    return <RegisterSuccess />;
+  }
+
   if (!isAuthenticated) {
     if (showPricing) {
       return <Pricing onComplete={() => setShowPricing(false)} />;
     }
-    return showLogin ? <Login onBack={() => setShowLogin(false)} /> : <Landing onStart={() => setShowLogin(true)} onRegister={() => setShowPricing(true)} />;
+    return showLogin ? <Login onBack={() => { setShowLogin(false); setShowRegisterSuccess(false); }} onRegister={() => setShowPricing(true)} /> : <Landing onStart={() => setShowLogin(true)} onRegister={() => setShowPricing(true)} />;
   }
 
   const renderPage = () => {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Truck, CheckCircle2, ArrowRight, Mail, Phone, Building2, User, Lock, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { initializeCompanyDemoData } from '../lib/subscription';
 
 interface FormData {
   companyName: string;
@@ -91,10 +90,7 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       if (userError) throw userError;
 
-      // Шаг 4: Инициализация демо-данных
-      await initializeCompanyDemoData(companyData.id);
-
-      // Переход на страницу тарифов
+      // Переход на страницу с инструкцией
       setStep(2);
     } catch (err: any) {
       setError(err.message || 'Ошибка регистрации');
@@ -107,22 +103,40 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     return (
       <div className="min-h-screen bg-neo-bg flex items-center justify-center p-6">
         <div className="max-w-2xl w-full text-center space-y-8 animate-in zoom-in duration-500">
-          <div className="w-24 h-24 mx-auto rounded-3xl bg-green-500 flex items-center justify-center text-white shadow-xl">
-            <CheckCircle2 size={48} />
+          <div className="w-24 h-24 mx-auto rounded-3xl bg-blue-500 flex items-center justify-center text-white shadow-xl">
+            <Mail size={48} />
           </div>
           <div>
             <h2 className="text-3xl font-black uppercase text-gray-800 dark:text-gray-200 mb-4">
-              Регистрация успешна!
+              Подтвердите email!
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-8">
               Компания <strong className="text-gray-800 dark:text-gray-200">{formData.companyName}</strong> зарегистрирована.
-              Вам предоставлен 14-дневный пробный период.
+            </p>
+            <div className="p-6 rounded-[2rem] bg-blue-500/10 border border-blue-500/20 mb-8">
+              <p className="text-gray-700 dark:text-gray-300 font-medium mb-4">
+                На почту <strong className="text-blue-500">{formData.email}</strong> отправлено письмо с:
+              </p>
+              <div className="space-y-2 text-left max-w-md mx-auto">
+                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  <span>Ссылкой для подтверждения email</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  <span>Вашим логином (email)</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  <span>Инструкцией по входу</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+              После подтверждения email вы сможете войти в систему
             </p>
           </div>
           <div className="space-y-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Письмо с подтверждением отправлено на <strong>{formData.email}</strong>
-            </p>
             <button
               onClick={() => window.location.href = '/login'}
               className="w-full py-5 rounded-[2rem] bg-blue-500 text-white font-black uppercase text-sm shadow-xl hover:scale-105 transition-all"
