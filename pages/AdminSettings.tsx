@@ -132,14 +132,14 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ onBack, onNavigate
 
         <nav className="space-y-2">
           {[
-            { id: 'dashboard', label: 'Дашборд', icon: '📊' },
-            { id: 'companies', label: 'Компании', icon: '🏢' },
-            { id: 'subscriptions', label: 'Подписки', icon: '💳' },
-            { id: 'settings', label: 'Настройки', icon: '⚙️', active: true }
+            { id: 'dashboard', label: 'Дашборд' },
+            { id: 'companies', label: 'Компании' },
+            { id: 'subscriptions', label: 'Подписки' },
+            { id: 'settings', label: 'Настройки', active: true }
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => onNavigate ? onNavigate(item.id) : window.location.href = `/admin/${item.id === 'dashboard' ? '' : item.id}`}
+              onClick={() => onNavigate && onNavigate(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm transition-all ${
                 item.active
                   ? 'bg-purple-500 text-white shadow-neo'

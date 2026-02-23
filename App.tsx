@@ -26,10 +26,29 @@ const App: React.FC = () => {
   const [showPricing, setShowPricing] = useState(false);
   const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
   const [hasRedirectedAdmin, setHasRedirectedAdmin] = useState(false);
-  const [adminPage, setAdminPage] = useState('dashboard');
 
   // Проверка на админа
   const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL;
+
+  // Определяем adminPage из URL
+  const getAdminPageFromUrl = (): string => {
+    const path = window.location.pathname;
+    if (path === '/admin/companies') return 'companies';
+    if (path === '/admin/subscriptions') return 'subscriptions';
+    if (path === '/admin/settings') return 'settings';
+    return 'dashboard';
+  };
+
+  const [adminPage, setAdminPage] = useState(getAdminPageFromUrl());
+
+  // Слушаем изменения URL (popstate)
+  React.useEffect(() => {
+    const handlePopState = () => {
+      setAdminPage(getAdminPageFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Проверяем URL при загрузке и при изменении статуса авторизации
   React.useEffect(() => {
@@ -56,22 +75,6 @@ const App: React.FC = () => {
     }
   }, [isAdmin, isAuthenticated, hasRedirectedAdmin]);
 
-  // Обновляем URL при смене adminPage
-  React.useEffect(() => {
-    if (currentPage === 'admin' && isAdmin) {
-      const paths: Record<string, string> = {
-        dashboard: '/admin',
-        companies: '/admin/companies',
-        subscriptions: '/admin/subscriptions',
-        settings: '/admin/settings'
-      };
-      const newPath = paths[adminPage] || '/admin';
-      if (window.location.pathname !== newPath) {
-        window.history.pushState({}, '', newPath);
-      }
-    }
-  }, [adminPage, currentPage, isAdmin]);
-
   // Админ-панель
   if (currentPage === 'admin' && isAdmin) {
     const handleLogout = () => {
@@ -83,15 +86,17 @@ const App: React.FC = () => {
 
     const handleNavigate = (page: string) => {
       setAdminPage(page);
+      const path = page === 'dashboard' ? '/admin' : `/admin/${page}`;
+      window.history.pushState({}, '', path);
     };
 
     switch (adminPage) {
       case 'companies':
-        return <AdminCompanies onBack={() => setAdminPage('dashboard')} onNavigate={handleNavigate} />;
+        return <AdminCompanies onBack={() => handleNavigate('dashboard')} onNavigate={handleNavigate} />;
       case 'subscriptions':
-        return <AdminSubscriptions onBack={() => setAdminPage('dashboard')} onNavigate={handleNavigate} />;
+        return <AdminSubscriptions onBack={() => handleNavigate('dashboard')} onNavigate={handleNavigate} />;
       case 'settings':
-        return <AdminSettings onBack={() => setAdminPage('dashboard')} onNavigate={handleNavigate} />;
+        return <AdminSettings onBack={() => handleNavigate('dashboard')} onNavigate={handleNavigate} />;
       default:
         return <AdminDashboard onLogout={handleLogout} onNavigate={handleNavigate} />;
     }
