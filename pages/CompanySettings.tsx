@@ -52,6 +52,7 @@ export const CompanySettings: React.FC = () => {
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [editingMemberRole, setEditingMemberRole] = useState<string | null>(null);
+  const [invites, setInvites] = useState<any[]>([]);
 
   const ROLE_DESCRIPTIONS: Record<string, string> = {
     [UserRole.DRIVER]: 'Заполняет путевые листы, акты, заправки. Доступ к топливу и документам.',
@@ -100,17 +101,67 @@ export const CompanySettings: React.FC = () => {
       });
     };
 
+    const loadInvites = async () => {
+      if (!user?.company_id) return;
+
+      const { data } = await supabase
+        .from('invite_tokens')
+        .select('*')
+        .eq('company_id', user.company_id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (data) setInvites(data);
+    };
+
     loadCompanyData();
     loadUsage();
+    loadInvites();
   }, [user?.company_id]);
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    addStaff(newMember);
-    setIsModalOpen(false);
-    setNewMember({ full_name: '', email: '', role: UserRole.USER });
-    // Обновляем счетчик пользователей
-    setUsage(prev => ({ ...prev, users: prev.users + 1 }));
+    
+    if (!user?.company_id) return;
+
+    // Генерация токена приглашения
+    const token = `inv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const inviteUrl = `${window.location.origin}/accept-invite/${token}`;
+
+    try {
+      // Создаём приглашение в базе
+      const { error: inviteError } = await supabase
+        .from('invite_tokens')
+        .insert([{
+          company_id: user.company_id,
+          email: newMember.email,
+          full_name: newMember.full_name,
+          role: newMember.role,
+          token: token,
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 дней
+        }]);
+
+      if (inviteError) throw inviteError;
+
+      // Отправляем email с приглашением (через Supabase Edge Function или внешний сервис)
+      // Для сейчас - показываем ссылку в alert
+      alert(
+        `Приглашение создано!\n\n` +
+        `Сотрудник: ${newMember.full_name}\n` +
+        `Email: ${newMember.email}\n` +
+        `Роль: ${newMember.role}\n\n` +
+        `Ссылка для активации:\n${inviteUrl}\n\n` +
+        `Отправьте эту ссылку сотруднику.`
+      );
+
+      setIsModalOpen(false);
+      setNewMember({ full_name: '', email: '', role: UserRole.USER });
+      
+      // В реальном приложении здесь был бы вызов addStaff
+      // addStaff({ ...newMember, id: Math.random().toString(36).substr(2, 9) });
+    } catch (err: any) {
+      alert('Ошибка создания приглашения: ' + err.message);
+    }
   };
 
   const handleCompanySave = async () => {
@@ -177,6 +228,26 @@ export const CompanySettings: React.FC = () => {
   const handleCancelEditRole = () => {
     setEditingMemberId(null);
     setEditingMemberRole(null);
+  };
+
+  const handleRevokeInvite = async (inviteId: string) => {
+    if (!confirm('Отменить приглашение?')) return;
+
+    const { error } = await supabase
+      .from('invite_tokens')
+      .update({ status: 'expired' })
+      .eq('id', inviteId);
+
+    if (!error) {
+      setInvites(invites.filter(i => i.id !== inviteId));
+      alert('Приглашение отменено');
+    }
+  };
+
+  const copyInviteLink = (token: string) => {
+    const url = `${window.location.origin}/accept-invite/${token}`;
+    navigator.clipboard.writeText(url);
+    alert('Ссылка скопирована в буфер обмена!');
   };
 
   if (!companyData) {
@@ -493,6 +564,76 @@ export const CompanySettings: React.FC = () => {
           ))}
         </div>
       </section>
+
+      {/* ===== АКТИВНЫЕ ПРИГЛАШЕНИЯ ===== */}
+      {invites.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex justify-between items-center px-4">
+            <h3 className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest flex items-center gap-2">
+              <Mail size={16} className="text-blue-500" /> Активные приглашения
+            </h3>
+            <span className="text-[9px] text-gray-500 font-black uppercase">{invites.length} шт.</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {invites.map(invite => (
+              <div key={invite.id} className="p-6 rounded-[2rem] shadow-neo bg-neo-bg border-2 border-blue-500/20">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl shadow-neo bg-blue-500/10 flex items-center justify-center text-blue-500 font-black text-sm uppercase">
+                      {invite.full_name[0]}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-gray-800 dark:text-gray-100 uppercase">{invite.full_name}</h4>
+                      <p className="text-[9px] text-gray-500 font-bold">{invite.email}</p>
+                    </div>
+                  </div>
+                  <div className="px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-[8px] font-black uppercase tracking-widest">
+                    Ожидание
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield size={12} className="text-blue-500" />
+                  <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">
+                    {invite.role === 'user' ? 'Пользователь' :
+                     invite.role === 'company_admin' ? 'Администратор' :
+                     invite.role === 'driver' ? 'Водитель' :
+                     invite.role === 'mechanic' ? 'Механик' :
+                     invite.role === 'procurement' ? 'Снабженец' :
+                     invite.role === 'accountant' ? 'Бухгалтер' :
+                     invite.role.replace('_', ' ')}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[9px] text-gray-500 mb-4">
+                  <span>Действует до:</span>
+                  <span className="font-bold">
+                    {new Date(invite.expires_at).toLocaleDateString('ru-RU', { 
+                      day: 'numeric', month: 'short', year: 'numeric' 
+                    })}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => copyInviteLink(invite.token)}
+                    className="py-2 rounded-xl bg-blue-500/10 text-blue-500 font-black uppercase text-[9px] tracking-widest hover:bg-blue-500 hover:text-white transition-all"
+                  >
+                    Копировать ссылку
+                  </button>
+                  <button
+                    onClick={() => handleRevokeInvite(invite.id)}
+                    className="py-2 rounded-xl bg-red-500/10 text-red-500 font-black uppercase text-[9px] tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                  >
+                    Отозвать
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ===== МОДАЛКА ДОБАВЛЕНИЯ СОТРУДНИКА ===== */}
       {isModalOpen && (

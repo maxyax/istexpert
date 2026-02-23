@@ -18,6 +18,7 @@ import { MaintenanceCalendar } from './pages/MaintenanceCalendar';
 import { Procurement } from './pages/Procurement';
 import { FuelManagement } from './pages/FuelManagement';
 import { CompanySettings } from './pages/CompanySettings';
+import { AcceptInvite } from './pages/AcceptInvite';
 
 const App: React.FC = () => {
   const { isAuthenticated, user, loadUserFromSupabase } = useAuthStore();
@@ -111,6 +112,11 @@ const App: React.FC = () => {
   // Страница успеха регистрации
   if (showRegisterSuccess) {
     return <RegisterSuccess />;
+  }
+
+  // Страница принятия приглашения (доступна без авторизации)
+  if (window.location.pathname.startsWith('/accept-invite/')) {
+    return <AcceptInvite />;
   }
 
   // Показываем загрузку пока загружаем пользователя
