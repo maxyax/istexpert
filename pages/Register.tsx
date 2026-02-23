@@ -68,9 +68,13 @@ export const Register: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (authError.message.includes('rate limit') || authError.message.includes('50 SECONDS')) {
           throw new Error('Слишком много запросов. Подождите 1 минуту и попробуйте снова.');
         }
+        // Пользователь уже существует
+        if (authError.message.includes('User already registered')) {
+          throw new Error('Пользователь с таким email уже зарегистрирован. Попробуйте войти.');
+        }
         throw authError;
       }
-      
+
       if (!authData.user) throw new Error('Ошибка регистрации');
 
       // Шаг 2: Создание компании

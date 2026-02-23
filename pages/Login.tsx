@@ -17,7 +17,7 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, register, demoLogin } = useAuthStore();
+  const { login, register, demoLogin, loadUserFromSupabase } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +99,12 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
       }
     } else {
       const ok = await login(email, pass);
-      if (!ok) setError('Неверный логин или доступ ограничен');
+      if (ok) {
+        // После успешного входа загружаем данные пользователя
+        await loadUserFromSupabase();
+      } else {
+        setError('Неверный логин или доступ ограничен');
+      }
       setLoading(false);
     }
   };
