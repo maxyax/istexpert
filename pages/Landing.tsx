@@ -16,7 +16,11 @@ import {
   Package,
   ChevronRight,
   Moon,
-  Sun
+  Sun,
+  X,
+  Calendar,
+  BarChart3,
+  Bell
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -24,52 +28,97 @@ interface FeatureCard {
   icon: React.ReactNode;
   title: string;
   desc: string;
+  fullDesc: string;
+  benefits: string[];
 }
 
 const FEATURES: FeatureCard[] = [
   {
     icon: <QrCode size={28} />,
     title: 'QR-Паспорта',
-    desc: 'Мгновенный доступ к истории техники по QR-коду'
+    desc: 'Мгновенный доступ к истории техники по QR-коду',
+    fullDesc: 'Система генерирует уникальный QR-код для каждой единицы техники. При сканировании открывается цифровой паспорт с полной историей обслуживания, ремонтами, заменами запчастей и документами.',
+    benefits: [
+      'Доступ без установки приложений — просто отсканируйте камеру телефона',
+      'Моментальная подача заявки на ремонт прямо из карточки',
+      'Электронные копии СТС, ПТС и других документов всегда под рукой',
+      'История всех работ за весь период эксплуатации'
+    ]
   },
   {
     icon: <Gauge size={28} />,
     title: 'Учет наработки',
-    desc: 'Автоматический расчет моточасов и интервалов ТО'
+    desc: 'Автоматический расчет моточасов и интервалов ТО',
+    fullDesc: 'Забудьте о ручных журналах учета. Система автоматически отслеживает наработку каждой единицы техники в моточасах и рассчитывает оптимальные интервалы для проведения технического обслуживания.',
+    benefits: [
+      'Контроль реальной работы двигателя, а не просто времени в работе',
+      'Автоматический прогноз даты следующего ТО',
+      'Снижение риска пропуска регламентных работ',
+      'Точный учет для списания ГСМ и запчастей'
+    ]
   },
   {
     icon: <Wrench size={28} />,
     title: 'Планирование ТО',
-    desc: 'Автоматические регламенты и календарь обслуживания'
+    desc: 'Автоматические регламенты и календарь обслуживания',
+    fullDesc: 'Система автоматически создает календарь технического обслуживания на основе наработки и календарных интервалов. Вы всегда будете знать, когда и какое ТО предстоит.',
+    benefits: [
+      'Автоматическое создание задач по ТО за 30 дней до срока',
+      'Напоминания о предстоящем обслуживании',
+      'Готовые чек-листы работ для каждого типа ТО',
+      'Учет условий эксплуатации при расчете интервалов'
+    ]
   },
   {
     icon: <Package size={28} />,
     title: 'Снабжение',
-    desc: 'Kanban-доска для закупок запчастей'
+    desc: 'Kanban-доска для закупок запчастей',
+    fullDesc: 'Единая цепочка снабжения от заявки механика до получения запчасти на складе. Статусы в реальном времени, контроль стоимости и сроков поставки.',
+    benefits: [
+      'Прозрачный статус каждой заявки: поиск, оплата, доставка, получение',
+      'Учет стоимости каждой детали с НДС',
+      'Контроль сроков поставки и ответственных',
+      'История закупок для анализа расходов'
+    ]
   },
   {
     icon: <FileText size={28} />,
     title: 'Документы',
-    desc: 'Электронные паспорта, страховки, акты'
+    desc: 'Электронные паспорта, страховки, акты',
+    fullDesc: 'Все документы по технике хранятся в электронном виде. Быстрый доступ к СТС, ПТС, страховкам, диагностическим картам, актам поломок и другим документам.',
+    benefits: [
+      'Загрузка документов в форматах PDF, DOC, DOCX',
+      'Просмотр документов прямо в браузере',
+      'Автоматическое напоминание об окончании страховки',
+      'История всех документов по каждой единице техники'
+    ]
   },
   {
-    icon: <TrendingUp size={28} />,
+    icon: <BarChart3 size={28} />,
     title: 'Аналитика',
-    desc: 'Статистика расходов и простоев'
+    desc: 'Статистика расходов и простоев',
+    fullDesc: 'Полная аналитика по автопарку: расходы на ТО и ремонты, простой техники, затраты на запчасти и ГСМ. Принимайте обоснованные решения на основе данных.',
+    benefits: [
+      'Дашборд с ключевыми показателями автопарка',
+      'Анализ простоев по каждой единице техники',
+      'Расчет стоимости владения каждой машиной',
+      'Сравнение расходов по периодам'
+    ]
   }
 ];
 
 const STATS = [
-  { value: '98%', label: 'Снижение простоев' },
-  { value: '40%', label: 'Экономия на ТО' },
-  { value: '24/7', label: 'Контроль автопарка' },
-  { value: '100+', label: 'Компаний доверяют' }
+  { value: '100%', label: 'Контроль автопарка', icon: <Truck size={24} /> },
+  { value: '24/7', label: 'Мониторинг состояния', icon: <Clock size={24} /> },
+  { value: '0', label: 'Потерь данных', icon: <ShieldCheck size={24} /> },
+  { value: '+30%', label: 'Эффективность парка', icon: <TrendingUp size={24} /> }
 ];
 
 export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
   const { demoLogin } = useAuthStore();
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<FeatureCard | null>(null);
 
   useEffect(() => {
     // Проверяем сохраненную тему
@@ -145,31 +194,37 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
       </nav>
 
       {/* Герой-секция */}
-      <section className="pt-48 pb-20 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-10 animate-in slide-in-from-left duration-700">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full shadow-neo-sm bg-neo-bg text-blue-500">
-              <Zap size={14} className="fill-current" />
+      <section className="pt-48 pb-20 px-6 relative overflow-hidden">
+        {/* Фоновые анимированные элементы */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
+        </div>
+        
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
+          <div className="space-y-10 animate-in slide-in-from-left duration-1000">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full shadow-neo-sm bg-neo-bg dark:bg-gray-800 text-blue-500 animate-in zoom-in duration-700">
+              <Zap size={14} className="fill-current animate-pulse" />
               <span className="text-[10px] font-black uppercase tracking-widest">
                 Цифровизация автопарка 2.0
               </span>
             </div>
 
             <h1 className="text-5xl md:text-7xl font-black uppercase leading-[1.1] tracking-tighter text-gray-800 dark:text-gray-200">
-              Система <br />
-              <span className="text-blue-500">управления</span> <br />
-              автопарком
+              <span className="block animate-in slide-in-from-bottom duration-700">Система</span>
+              <span className="block text-blue-500 animate-in slide-in-from-bottom duration-700 delay-100">управления</span>
+              <span className="block animate-in slide-in-from-bottom duration-700 delay-200">автопарком</span>
             </h1>
 
-            <p className="text-xl text-gray-500 dark:text-gray-400 font-medium max-w-lg leading-relaxed">
+            <p className="text-xl text-gray-500 dark:text-gray-400 font-medium max-w-lg leading-relaxed animate-in slide-in-from-bottom duration-700 delay-300">
               Автоматизируйте ТО, ремонты, снабжение и документооборот.
               Полный контроль над каждой единицей техники в режиме реального времени.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col sm:flex-row gap-6 animate-in slide-in-from-bottom duration-700 delay-400">
               <button
                 onClick={onStart}
-                className="px-12 py-6 rounded-[2.5rem] bg-blue-500 text-white font-black uppercase text-sm shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-4 group"
+                className="group px-12 py-6 rounded-[2.5rem] bg-blue-500 text-white font-black uppercase text-sm shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-4"
               >
                 Начать работу
                 <ArrowRight
@@ -179,14 +234,14 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
               </button>
               <button
                 onClick={demoLogin}
-                className="px-10 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg text-blue-500 font-black uppercase text-sm hover:shadow-neo-inset transition-all dark:text-blue-400"
+                className="px-10 py-6 rounded-[2.5rem] shadow-neo bg-neo-bg dark:bg-gray-800 text-blue-500 dark:text-blue-400 font-black uppercase text-sm hover:shadow-neo-inset transition-all duration-300 hover:scale-105"
               >
                 Демо-доступ
               </button>
             </div>
 
             {/* Быстрые преимущества */}
-            <div className="flex flex-wrap gap-3 pt-4">
+            <div className="flex flex-wrap gap-3 pt-4 animate-in slide-in-from-bottom duration-700 delay-500">
               {[
                 'Без установки',
                 'Работает в браузере',
@@ -194,7 +249,8 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full shadow-neo-sm bg-neo-bg"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full shadow-neo-sm bg-neo-bg dark:bg-gray-800 animate-in zoom-in duration-500"
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <CheckCircle2 size={14} className="text-emerald-500" />
                   <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase">
@@ -205,11 +261,15 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             </div>
           </div>
 
-          {/* Правая часть - визуализация */}
-          <div className="relative animate-in zoom-in duration-1000 hidden lg:block">
-            <div className="w-full aspect-square rounded-[4rem] shadow-neo bg-neo-bg dark:bg-gray-800 flex items-center justify-center p-12 border-8 border-white/50 dark:border-gray-700/50">
-              <div className="text-center space-y-6">
-                <div className="w-32 h-32 mx-auto rounded-3xl bg-neo-bg shadow-neo dark:bg-gray-700 flex items-center justify-center text-blue-600 dark:text-blue-400">
+          {/* Правая часть - визуализация с анимацией */}
+          <div className="relative animate-in zoom-in duration-1000 delay-300 hidden lg:block">
+            <div className="w-full aspect-square rounded-[4rem] shadow-neo bg-neo-bg dark:bg-gray-800 flex items-center justify-center p-12 border-8 border-white/50 dark:border-gray-700/50 relative">
+              {/* Анимированные кольца */}
+              <div className="absolute inset-4 border-2 border-dashed border-blue-300/20 dark:border-blue-500/10 rounded-full animate-spin-slow" />
+              <div className="absolute inset-8 border-2 border-dashed border-indigo-300/20 dark:border-indigo-500/10 rounded-full animate-spin-slow-reverse" />
+              
+              <div className="text-center space-y-6 relative z-10">
+                <div className="w-32 h-32 mx-auto rounded-3xl bg-neo-bg dark:bg-gray-700 shadow-neo flex items-center justify-center text-blue-600 dark:text-blue-400 animate-float">
                   <Truck size={64} />
                 </div>
                 <div>
@@ -220,17 +280,31 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                     Fleet Management
                   </p>
                 </div>
-                <div className="flex gap-3 justify-center">
-                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-blue-600 dark:text-blue-400">
+                <div className="flex gap-3 justify-center flex-wrap">
+                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 hover:scale-110 transition-transform">
                     ТО
                   </div>
-                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-orange-600 dark:text-orange-400">
+                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-orange-600 dark:text-orange-400 hover:scale-110 transition-transform">
                     Ремонт
                   </div>
-                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-purple-600 dark:text-purple-400">
+                  <div className="px-4 py-2 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-[10px] font-black uppercase text-purple-600 dark:text-purple-400 hover:scale-110 transition-transform">
                     Снабжение
                   </div>
                 </div>
+              </div>
+              
+              {/* Плавающие иконки по углам */}
+              <div className="absolute top-8 right-8 w-14 h-14 rounded-2xl bg-neo-bg dark:bg-gray-700 shadow-neo flex items-center justify-center text-blue-500 animate-float" style={{ animationDelay: '0s' }}>
+                <QrCode size={24} />
+              </div>
+              <div className="absolute top-8 left-8 w-14 h-14 rounded-2xl bg-neo-bg dark:bg-gray-700 shadow-neo flex items-center justify-center text-orange-500 animate-float" style={{ animationDelay: '0.5s' }}>
+                <Wrench size={24} />
+              </div>
+              <div className="absolute bottom-8 right-8 w-14 h-14 rounded-2xl bg-neo-bg dark:bg-gray-700 shadow-neo flex items-center justify-center text-purple-500 animate-float" style={{ animationDelay: '1s' }}>
+                <Package size={24} />
+              </div>
+              <div className="absolute bottom-8 left-8 w-14 h-14 rounded-2xl bg-neo-bg dark:bg-gray-700 shadow-neo flex items-center justify-center text-emerald-500 animate-float" style={{ animationDelay: '1.5s' }}>
+                <Calendar size={24} />
               </div>
             </div>
           </div>
@@ -244,8 +318,12 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             {STATS.map((stat, i) => (
               <div
                 key={i}
-                className="p-6 md:p-8 rounded-[2rem] shadow-neo bg-neo-bg dark:bg-gray-800 text-center space-y-3 hover:shadow-neo-inset transition-all"
+                className="group p-6 md:p-8 rounded-[2rem] shadow-neo bg-neo-bg dark:bg-gray-800 text-center space-y-4 hover:shadow-neo-inset transition-all duration-500 hover:scale-105 animate-in slide-in-from-bottom"
+                style={{ animationDelay: `${i * 100}ms` }}
               >
+                <div className="flex justify-center text-blue-500 group-hover:scale-110 transition-transform duration-300">
+                  {stat.icon}
+                </div>
                 <div className="text-3xl md:text-5xl font-black text-blue-500">
                   {stat.value}
                 </div>
@@ -276,9 +354,10 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             {FEATURES.map((feature, i) => (
               <div
                 key={i}
-                className="group p-10 rounded-[3rem] shadow-neo bg-neo-bg dark:bg-gray-800 space-y-6 hover:shadow-neo-inset transition-all"
+                className="group p-10 rounded-[3rem] shadow-neo bg-neo-bg dark:bg-gray-800 space-y-6 hover:shadow-neo-inset transition-all duration-500 animate-in slide-in-from-bottom"
+                style={{ animationDelay: `${i * 100}ms` }}
               >
-                <div className="p-4 rounded-2xl shadow-neo w-fit text-blue-500 group-hover:scale-110 transition-transform">
+                <div className="p-4 rounded-2xl shadow-neo w-fit text-blue-500 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                   {feature.icon}
                 </div>
                 <div>
@@ -289,15 +368,92 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                     {feature.desc}
                   </p>
                 </div>
-                <div className="text-[10px] font-black text-blue-500 uppercase flex items-center gap-2 pt-2">
+                <button
+                  onClick={() => setSelectedFeature(feature)}
+                  className="text-[10px] font-black text-blue-500 uppercase flex items-center gap-2 pt-2 group-hover:translate-x-2 transition-all duration-300"
+                >
                   <span>Подробнее</span>
                   <ChevronRight size={12} />
-                </div>
+                </button>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Модальное окно с подробностями */}
+      {selectedFeature && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
+          onClick={() => setSelectedFeature(null)}
+        >
+          <div
+            className="bg-neo-bg dark:bg-gray-800 w-full max-w-2xl rounded-[3rem] shadow-neo p-8 md:p-12 border border-white/20 animate-in zoom-in duration-300 overflow-hidden relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Фоновый декоративный элемент */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+            
+            <div className="flex justify-between items-start mb-8 relative z-10">
+              <div className="flex items-center gap-6">
+                <div className="p-4 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 text-blue-500">
+                  {selectedFeature.icon}
+                </div>
+                <h3 className="text-2xl font-black uppercase tracking-tight text-gray-800 dark:text-gray-200">
+                  {selectedFeature.title}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedFeature(null)}
+                className="p-3 rounded-xl shadow-neo text-gray-400 hover:shadow-neo-inset transition-all hover:rotate-90"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="space-y-8 relative z-10">
+              <div className="p-6 rounded-[2rem] shadow-neo-inset bg-neo-bg dark:bg-gray-700">
+                <p className="text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+                  {selectedFeature.fullDesc}
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 size={20} className="text-emerald-500" />
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    Преимущества
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  {selectedFeature.benefits.map((benefit, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-4 p-4 rounded-2xl shadow-neo bg-neo-bg dark:bg-gray-700 hover:shadow-neo-inset transition-all duration-300 hover:scale-[1.02]"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 shrink-0" />
+                      <span className="text-sm text-gray-700 dark:text-gray-200 font-medium leading-relaxed">
+                        {benefit}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setSelectedFeature(null);
+                  onStart();
+                }}
+                className="w-full py-5 rounded-[2rem] bg-blue-500 text-white font-black uppercase text-xs shadow-lg tracking-widest flex items-center justify-center gap-3 hover:scale-105 transition-all"
+              >
+                Попробовать сейчас
+                <ArrowRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CTA секция */}
       <section className="py-32 px-6">
@@ -373,6 +529,31 @@ export const Landing: React.FC<{ onStart: () => void }> = ({ onStart }) => {
           </p>
         </div>
       </footer>
+
+      {/* Глобальные стили для анимаций */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+        }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes spin-slow-reverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        .animate-spin-slow {
+          animation: spin-slow 30s linear infinite;
+        }
+        .animate-spin-slow-reverse {
+          animation: spin-slow-reverse 20s linear infinite;
+        }
+      `}</style>
     </div>
   );
 };
