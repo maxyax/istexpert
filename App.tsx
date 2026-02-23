@@ -8,6 +8,9 @@ import { Register } from './pages/Register';
 import { RegisterSuccess } from './pages/RegisterSuccess';
 import { Pricing } from './pages/Pricing';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminCompanies } from './pages/AdminCompanies';
+import { AdminSubscriptions } from './pages/AdminSubscriptions';
+import { AdminSettings } from './pages/AdminSettings';
 import { Dashboard } from './pages/Dashboard';
 import { EquipmentList } from './pages/EquipmentList';
 import { Maintenance } from './pages/Maintenance';
@@ -23,6 +26,7 @@ const App: React.FC = () => {
   const [showPricing, setShowPricing] = useState(false);
   const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
   const [hasRedirectedAdmin, setHasRedirectedAdmin] = useState(false);
+  const [adminPage, setAdminPage] = useState('dashboard');
 
   // Проверка на админа
   const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL;
@@ -32,10 +36,21 @@ const App: React.FC = () => {
     const path = window.location.pathname;
     if (path === '/admin' && isAdmin) {
       setCurrentPage('admin');
+      setAdminPage('dashboard');
+    } else if (path === '/admin/companies' && isAdmin) {
+      setCurrentPage('admin');
+      setAdminPage('companies');
+    } else if (path === '/admin/subscriptions' && isAdmin) {
+      setCurrentPage('admin');
+      setAdminPage('subscriptions');
+    } else if (path === '/admin/settings' && isAdmin) {
+      setCurrentPage('admin');
+      setAdminPage('settings');
     }
     // Если админ только что залогинился, перенаправляем на /admin
     if (isAuthenticated && isAdmin && !hasRedirectedAdmin) {
       setCurrentPage('admin');
+      setAdminPage('dashboard');
       window.history.pushState({}, '', '/admin');
       setHasRedirectedAdmin(true);
     }
@@ -43,11 +58,23 @@ const App: React.FC = () => {
 
   // Админ-панель
   if (currentPage === 'admin' && isAdmin) {
-    return <AdminDashboard onLogout={() => { 
+    const handleLogout = () => {
       setCurrentPage('dashboard');
       setHasRedirectedAdmin(false);
+      setAdminPage('dashboard');
       window.history.pushState({}, '', '/');
-    }} />;
+    };
+
+    switch (adminPage) {
+      case 'companies':
+        return <AdminCompanies onBack={() => setAdminPage('dashboard')} />;
+      case 'subscriptions':
+        return <AdminSubscriptions onBack={() => setAdminPage('dashboard')} />;
+      case 'settings':
+        return <AdminSettings onBack={() => setAdminPage('dashboard')} />;
+      default:
+        return <AdminDashboard onLogout={handleLogout} onNavigate={setAdminPage} />;
+    }
   }
 
   // Страница успеха регистрации

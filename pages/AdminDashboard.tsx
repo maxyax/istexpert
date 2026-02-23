@@ -18,7 +18,7 @@ interface AdminStats {
   yearlyRevenue: number;
 }
 
-export const AdminDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
+export const AdminDashboard: React.FC<{ onLogout: () => void; onNavigate?: (page: string) => void }> = ({ onLogout, onNavigate }) => {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -168,11 +168,11 @@ export const AdminDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout })
             { id: 'dashboard', label: 'Дашборд', icon: BarChart3 },
             { id: 'companies', label: 'Компании', icon: Users },
             { id: 'subscriptions', label: 'Подписки', icon: Calendar },
-            { id: 'payments', label: 'Платежи', icon: DollarSign },
             { id: 'settings', label: 'Настройки', icon: Shield }
           ].map((item) => (
             <button
               key={item.id}
+              onClick={() => onNavigate ? onNavigate(item.id) : null}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl shadow-neo text-gray-600 dark:text-gray-300 font-bold text-sm hover:shadow-neo-inset transition-all"
             >
               <item.icon size={20} />
