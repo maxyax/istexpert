@@ -7,20 +7,22 @@ const PLANS = [
     name: 'Пробный',
     price: 0,
     period: '14 дней',
-    description: 'Для знакомства с системой',
+    description: 'Полный доступ на 14 дней',
     features: [
       'До 5 единиц техники',
       'До 3 пользователей',
-      'Базовый учет ТО',
+      'Полный учет ТО',
       'QR-паспорта',
-      'Без документов'
+      'Документы (до 50)',
+      'Снабжение (до 10 заявок)',
+      'Аналитика и отчеты',
+      'Топливный учет'
     ],
     limitations: [
-      'Нет снабжения',
-      'Нет аналитики',
+      'Ограничено 14 днями',
       'Нет API'
     ],
-    popular: false
+    popular: true
   },
   {
     id: 'basic',
@@ -260,12 +262,13 @@ export const Pricing: React.FC<{ onComplete: () => void }> = ({ onComplete }) =>
                   { name: 'Единицы техники', values: ['5', '20', '100', '∞'] },
                   { name: 'Пользователи', values: ['3', '10', '50', '∞'] },
                   { name: 'QR-паспорта', values: [true, true, true, true] },
-                  { name: 'Учет ТО', values: ['Базовый', 'Полный', 'Полный', 'Полный'] },
-                  { name: 'Документы', values: ['—', '100', '∞', '∞'] },
-                  { name: 'Снабжение', values: [false, true, true, true] },
-                  { name: 'Аналитика', values: [false, false, true, true] },
+                  { name: 'Учет ТО', values: ['Полный', 'Полный', 'Полный', 'Полный'] },
+                  { name: 'Документы', values: ['50', '100', '∞', '∞'] },
+                  { name: 'Снабжение', values: ['10 заявок', '∞', '∞', '∞'] },
+                  { name: 'Аналитика', values: [true, true, true, true] },
+                  { name: 'Топливный учет', values: [true, true, true, true] },
                   { name: 'API доступ', values: [false, false, false, true] },
-                  { name: 'Поддержка', values: ['—', 'Email', 'Приоритет', 'Персональный'] }
+                  { name: 'Поддержка', values: ['Email', 'Email', 'Приоритет', 'Персональный'] }
                 ].map((row, i) => (
                   <tr key={i} className="hover:bg-white/5 dark:hover:bg-gray-800/50 transition-colors">
                     <td className="py-4 px-6 text-sm font-bold text-gray-700 dark:text-gray-300">
