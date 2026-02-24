@@ -48,46 +48,37 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       // Получаем информацию о пользователе из нашей БД
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from('users')
         .select('*, company:companies(name, inn)')
         .eq('id', data.user.id)
         .single();
 
-      if (userData) {
-        // Проверяем на супер-админа
-        const isAdmin = email === import.meta.env.VITE_ADMIN_EMAIL;
-        set({
-          isAuthenticated: true,
-          isDemo: false,
-          user: {
-            id: userData.id,
-            email: userData.email,
-            full_name: userData.full_name,
-            role: isAdmin ? UserRole.SUPER_ADMIN : (userData.role as UserRole),
-            company_id: userData.company_id
-          },
-          company: userData.company ? {
-            name: userData.company.name,
-            inn: userData.company.inn,
-            address: ''
-          } : get().company
-        });
-        return true;
+      if (userError || !userData) {
+        // Пользователь есть в auth, но нет в таблице users
+        console.error('User not found in database:', data.user.id);
+        // Выходим из auth, чтобы не было несоответствия
+        await supabase.auth.signOut();
+        return false;
       }
 
-      // Если пользователя нет в БД, используем данные из auth
+      // Проверяем на супер-админа
       const isAdmin = email === import.meta.env.VITE_ADMIN_EMAIL;
       set({
         isAuthenticated: true,
         isDemo: false,
         user: {
-          id: data.user.id,
-          email: data.user.email || email,
-          full_name: data.user.user_metadata?.full_name || 'Пользователь',
-          role: isAdmin ? UserRole.SUPER_ADMIN : UserRole.USER,
-          company_id: 'default'
-        }
+          id: userData.id,
+          email: userData.email,
+          full_name: userData.full_name,
+          role: isAdmin ? UserRole.SUPER_ADMIN : (userData.role as UserRole),
+          company_id: userData.company_id
+        },
+        company: userData.company ? {
+          name: userData.company.name,
+          inn: userData.company.inn,
+          address: ''
+        } : null
       });
       return true;
     } catch (err) {

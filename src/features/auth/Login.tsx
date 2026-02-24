@@ -20,7 +20,7 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, register, demoLogin, loadUserFromSupabase } = useAuthStore();
+  const { login, demoLogin } = useAuthStore();
   const { loadDemoData: loadFleetDemoData } = useFleetStore();
   const { loadDemoData: loadMaintenanceDemoData } = useMaintenanceStore();
   const { loadDemoData: loadProcurementDemoData } = useProcurementStore();
@@ -114,11 +114,8 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
       }
     } else {
       const ok = await login(email, pass);
-      if (ok) {
-        // После успешного входа загружаем данные пользователя
-        await loadUserFromSupabase();
-      } else {
-        setError('Неверный логин или доступ ограничен');
+      if (!ok) {
+        setError('Неверный логин или пароль, либо пользователь не найден в базе данных');
       }
       setLoading(false);
     }
