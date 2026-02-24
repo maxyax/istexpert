@@ -41,7 +41,7 @@ const PLAN_NAMES: Record<string, string> = {
 };
 
 export const CompanySettings: React.FC = () => {
-  const { company, user, staff, addStaff, removeStaff } = useAuthStore();
+  const { company, user, staff, addStaff, removeStaff, isDemo } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditingCompany, setIsEditingCompany] = useState(false);
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
@@ -65,8 +65,27 @@ export const CompanySettings: React.FC = () => {
 
   const isAdmin = user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.COMPANY_ADMIN || user?.role === UserRole.OWNER;
 
-  // Загрузка данных компании из Supabase
+  // Загрузка данных компании
   useEffect(() => {
+    // В демо-режиме используем данные из store
+    if (isDemo && company) {
+      setCompanyData({
+        id: 'demo-company',
+        name: company.name,
+        inn: company.inn,
+        email: user?.email || 'demo@istexpert.ru',
+        phone: '',
+        subscription_status: 'trial',
+        subscription_plan: 'free',
+        subscription_start: new Date().toISOString(),
+        subscription_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+      });
+      setDaysRemaining(14);
+      setUsage({ users: 4, equipment: 3 }); // Демо: 3 техники + 1 пользователь
+      return;
+    }
+
+    // Обычная загрузка из Supabase
     const loadCompanyData = async () => {
       if (!user?.company_id) return;
 
@@ -117,7 +136,7 @@ export const CompanySettings: React.FC = () => {
     loadCompanyData();
     loadUsage();
     loadInvites();
-  }, [user?.company_id]);
+  }, [user?.company_id, isDemo, company]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
