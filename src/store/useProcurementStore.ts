@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { ProcurementRequest, ProcurementStatus } from '../types';
 import { useMaintenanceStore } from './useMaintenanceStore';
 import { useAuthStore } from './useAuthStore';
+import { getDemoData, isDemoSession } from '../services/demo';
 
 interface ProcurementState {
   requests: ProcurementRequest[];
@@ -11,12 +12,21 @@ interface ProcurementState {
   addRequest: (req: ProcurementRequest) => void;
   updateRequestStatus: (id: string, status: ProcurementStatus) => void;
   updateRequest: (id: string, updates: Partial<ProcurementRequest>) => void;
+  loadDemoData: () => void;
 }
 
 export const useProcurementStore = create<ProcurementState>((set) => ({
   requests: [],
   selectedRequestId: null,
   setSelectedRequestId: (id) => set({ selectedRequestId: id }),
+  loadDemoData: () => {
+    if (isDemoSession()) {
+      const demoData = getDemoData();
+      if (demoData && demoData.procurement) {
+        set({ requests: demoData.procurement });
+      }
+    }
+  },
   addRequest: (req) => set((state) => ({ requests: [req, ...state.requests] })),
   updateRequestStatus: (id, status) => set((state) => {
     const updated = state.requests.map(r => r.id === id ? { ...r, status, completedAt: status === 'На складе' ? new Date().toISOString() : r.completedAt } : r);

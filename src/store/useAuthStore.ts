@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { User, UserRole } from '../types';
 import { supabase } from '../services/supabase';
+import { initializeDemoData, clearDemoData, isDemoSession, getDemoData } from '../services/demo';
 
 interface CompanyInfo {
   name: string;
@@ -12,11 +13,12 @@ interface CompanyInfo {
 interface AuthState {
   isAuthenticated: boolean;
   isRegistered: boolean;
+  isDemo: boolean;
   user: User | null;
   company: CompanyInfo | null;
   staff: User[];
   login: (email: string, pass: string) => Promise<boolean>;
-  demoLogin: () => void;
+  demoLogin: () => Promise<void>;
   register: (companyName: string, inn: string, adminEmail: string) => void;
   logout: () => void;
   addStaff: (member: Omit<User, 'id' | 'company_id'>) => void;
@@ -28,6 +30,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isRegistered: false,
+  isDemo: false,
   user: null,
   company: null,
   staff: [],
@@ -56,6 +59,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const isAdmin = email === import.meta.env.VITE_ADMIN_EMAIL;
         set({
           isAuthenticated: true,
+          isDemo: false,
           user: {
             id: userData.id,
             email: userData.email,
@@ -76,6 +80,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const isAdmin = email === import.meta.env.VITE_ADMIN_EMAIL;
       set({
         isAuthenticated: true,
+        isDemo: false,
         user: {
           id: data.user.id,
           email: data.user.email || email,
@@ -91,28 +96,69 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   demoLogin: async () => {
-    const { user } = get();
-    if (user) {
-      set({ isAuthenticated: true });
-    } else {
-      set({
-        isAuthenticated: true,
-        user: { id: 'demo', email: 'demo@istexpert.ru', full_name: 'Демо Пользователь', role: UserRole.COMPANY_ADMIN, company_id: 'c1' }
-      });
-    }
+    // Инициализируем демо-данные
+    const demoData = await initializeDemoData();
+    
+    set({
+      isAuthenticated: true,
+      isDemo: true,
+      isRegistered: false,
+      user: {
+        id: demoData.userId,
+        email: 'demo@istexpert.ru',
+        full_name: 'Демо Пользователь',
+        role: UserRole.COMPANY_ADMIN,
+        company_id: demoData.companyId
+      },
+      company: {
+        name: 'Демо-компания «СпецТехСтрой»',
+        inn: '7701234567',
+        address: 'г. Москва, ул. Примерная, д. 1'
+      },
+      staff: [
+        { id: 'demo-staff-1', email: 'ivanov@demo.ru', full_name: 'Иванов С.П.', role: UserRole.DRIVER, company_id: demoData.companyId },
+        { id: 'demo-staff-2', email: 'petrov@demo.ru', full_name: 'Петров А.В.', role: UserRole.DRIVER, company_id: demoData.companyId },
+        { id: 'demo-staff-3', email: 'mekhanikov@demo.ru', full_name: 'Механиков С.В.', role: UserRole.MECHANIC, company_id: demoData.companyId }
+      ]
+    });
   },
   register: (name, inn, email) => {
     set({
       isRegistered: true,
       isAuthenticated: true,
+      isDemo: false,
       company: { name, inn, address: '' },
       user: { id: 'admin-new', email, full_name: 'Владелец бизнеса', role: UserRole.COMPANY_ADMIN, company_id: 'new-c' }
     });
   },
   loadUserFromSupabase: async () => {
+    // Проверяем, не демо ли это сессия
+    if (isDemoSession()) {
+      const demoData = getDemoData();
+      if (demoData) {
+        set({
+          isAuthenticated: true,
+          isDemo: true,
+          user: {
+            id: demoData.userId,
+            email: 'demo@istexpert.ru',
+            full_name: 'Демо Пользователь',
+            role: UserRole.COMPANY_ADMIN,
+            company_id: demoData.companyId
+          },
+          company: {
+            name: 'Демо-компания «СпецТехСтрой»',
+            inn: '7701234567',
+            address: 'г. Москва, ул. Примерная, д. 1'
+          }
+        });
+        return;
+      }
+    }
+
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) {
-      set({ isAuthenticated: false, user: null, company: null });
+      set({ isAuthenticated: false, isDemo: false, user: null, company: null });
       return;
     }
 
@@ -126,6 +172,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const isAdmin = authUser.email === import.meta.env.VITE_ADMIN_EMAIL;
       set({
         isAuthenticated: true,
+        isDemo: false,
         user: {
           id: userData.id,
           email: userData.email,
@@ -140,12 +187,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } : null
       });
     } else {
-      set({ isAuthenticated: false, user: null, company: null });
+      set({ isAuthenticated: false, isDemo: false, user: null, company: null });
     }
   },
   logout: async () => {
     await supabase.auth.signOut();
-    set({ isAuthenticated: false, user: null, company: null, staff: [] });
+    clearDemoData();
+    set({ isAuthenticated: false, isDemo: false, user: null, company: null, staff: [] });
   },
   addStaff: (member) => set((state) => ({
     staff: [...state.staff, { ...member, id: Math.random().toString(36).substr(2, 9), company_id: state.user?.company_id || 'c1' }]

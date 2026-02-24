@@ -4,6 +4,7 @@ import { MaintenanceRecord, BreakdownRecord, BreakdownStatus, PlannedTO, Planned
 import { useNotificationStore } from './useNotificationStore';
 import { useFleetStore } from './useFleetStore';
 import { useAuthStore } from './useAuthStore';
+import { getDemoData, isDemoSession } from '../services/demo';
 
 interface MaintenanceState {
   records: MaintenanceRecord[];
@@ -20,6 +21,7 @@ interface MaintenanceState {
   removePlannedTO: (id: string) => void;
   addFuelRecord: (record: FuelRecord) => void;
   _recalculateEquipmentStatus?: (equipmentId: string) => void;
+  loadDemoData: () => void;
 }
 
 export const useMaintenanceStore = create<MaintenanceState>((set) => ({
@@ -29,6 +31,16 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
   fuelRecords: [],
   selectedMaintenanceEquipId: null,
   setSelectedMaintenanceEquipId: (id) => set({ selectedMaintenanceEquipId: id }),
+  loadDemoData: () => {
+    if (isDemoSession()) {
+      const demoData = getDemoData();
+      if (demoData) {
+        if (demoData.maintenance) set({ records: demoData.maintenance });
+        if (demoData.breakdowns) set({ breakdowns: demoData.breakdowns });
+        if (demoData.fuel) set({ fuelRecords: demoData.fuel });
+      }
+    }
+  },
   addMaintenance: (record) => set((state) => ({
     records: [record, ...state.records],
     plannedTOs: state.plannedTOs.map(p => 

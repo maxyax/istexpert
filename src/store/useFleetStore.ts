@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Equipment, EquipStatus, MaintenanceRegulation } from '../types';
+import { getDemoData, isDemoSession } from '../services/demo';
 
 interface FleetState {
   equipment: Equipment[];
@@ -9,6 +10,7 @@ interface FleetState {
   deleteEquipment: (id: string) => void;
   selectEquipment: (id: string | null) => void;
   updateRegulations: (id: string, regs: MaintenanceRegulation[]) => void;
+  loadDemoData: () => void;
 }
 
 export const useFleetStore = create<FleetState>((set) => ({
@@ -25,4 +27,12 @@ export const useFleetStore = create<FleetState>((set) => ({
   updateRegulations: (id, regs) => set((state) => ({
     equipment: state.equipment.map(e => e.id === id ? { ...e, regulations: regs } : e)
   })),
+  loadDemoData: () => {
+    if (isDemoSession()) {
+      const demoData = getDemoData();
+      if (demoData && demoData.equipment) {
+        set({ equipment: demoData.equipment });
+      }
+    }
+  },
 }));

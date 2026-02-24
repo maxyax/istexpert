@@ -1,11 +1,12 @@
 import React from 'react';
 import {
   Truck, AlertTriangle, Clock, Activity, History,
-  ChevronRight, Fuel, TrendingUp, CheckCircle2, Wrench, Package, Calendar, DollarSign
+  ChevronRight, Fuel, TrendingUp, CheckCircle2, Wrench, Package, Calendar, DollarSign, Info
 } from 'lucide-react';
 import { useFleetStore } from '../../store/useFleetStore';
 import { useMaintenanceStore } from '../../store/useMaintenanceStore';
 import { useProcurementStore } from '../../store/useProcurementStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { EquipStatus } from '../../types';
 import { formatDate, formatMoney } from '../../utils/format';
 
@@ -47,6 +48,7 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
   const { equipment } = useFleetStore();
   const { breakdowns, records, fuelRecords, plannedTOs } = useMaintenanceStore();
   const { requests } = useProcurementStore();
+  const { isDemo } = useAuthStore();
 
   // Вычисляем статусы для каждой единицы техники
   const equipmentWithComputedStatus = equipment.map(e => ({
@@ -164,6 +166,20 @@ export const Dashboard: React.FC<any> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700">
+      {/* Демо-баннер */}
+      {isDemo && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 flex items-start gap-3">
+          <Info className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
+          <div className="flex-1">
+            <h3 className="text-sm font-bold text-blue-700 dark:text-blue-400 uppercase mb-1">Демо-режим</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-300">
+              Вы просматриваете демо-версию с тестовыми данными. <br/>
+              <span className="font-semibold">Зарегистрируйте компанию</span>, чтобы начать работу с пустой базой и своими данными.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Карточки статистики */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map(s => (

@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { Truck, Mail, Lock, Building, ArrowLeft, ChevronRight, PlayCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useFleetStore } from '../../store/useFleetStore';
+import { useMaintenanceStore } from '../../store/useMaintenanceStore';
+import { useProcurementStore } from '../../store/useProcurementStore';
 import { supabase } from '../../services/supabase';
 
 export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({ onBack, onRegister }) => {
@@ -18,6 +21,18 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
   const [showPassword, setShowPassword] = useState(false);
 
   const { login, register, demoLogin, loadUserFromSupabase } = useAuthStore();
+  const { loadDemoData: loadFleetDemoData } = useFleetStore();
+  const { loadDemoData: loadMaintenanceDemoData } = useMaintenanceStore();
+  const { loadDemoData: loadProcurementDemoData } = useProcurementStore();
+
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    await demoLogin();
+    loadFleetDemoData();
+    loadMaintenanceDemoData();
+    loadProcurementDemoData();
+    setLoading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +135,7 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            <button onClick={demoLogin} className="w-full py-4 rounded-2xl shadow-neo bg-neo-bg text-blue-600 font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:shadow-neo-inset transition-all">
+            <button onClick={handleDemoLogin} disabled={loading} className="w-full py-4 rounded-2xl shadow-neo bg-neo-bg text-blue-600 font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:shadow-neo-inset transition-all disabled:opacity-50">
               <PlayCircle size={18}/> Быстрый Демо-вход
             </button>
             <div className="flex items-center gap-4 py-2">
