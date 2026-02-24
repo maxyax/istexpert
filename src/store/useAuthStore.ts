@@ -116,10 +116,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       ]
     });
 
+    console.log('AuthStore: Demo login completed, loading demo data...');
+    console.log('AuthStore: Demo company ID:', demoData.companyId);
+    
     // Загружаем данные в хранилища
     useFleetStore.getState().loadDemoData();
     useMaintenanceStore.getState().loadDemoData();
     useProcurementStore.getState().loadDemoData();
+    
+    console.log('AuthStore: All demo data loaded');
   },
   register: (name, inn, email) => {
     set({

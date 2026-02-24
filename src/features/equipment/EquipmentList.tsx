@@ -6,6 +6,7 @@ import {
 import { useFleetStore } from '../../store/useFleetStore';
 import { useMaintenanceStore } from '../../store/useMaintenanceStore';
 import { useProcurementStore } from '../../store/useProcurementStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { EquipStatus, Equipment, MaintenanceRegulation } from '../../types';
 import { formatNumber, formatDate, formatDateTime } from '../../utils/format';
 import QRCode from 'qrcode';
@@ -171,8 +172,18 @@ interface EquipmentListProps {
 }
 
 export const EquipmentList: React.FC<EquipmentListProps> = ({ onNavigate }) => {
-  const { equipment, selectEquipment, selectedEquipmentId, updateEquipment, deleteEquipment, addEquipment } = useFleetStore();
-  const { records, breakdowns, plannedTOs } = useMaintenanceStore();
+  const { equipment, selectEquipment, selectedEquipmentId, updateEquipment, deleteEquipment, addEquipment, loadDemoData } = useFleetStore();
+  const { records, breakdowns, plannedTOs, loadDemoData: loadMaintenanceDemoData } = useMaintenanceStore();
+  const { isDemo } = useAuthStore();
+  
+  // Загружаем демо-данные при монтировании в демо-режиме
+  useEffect(() => {
+    if (isDemo) {
+      loadDemoData();
+      loadMaintenanceDemoData();
+    }
+  }, [isDemo]);
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');

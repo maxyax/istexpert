@@ -30,8 +30,10 @@ export const useFleetStore = create<FleetState>((set) => ({
   loadDemoData: () => {
     if (isDemoSession()) {
       const demoData = getDemoData();
+      console.log('FleetStore: Loading demo data', demoData?.equipment);
       if (demoData && demoData.equipment) {
         set({ equipment: demoData.equipment });
+        console.log('FleetStore: Equipment loaded', demoData.equipment.length, 'items');
       }
     }
   },
