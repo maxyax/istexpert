@@ -2,9 +2,6 @@
 import React, { useState } from 'react';
 import { Truck, Mail, Lock, Building, ArrowLeft, ChevronRight, PlayCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
-import { useFleetStore } from '../../store/useFleetStore';
-import { useMaintenanceStore } from '../../store/useMaintenanceStore';
-import { useProcurementStore } from '../../store/useProcurementStore';
 import { supabase } from '../../services/supabase';
 
 export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({ onBack, onRegister }) => {
@@ -21,16 +18,10 @@ export const Login: React.FC<{onBack: () => void; onRegister?: () => void}> = ({
   const [showPassword, setShowPassword] = useState(false);
 
   const { login, demoLogin } = useAuthStore();
-  const { loadDemoData: loadFleetDemoData } = useFleetStore();
-  const { loadDemoData: loadMaintenanceDemoData } = useMaintenanceStore();
-  const { loadDemoData: loadProcurementDemoData } = useProcurementStore();
 
   const handleDemoLogin = async () => {
     setLoading(true);
     await demoLogin();
-    loadFleetDemoData();
-    loadMaintenanceDemoData();
-    loadProcurementDemoData();
     setLoading(false);
   };
 

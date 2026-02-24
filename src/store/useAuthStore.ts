@@ -3,6 +3,9 @@ import { create } from 'zustand';
 import { User, UserRole } from '../types';
 import { supabase } from '../services/supabase';
 import { initializeDemoData, clearDemoData, isDemoSession, getDemoData } from '../services/demo';
+import { useFleetStore } from './useFleetStore';
+import { useMaintenanceStore } from './useMaintenanceStore';
+import { useProcurementStore } from './useProcurementStore';
 
 interface CompanyInfo {
   name: string;
@@ -112,6 +115,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         { id: 'demo-staff-3', email: 'mekhanikov@demo.ru', full_name: 'Механиков С.В.', role: UserRole.MECHANIC, company_id: demoData.companyId }
       ]
     });
+
+    // Загружаем данные в хранилища
+    useFleetStore.getState().loadDemoData();
+    useMaintenanceStore.getState().loadDemoData();
+    useProcurementStore.getState().loadDemoData();
   },
   register: (name, inn, email) => {
     set({
